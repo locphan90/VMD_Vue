@@ -63,11 +63,33 @@ export default {
   overflow: hidden;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
 }
 
 .partner-card img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+@media (max-width: 1024px) {
+  .partner-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .partner-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .partner-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

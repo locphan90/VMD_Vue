@@ -1,14 +1,16 @@
-// Banner.vue
 <template>
   <section class="banner">
     <div class="banner-large">
-      <img :src="mainBanner.image" :alt="mainBanner.alt">
-      <div class="slider-nav slider-prev" @click="prevSlide"><i class="fas fa-chevron-left"></i></div>
-      <div class="slider-nav slider-next" @click="nextSlide"><i class="fas fa-chevron-right"></i></div>
+      <img src="#" alt="Futa Đào Trà Sả" />
+      <div class="slider-nav slider-prev"><i class="fas fa-chevron-left"></i></div>
+      <div class="slider-nav slider-next"><i class="fas fa-chevron-right"></i></div>
     </div>
     <div class="banner-small">
-      <div class="banner-item" v-for="(banner, index) in smallBanners" :key="index">
-        <img :src="banner.image" :alt="banner.alt">
+      <div class="banner-item">
+        <img src="#" alt="Welcome Coffesh" />
+      </div>
+      <div class="banner-item">
+        <img src="#" alt="Coffee Beans" />
       </div>
     </div>
   </section>
@@ -17,38 +19,7 @@
 <script>
 export default {
   name: 'Banner',
-  data() {
-    return {
-      currentSlide: 0,
-      banners: [
-        { image: '/api/placeholder/600/300', alt: 'Futa Đào Trà Sả' },
-        { image: '/api/placeholder/600/300', alt: 'Banner 2' },
-        { image: '/api/placeholder/600/300', alt: 'Banner 3' }
-      ],
-      smallBanners: [
-        { image: '/api/placeholder/300/140', alt: 'Welcome Coffesh' },
-        { image: '/api/placeholder/300/140', alt: 'Coffee Beans' }
-      ]
-    }
-  },
-  computed: {
-    mainBanner() {
-      return this.banners[this.currentSlide];
-    }
-  },
-  methods: {
-    nextSlide() {
-      this.currentSlide = (this.currentSlide + 1) % this.banners.length;
-    },
-    prevSlide() {
-      this.currentSlide = (this.currentSlide - 1 + this.banners.length) % this.banners.length;
-    }
-  },
-  mounted() {
-    // Auto slide every 5 seconds
-    setInterval(this.nextSlide, 5000);
-  }
-}
+};
 </script>
 
 <style scoped>
@@ -62,17 +33,15 @@ export default {
 }
 
 .banner-large {
-  height: 300px;
-  background-color: #e2ffe0;
-  overflow: hidden;
-  border-radius: 10px;
   position: relative;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .banner-large img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
+  display: block;
 }
 
 .banner-small {
@@ -89,18 +58,17 @@ export default {
 
 .banner-item img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
+  display: block;
 }
 
-/* Navigation for sliders */
 .slider-nav {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   width: 30px;
   height: 30px;
-  background-color: rgba(255,255,255,0.7);
+  background-color: rgba(255, 255, 255, 0.7);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -117,10 +85,21 @@ export default {
   right: 10px;
 }
 
-/* Responsive styles */
 @media (max-width: 768px) {
   .banner {
     grid-template-columns: 1fr;
+  }
+
+  .banner-small {
+    grid-template-rows: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .slider-nav {
+    width: 24px;
+    height: 24px;
   }
 }
 </style>
