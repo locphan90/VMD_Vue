@@ -3,9 +3,9 @@
     <Banner />
     <About />
     <Categories />
-    <Products title="Sản phẩm nổi bật" />
+    <Products title="SẢN PHẨM NỔI BẬT" type="NOIBAT" />
     <Brands />
-    <Products title="Sản phẩm mới" />
+    <Products title="SẢN PHẨM MỚI" type="MOI" />
     <Partners />
     <News />
     <Newsletter />

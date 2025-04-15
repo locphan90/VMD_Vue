@@ -1,8 +1,13 @@
 <template>
   <section class="newsletter">
-    <h2 class="section-title">ĐĂNG KÝ NHẬN TIN</h2>
     <form class="newsletter-form" @submit.prevent="submitForm">
-      <input type="email" v-model="email" placeholder="Vui lòng nhập Email..." required />
+      <div class="center-text">ĐĂNG KÝ NHẬN THÔNG TIN</div>
+      <input
+        type="email"
+        v-model="email"
+        placeholder="Vui lòng nhập Email..."
+        required
+      />
       <button type="submit">ĐĂNG KÝ</button>
     </form>
   </section>
@@ -10,16 +15,16 @@
 
 <script>
 export default {
-  name: 'Newsletter',
+  name: "Newsletter",
   data() {
     return {
-      email: '',
+      email: "",
     };
   },
   methods: {
     submitForm() {
       alert(`Email đăng ký: ${this.email}`);
-      this.email = '';
+      this.email = "";
     },
   },
 };
@@ -42,7 +47,7 @@ export default {
 }
 
 .section-title::after {
-  content: '';
+  content: "";
   display: block;
   width: 50px;
   height: 3px;
@@ -77,6 +82,12 @@ export default {
 
 .newsletter-form button:hover {
   background-color: #c0392b;
+}
+
+.center-text {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 @media (max-width: 768px) {
