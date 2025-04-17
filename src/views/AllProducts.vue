@@ -1,5 +1,5 @@
 <template>
-  <div class="all-products">
+  <div class="all-products scroll-fix">
     <div class="filter-bar">
       <select v-model="filterCat">
         <option value="">Tất cả</option>
@@ -85,7 +85,7 @@ export default {
   data() {
     return {
       products: [],
-      isAdmin: true,
+      isAdmin: false, // Dùng biến này trong template
       filterType: "",
       currentPage: 1,
       perPage: 12,
@@ -119,26 +119,23 @@ export default {
       return Math.ceil(this.filteredProducts.length / this.perPage);
     },
   },
+  mounted() {
+    this.fetchProducts();
+
+    const adminFlag = localStorage.getItem("isAdmin");
+    this.isAdmin = adminFlag === "true"; // ✅ Cập nhật biến đúng nơi
+  },
   methods: {
-    goToDetail(name) {
-      this.$router.push({ name: "ProductDetail", params: { name } });
-    },
     async fetchProducts() {
       try {
         const res = await axios.get("https://localhost:7210/api/sanpham");
-        this.products = res.data.filter((p) => p.status !== "XX"); // Ẩn sản phẩm đã xóa
+        this.products = res.data.filter((p) => p.status !== "XX");
       } catch (err) {
         console.error("Lỗi khi tải sản phẩm:", err);
       }
     },
-    prevPage() {
-      if (this.currentPage > 1) this.currentPage--;
-    },
-    nextPage() {
-      if (this.currentPage < this.totalPages) this.currentPage++;
-    },
     async toggleShowUp(id, checked) {
-      const showUpValue = checked ? true : false;
+      const showUpValue = checked;
       try {
         await axios.put(`https://localhost:7210/api/sanpham/${id}`, {
           showUp: showUpValue,
@@ -149,18 +146,24 @@ export default {
         console.error("Lỗi cập nhật showUp:", err);
       }
     },
-
     async markProductDeleted(id) {
       if (!confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) return;
       try {
         await axios.put(`https://localhost:7210/api/sanpham/${id}`, {
           status: "XX",
         });
-        this.fetchProducts(); // Load lại dữ liệu sau khi xóa
+        this.fetchProducts();
       } catch (err) {
         console.error("Lỗi khi xóa sản phẩm:", err);
       }
     },
+    prevPage() {
+      if (this.currentPage > 1) this.currentPage--;
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) this.currentPage++;
+    },
+
   },
   watch: {
     filterType() {
@@ -176,11 +179,9 @@ export default {
       this.currentPage = 1;
     },
   },
-  mounted() {
-    this.fetchProducts();
-  },
 };
 </script>
+
 
 <style scoped>
 .all-products {
@@ -329,6 +330,10 @@ export default {
   font-size: 12px;
   text-align: left;
   color: #007bff;
+}
+
+.scroll-fix {
+  margin-top: 150px; /* hoặc đúng chiều cao của header */
 }
 
 /* Responsive */

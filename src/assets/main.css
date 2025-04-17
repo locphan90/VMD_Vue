@@ -33,3 +33,7 @@ a,
     padding: 0 2rem;
   }
 }
+.currency {
+  font-size: 0.7em;
+  vertical-align: super;
+}

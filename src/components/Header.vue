@@ -1,5 +1,5 @@
 <template>
-  <header>
+  <header class="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
     <div class="top-bar">
       <div class="logo">
         <img src="#" alt="Logo" />
@@ -14,28 +14,67 @@
     <nav :class="{ open: isMenuOpen }">
       <ul>
         <li><router-link to="/">TRANG CHỦ</router-link></li>
-        <li><router-link to="/sanpham">SẢN PHẨM</router-link></li>
-        <li><router-link to="/lienhe">LIÊN HỆ</router-link></li>
+        <li>
+          <a href="#" @click.prevent="scrollToSection('about')">VỀ CHÚNG TÔI</a>
+        </li>
+        <li>
+          <a href="#" @click.prevent="scrollToSection('brands')">THƯƠNG HIỆU</a>
+        </li>
+        <li>
+          <a href="#" @click.prevent="scrollToSection('categories')"
+            >NGÀNH HÀNG</a
+          >
+        </li>
+        <li>
+          <a href="#" @click.prevent="scrollToSection('news')">TIN TỨC</a>
+        </li>
+        <li>
+          <a href="#" @click.prevent="scrollToSection('footer')">LIÊN HỆ</a>
+        </li>
         <li v-if="!isLoggedIn">
           <a href="#" @click.prevent="openLogin"> <i></i> ĐĂNG NHẬP </a>
         </li>
-        <li v-else class="dropdown">
-          <a href="#" @click.prevent="toggleUserMenu">{{ username }}</a>
-          <ul v-if="showUserMenu" class="dropdown-menu">
+        <li v-else class="dropdown" @click="toggleUserMenu">
+          <a href="#">{{ username }}</a>
+          <ul
+            v-if="showUserMenu"
+            class="dropdown-menu"
+            @mouseenter="isHovering = true"
+            @mouseleave="handleMouseLeave"
+          >
             <li>
-              <router-link to="/admin/products" @click.native="closeUserMenu">Nhập sản phẩm</router-link>
+              <router-link to="/products" @click.native="closeUserMenu"
+                >Sản phẩm</router-link
+              >
             </li>
             <li>
-              <router-link to="/admin/brands">Nhập thương hiệu</router-link>
+              <router-link to="/admin/products" @click.native="closeUserMenu"
+                >Nhập sản phẩm</router-link
+              >
             </li>
             <li>
-              <router-link to="/admin/events">Nhập thông tin sự kiện</router-link>
+              <router-link to="/admin/brands" @click.native="closeUserMenu"
+                >Nhập thương hiệu</router-link
+              >
             </li>
             <li>
-              <router-link to="/admin/partners">Nhập đối tác</router-link>
+              <router-link to="/admin/events" @click.native="closeUserMenu"
+                >Nhập thông tin sự kiện</router-link
+              >
             </li>
-            <li><router-link to="/doimatkhau">Đổi mật khẩu</router-link></li>
-            <li><a href="#" @click.prevent="logout">Đăng xuất</a></li>
+            <li>
+              <router-link to="/admin/partners" @click.native="closeUserMenu"
+                >Nhập đối tác</router-link
+              >
+            </li>
+            <li>
+              <a href="#" @click.prevent="changePassword">
+                <i></i> Đổi mật khẩu
+              </a>
+            </li>
+            <li>
+              <a href="#" @click.prevent="logout">Đăng xuất</a>
+            </li>
           </ul>
         </li>
       </ul>
@@ -55,61 +94,82 @@
   </header>
 </template>
 
-<script>
+<script setup>
 import LoginForm from "./LoginForm.vue";
 import ChangePasswordForm from "./ChangePasswordForm.vue";
+import eventBus from "../eventBus";
+import { ref } from "vue";
+import { useRouter, useRoute } from "vue-router";
+const isHovering = ref(false);
+const isMenuOpen = ref(false);
+const showLogin = ref(false);
+const isLoggedIn = ref(false);
+const username = ref("");
+const showUserMenu = ref(false);
+const showChangePassword = ref(false);
+const router = useRouter();
+const route = useRoute();
+const scrollToSection = (section) => {
+  eventBus.emit("scrollTo", section);
+};
 
-export default {
-  name: "Header",
-  components: { LoginForm, ChangePasswordForm },
-  data() {
-    return {
-      isMenuOpen: false,
-      showLogin: false,
-      isLoggedIn: false,
-      username: "",
-      showUserMenu: false,
-      showChangePassword: false,
-      showAdminMenu: false,
-    };
-  },
-  methods: {
-    toggleMenu() {
-      this.isMenuOpen = !this.isMenuOpen;
-    },
-    openLogin() {
-      this.showLogin = true;
-    },
-    closeLogin() {
-      this.showLogin = false;
-    },
-    handleLoginSuccess(username) {
-      this.username = username;
-      this.isLoggedIn = true;
-      this.showLogin = false;
-      this.showUserMenu = false;
-    },
-    toggleUserMenu() {
-      this.showUserMenu = !this.showUserMenu;
-    },
-    logout() {
-      this.isLoggedIn = false;
-      this.username = "";
-      this.showUserMenu = false;
-      localStorage.clear(); // Dọn localStorage nếu có lưu
-      alert("Bạn đã đăng xuất!");
-    },
-    changePassword() {
-      this.showUserMenu = false;
-      this.showChangePassword = true;
-    },
-    closeChangePassword() {
-      this.showChangePassword = false;
-    },
-    closeUserMenu() {
-      this.showUserMenu = false;
-    },
-  },
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value;
+};
+
+const openLogin = () => {
+  showLogin.value = true;
+};
+
+const closeLogin = () => {
+  showLogin.value = false;
+};
+
+const handleLoginSuccess = (name) => {
+  username.value = name;
+  isLoggedIn.value = true;
+  showLogin.value = false;
+  showUserMenu.value = false;
+};
+
+const toggleUserMenu = () => {
+  showUserMenu.value = !showUserMenu.value;
+};
+
+const logout = () => {
+  isLoggedIn.value = false;
+  username.value = "";
+  showUserMenu.value = false;
+  localStorage.clear();
+  // Nếu đang ở trang AllProducts thì reload
+  if (route.name === "AllProducts") {
+    router.go(); // Reload lại trang
+  } else {
+    router.push("/"); // Chuyển về trang chủ
+  }
+  alert("Bạn đã đăng xuất!");
+};
+
+const changePassword = () => {
+  showUserMenu.value = false;
+  showChangePassword.value = true;
+};
+
+const closeChangePassword = () => {
+  showChangePassword.value = false;
+};
+
+const closeUserMenu = () => {
+  showUserMenu.value = false;
+};
+
+const handleMouseLeave = () => {
+  isHovering.value = false;
+  setTimeout(() => {
+    if (!isHovering.value) {
+      showUserMenu.value = false;
+    }
+  }, 200);
 };
 </script>
 
@@ -147,7 +207,7 @@ header {
 }
 
 .register-link:hover {
-  color: #007bff;
+  color: #e74c3c;
 }
 
 .menu-toggle {
@@ -229,6 +289,20 @@ nav ul li a:hover {
   background-color: #e74c3c;
   color: white;
   border-radius: 4px;
+}
+
+.main-content {
+  padding-top: 80px;
+}
+
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive */

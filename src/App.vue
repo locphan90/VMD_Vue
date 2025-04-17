@@ -2,20 +2,42 @@
   <div>
     <Header />
     <router-view />
-    <Footer />
+    <footer ref="footerSection">
+      <Footer />
+    </footer>
   </div>
 </template>
 
-<script>
-import Header from './components/Header.vue';
-import Footer from './components/Footer.vue';
+<script setup>
+import { ref, onMounted, onBeforeUnmount } from "vue";
+import Header from "./components/Header.vue";
+import Footer from "./components/Footer.vue";
+import eventBus from "./eventBus";
 
-export default {
-  components: {
-    Header,
-    Footer,
-  },
-};
+// Tạo ref cho footer
+const footerSection = ref(null);
+
+// Xử lý scroll tới footer
+function handleScroll(target) {
+  if (target === "footer") {
+    footerSection.value?.scrollIntoView({ behavior: "smooth" });
+  }
+}
+
+onMounted(() => {
+  eventBus.on("scrollTo", handleScroll);
+  const username = localStorage.getItem("username");
+  const role = localStorage.getItem("role");
+
+  if (!username || !role) {
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
+  }
+});
+
+onBeforeUnmount(() => {
+  eventBus.off("scrollTo", handleScroll);
+});
 </script>
 
 
@@ -61,7 +83,7 @@ img {
 }
 
 .section-title::after {
-  content: '';
+  content: "";
   display: block;
   width: 50px;
   height: 3px;

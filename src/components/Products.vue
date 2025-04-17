@@ -66,7 +66,9 @@ export default {
   },
   computed: {
     filteredProducts() {
-      return this.products.filter((p) => p.cat === this.type);
+      return this.products.filter(
+        (p) => p.cat === this.type && p.showUp === true && p.status === "OK"
+      );
     },
     totalItems() {
       return this.filteredProducts.length;
@@ -250,9 +252,25 @@ export default {
   position: relative;
 }
 
-.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #ddd}
-.section-header h2 { font-size: 24px; }
-.view-all { color: #e74c3c; text-decoration: none; font-size: 14px; }
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+}
+.section-header h2 {
+  font-size: 24px;
+}
+.view-all {
+  color: #e74c3c;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.scroll-target {
+  scroll-margin-top: 135px; /* đúng bằng chiều cao header cố định */
+}
 
 @media (max-width: 1200px) {
   :root {

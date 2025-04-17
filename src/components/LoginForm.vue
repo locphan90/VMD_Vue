@@ -20,48 +20,65 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
-  emits: ['close', 'login-success'],
+  emits: ["close", "login-success"],
   data() {
     return {
-      username: '',
-      password: ''
+      username: "",
+      password: "",
     };
   },
   methods: {
     async handleLogin() {
       try {
-        console.log('Gửi yêu cầu login:', this.username, this.password);
+        console.log("Gửi yêu cầu login:", this.username, this.password);
 
-        const response = await axios.post('https://localhost:7210/api/auth/login', {
-          UserName: this.username,
-          Password: this.password // ❗️Không mã hoá, gửi plain text như Postman
-        });
+        const response = await axios.post(
+          "https://localhost:7210/api/auth/login",
+          {
+            UserName: this.username,
+            Password: this.password, // ❗️Không mã hoá, gửi plain text như Postman
+          }
+        );
 
-        console.log('Phản hồi API:', response.data);
+        console.log("Phản hồi API:", response.data);
 
         // Kiểm tra phản hồi từ server
-        if (response.data && response.data.message === 'Đăng nhập thành công!') {
-          this.$emit('login-success', response.data.userName);
+        if (
+          response.data &&
+          response.data.message === "Đăng nhập thành công!"
+        ) {
+          this.$emit("login-success", response.data.userName);
 
           // Option: Lưu user info hoặc token
-          localStorage.setItem('userId', response.data.id);
-          localStorage.setItem('username', response.data.userName);
-          localStorage.setItem('role', response.data.role);  
+          localStorage.setItem("userId", response.data.id);
+          localStorage.setItem("username", response.data.userName);
+          localStorage.setItem("role", response.data.role);
+          if (response.data.role === "Admin") {
+            localStorage.setItem("isAdmin", "true");
+          } else {
+            localStorage.setItem("isAdmin", "false");
+          }
         } else {
-          alert('Tài khoản hoặc mật khẩu không đúng!');
+          alert("Tài khoản hoặc mật khẩu không đúng!");
         }
       } catch (error) {
-        console.error('Chi tiết lỗi khi đăng nhập:', error.response ? error.response.data : error.message);
-        alert('Có lỗi xảy ra khi đăng nhập: ' + (error.response ? error.response.data.message : error.message));
+        console.error(
+          "Chi tiết lỗi khi đăng nhập:",
+          error.response ? error.response.data : error.message
+        );
+        alert(
+          "Có lỗi xảy ra khi đăng nhập: " +
+            (error.response ? error.response.data.message : error.message)
+        );
       }
     },
     closeModal() {
-      this.$emit('close');
-    }
-  }
+      this.$emit("close");
+    },
+  },
 };
 </script>
 

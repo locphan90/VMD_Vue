@@ -25,30 +25,62 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   emits: ['close'],
   data() {
     return {
       oldPassword: '',
       newPassword: '',
-      confirmPassword: ''
+      confirmPassword: '',
+      username: '' // bạn có thể lấy từ localStorage hoặc props
     };
   },
+  mounted() {
+    // Lấy username từ localStorage hoặc nơi bạn lưu
+    this.username = localStorage.getItem('username') || '';
+  },
   methods: {
-    handleChangePassword() {
+    async handleChangePassword() {
+      if (!this.oldPassword || !this.newPassword || !this.confirmPassword) {
+        alert('Vui lòng nhập đầy đủ thông tin!');
+        return;
+      }
+
       if (this.newPassword !== this.confirmPassword) {
         alert('Mật khẩu mới và xác nhận không khớp!');
         return;
       }
 
-      // Giả lập đổi mật khẩu thành công
-      console.log('Đổi mật khẩu thành công:', {
-        oldPassword: this.oldPassword,
-        newPassword: this.newPassword
-      });
+      try {
+        const payload = {
+          UserName: this.username,
+          OldPassword: this.oldPassword,
+          NewPassword: this.newPassword
+        };
 
-      alert('Đổi mật khẩu thành công!');
-      this.$emit('close');
+        const token = localStorage.getItem('token'); // nếu cần xác thực
+
+        const res = await axios.post(
+          'https://localhost:7210/api/Auth/change-password',
+          payload,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+
+        alert('Đổi mật khẩu thành công!');
+        this.$emit('close');
+      } catch (error) {
+        console.error('Lỗi đổi mật khẩu:', error);
+        alert(
+          error.response?.data?.message ||
+            'Không thể đổi mật khẩu. Vui lòng kiểm tra lại.'
+        );
+      }
     },
     closeModal() {
       this.$emit('close');
@@ -56,6 +88,8 @@ export default {
   }
 };
 </script>
+
+
 
 <style scoped>
 .modal-overlay {
