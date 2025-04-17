@@ -15,7 +15,12 @@
 
       <div class="form-group">
         <label for="brandFile">File hình ảnh thương hiệu</label>
-        <input id="brandFile" type="file" @change="handleFileChange" ref="fileInput" />
+        <input
+          id="brandFile"
+          type="file"
+          @change="handleFileChange"
+          ref="fileInput"
+        />
       </div>
 
       <button class="btn-save" @click="handleSubmit">Lưu</button>
@@ -37,7 +42,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from "axios";
+import axios from "../../utils/axios";
 
 const brandName = ref("");
 const selectedFile = ref(null);
@@ -45,9 +50,7 @@ const brandList = ref([]);
 const fileInput = ref(null);
 const fetchBrands = async () => {
   try {
-    const res = await axios.get(
-      "https://localhost:7210/api/MISC?cat=THUONGHIEU"
-    );
+    const res = await axios.get("/api/MISC?cat=THUONGHIEU");
     brandList.value = res.data.filter((item) => item.status === "OK");
   } catch (err) {
     console.error("Lỗi tải thương hiệu:", err);
@@ -65,13 +68,15 @@ const handleSubmit = async () => {
   }
 
   try {
+    console.log("File chuẩn bị gửi:", selectedFile.value);
     const formData = new FormData();
     formData.append("file", selectedFile.value);
 
-    const uploadRes = await axios.post(
-      "https://localhost:7210/api/ftp/upload",
-      formData
-    );
+    const uploadRes = await axios.post("/api/ftp/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     const fileUrl = uploadRes.data.filePath;
 
     const postData = {
@@ -80,12 +85,12 @@ const handleSubmit = async () => {
       VAL2: fileUrl,
     };
 
-    await axios.post("https://localhost:7210/api/MISC", postData);
+    await axios.post("/api/MISC", postData);
     await fetchBrands();
 
     brandName.value = "";
     selectedFile.value = null;
-    fileInput.value.value = ""; // ✅ reset input file
+    fileInput.value = ""; // ✅ reset input file
 
     alert("Lưu thương hiệu thành công!");
   } catch (error) {
@@ -99,7 +104,7 @@ const deleteBrand = async (id) => {
   if (!confirmDelete) return;
 
   try {
-    await axios.put(`https://localhost:7210/api/MISC/${id}`, {
+    await axios.put(`/api/MISC/${id}`, {
       status: "XX",
     });
     await fetchBrands();

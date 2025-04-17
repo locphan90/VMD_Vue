@@ -9,7 +9,7 @@
           id="partnerName"
           v-model="partnerName"
           type="text"
-          placeholder="Nhập tên thương hiệu"
+          placeholder="Nhập tên đối tác"
         />
       </div>
 
@@ -37,7 +37,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from "axios";
+import axios from '../../utils/axios';
 
 const partnerName = ref("");
 const selectedFile = ref(null);
@@ -46,7 +46,7 @@ const partnerList = ref([]);
 const fetchPartners = async () => {
   try {
     const res = await axios.get(
-      "https://localhost:7210/api/MISC?cat=DOITAC"
+      "/api/MISC?cat=DOITAC"
     );
     partnerList.value = res.data.filter((item) => item.status === "OK");
   } catch (err) {
@@ -69,19 +69,20 @@ const handleSubmit = async () => {
     const formData = new FormData();
     formData.append("file", selectedFile.value);
 
-    const uploadRes = await axios.post(
-      "https://localhost:7210/api/upload",
-      formData
-    );
+    const uploadRes = await axios.post("/api/ftp/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     const fileUrl = uploadRes.data.filePath;
-
+    console.log(uploadRes.data.filePath);
     const postData = {
       cat: "DOITAC",
       val: partnerName.value,
       val2: fileUrl,
     };
 
-    await axios.post("https://localhost:7210/api/MISC", postData);
+    await axios.post("/api/MISC", postData);
     await fetchPartners();
 
     partnerName.value = "";
@@ -98,7 +99,7 @@ const deletePartner = async (id) => {
   if (!confirmDelete) return;
 
   try {
-    await axios.put(`https://localhost:7210/api/MISC/${id}`, {
+    await axios.put(`/api/MISC/${id}`, {
       status: "XX",
     });
     await fetchPartners();
