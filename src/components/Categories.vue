@@ -3,16 +3,28 @@
     <h2 class="section-title">NGÀNH HÀNG</h2>
     <div class="category-icons">
       <div class="category-icon">
-        <img src="#" alt="Retail" />
+        <img
+          src="https://img.icons8.com/ios-filled/100/000000/shop.png"
+          alt="Retail"
+        />
       </div>
       <div class="category-icon">
-        <img src="#" alt="Beauty" />
+        <img
+          src="https://img.icons8.com/ios-filled/100/000000/lipstick.png"
+          alt="Beauty"
+        />
       </div>
       <div class="category-icon">
-        <img src="#" alt="Health" />
+        <img
+          src="https://img.icons8.com/ios-filled/100/000000/heart-health.png"
+          alt="Health"
+        />
       </div>
       <div class="category-icon">
-        <img src="#" alt="Logistics" />
+        <img
+          src="https://img.icons8.com/ios-filled/100/000000/delivery.png"
+          alt="Logistics"
+        />
       </div>
     </div>
   </section>
@@ -20,7 +32,7 @@
 
 <script>
 export default {
-  name: 'Categories',
+  name: "Categories",
 };
 </script>
 
@@ -40,7 +52,7 @@ export default {
 }
 
 .section-title::after {
-  content: '';
+  content: "";
   display: block;
   width: 50px;
   height: 3px;

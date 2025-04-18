@@ -1,6 +1,8 @@
 <template>
   <div>
-    <Banner />
+    <section ref="bannerSection" class="scroll-target">
+      <Banner />
+    </section>
 
     <section ref="aboutSection" class="scroll-target">
       <About />
@@ -97,6 +99,6 @@ onBeforeUnmount(() => {
 <style scoped>
 /* Nếu cần style riêng cho trang Home thì thêm vào đây */
 .scroll-target {
-  scroll-margin-top: 135px; /* Chỉnh theo đúng chiều cao header của bạn */
+  scroll-margin-top: 300px; /* Chỉnh theo đúng chiều cao header của bạn */
 }
 </style>

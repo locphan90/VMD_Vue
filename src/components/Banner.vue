@@ -1,16 +1,21 @@
 <template>
   <section class="banner">
     <div class="banner-large">
-      <img src="#" alt="Futa Đào Trà Sả" />
-      <div class="slider-nav slider-prev"><i class="fas fa-chevron-left"></i></div>
-      <div class="slider-nav slider-next"><i class="fas fa-chevron-right"></i></div>
+      <img :src="images[0]" alt="Hình lớn" />
+      <div class="slider-nav slider-prev" @click="rotateLeft">
+        <i class="fas fa-chevron-left"></i>
+      </div>
+      <div class="slider-nav slider-next" @click="rotateRight">
+        <i class="fas fa-chevron-right"></i>
+      </div>
     </div>
     <div class="banner-small">
-      <div class="banner-item">
-        <img src="#" alt="Welcome Coffesh" />
-      </div>
-      <div class="banner-item">
-        <img src="#" alt="Coffee Beans" />
+      <div
+        class="banner-item"
+        v-for="(img, index) in images.slice(1)"
+        :key="index"
+      >
+        <img :src="img" :alt="'Hình nhỏ ' + (index + 1)" />
       </div>
     </div>
   </section>
@@ -18,7 +23,27 @@
 
 <script>
 export default {
-  name: 'Banner',
+  name: "Banner",
+  data() {
+    return {
+      images: [
+        "https://picsum.photos/id/1011/1200/600",
+        "https://picsum.photos/id/1025/600/200",
+        "https://picsum.photos/id/103/600/200",
+        "https://picsum.photos/id/1050/600/200",
+      ],
+    };
+  },
+  methods: {
+    rotateLeft() {
+      const first = this.images.shift(); // Lấy phần tử đầu
+      this.images.push(first);           // Đẩy xuống cuối
+    },
+    rotateRight() {
+      const last = this.images.pop();    // Lấy phần tử cuối
+      this.images.unshift(last);         // Đưa lên đầu
+    },
+  },
 };
 </script>
 
@@ -40,25 +65,28 @@ export default {
 
 .banner-large img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: 3 / 2;
   display: block;
 }
 
 .banner-small {
   display: grid;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: repeat(3, 1fr);
   gap: 15px;
 }
 
 .banner-item {
-  background-color: #fff;
   border-radius: 10px;
   overflow: hidden;
 }
 
 .banner-item img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: 3 / 1;
   display: block;
 }
 
@@ -91,8 +119,12 @@ export default {
   }
 
   .banner-small {
-    grid-template-rows: 1fr;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: unset;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .banner-item img {
+    aspect-ratio: 4 / 3;
   }
 }
 
@@ -100,6 +132,10 @@ export default {
   .slider-nav {
     width: 24px;
     height: 24px;
+  }
+
+  .banner-small {
+    grid-template-columns: 1fr;
   }
 }
 </style>

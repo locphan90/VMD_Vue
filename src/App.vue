@@ -1,7 +1,9 @@
 <template>
   <div>
     <Header />
-    <router-view />
+    <main class="main-content">
+      <router-view />
+    </main>
     <footer ref="footerSection">
       <Footer />
     </footer>
@@ -89,6 +91,10 @@ img {
   height: 3px;
   background-color: #e74c3c;
   margin: 10px auto;
+}
+
+.main-content {
+  padding-top: 135px; /* hoặc đúng chiều cao header của bạn */
 }
 
 @media (max-width: 480px) {
