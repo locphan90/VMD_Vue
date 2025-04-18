@@ -96,7 +96,8 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
-import { formatInputCurrency } from "../../utils/formatter";
+import { formatInputCurrency } from "@/utils/formatter";
+import getFullFtpUrl from "@/utils/pathHelper";
 
 const product = ref({
   cat: "Mới",
@@ -173,10 +174,15 @@ const fetchTodayProducts = async () => {
     const res = await axios.get("https://localhost:7210/api/sanpham");
     const today = new Date().toISOString().split("T")[0];
     // todayProducts = res.data.filter((p) => p.status !== "XX");
-    todayProducts.value = res.data.filter((sp) => {
-      const updatedDate = new Date(sp.fstUpdate).toISOString().split("T")[0];
-      return sp.status !== "XX" && updatedDate === today;
-    });
+    todayProducts.value = res.data
+      .filter((sp) => {
+        const updatedDate = new Date(sp.fstUpdate).toISOString().split("T")[0];
+        return sp.status !== "XX" && updatedDate === today;
+      })
+      .map((sp) => ({
+        ...sp,
+        fileFTP: getFullFtpUrl(sp.fileFTP), // ✅ xử lý đường dẫn ảnh tại đây
+      }));
   } catch (err) {
     console.error("Lỗi khi tải sản phẩm hôm nay:", err);
   }

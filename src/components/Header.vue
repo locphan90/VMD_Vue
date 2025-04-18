@@ -5,7 +5,7 @@
         <img src="#" alt="Logo" />
       </div>
       <div class="utils">
-        <router-link to="/register" class="register-link"
+        <router-link to="/dangkydaily" class="register-link"
           >ĐĂNG KÝ ĐẠI LÝ</router-link
         >
       </div>
@@ -45,6 +45,11 @@
             <li>
               <router-link to="/products" @click.native="closeUserMenu"
                 >Sản phẩm</router-link
+              >
+            </li>
+            <li>
+              <router-link to="/admin/dailymanager" @click.native="closeUserMenu"
+                >Quản lý đăng ký đại lý</router-link
               >
             </li>
             <li>

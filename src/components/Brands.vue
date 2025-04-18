@@ -10,17 +10,33 @@
 </template>
 
 <script>
+import axios from "@/utils/axios";
+import getFullFtpUrl from "@/utils/pathHelper";
+
 export default {
-  name: 'Brands',
+  name: "Brands",
   data() {
     return {
-      brands: [
-        { image: '/api/placeholder/280/100', name: 'F-Coffee' },
-        { image: '/api/placeholder/280/100', name: 'Của Mẹ' },
-        { image: '/api/placeholder/280/100', name: 'Perfume' },
-        { image: '/api/placeholder/280/100', name: 'Brand' },
-      ],
+      brands: [],
     };
+  },
+  async mounted() {
+    await this.fetchBrands();
+  },
+  methods: {
+    async fetchBrands() {
+      try {
+        const res = await axios.get("/api/MISC?cat=THUONGHIEU");
+        this.brands = res.data
+          .filter((item) => item.status === "OK")
+          .map((item) => ({
+            image: getFullFtpUrl(item.vaL2),
+            name: item.val,
+          }));
+      } catch (err) {
+        console.error("Lỗi khi tải thương hiệu:", err);
+      }
+    },
   },
 };
 </script>
@@ -50,38 +66,34 @@ export default {
 }
 
 .brand-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* 👈 canh giữa khi ít */
+  gap: 16px; /* 👈 khoảng cách giữa các thẻ */
 }
 
 .brand-card {
+  width: 102.59px;
+  height: 102.59px;
   background-color: #fff;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  height: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
 }
 
 .brand-card img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover; /* 👌 cắt ảnh gọn đẹp */
 }
 
-@media (max-width: 1024px) {
-  .brand-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
+/* Responsive: nếu màn hình nhỏ thì giãn đều vẫn giữ kích thước */
 @media (max-width: 768px) {
   .brand-grid {
-    grid-template-columns: 1fr;
+    gap: 12px;
   }
 }
 </style>

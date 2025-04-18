@@ -127,7 +127,8 @@
 import { ref, reactive, onMounted, computed } from "vue";
 // import axios from "axios";
 import Editor from "@tinymce/tinymce-vue";
-import axios from '../../utils/axios';
+import axios from "@/utils/axios";
+import getFullFtpUrl from "@/utils/pathHelper";
 export default {
   name: "BlogPostManager",
   components: {
@@ -209,9 +210,7 @@ export default {
     // Fetch all posts
     const fetchPosts = async () => {
       try {
-        const response = await axios.get(
-          "/api/ThongTinSuKien"
-        );
+        const response = await axios.get("/api/ThongTinSuKien");
         posts.value = response.data;
       } catch (error) {
         console.error("Error fetching posts:", error);
@@ -228,18 +227,14 @@ export default {
       uploadFormData.append("file", file);
 
       try {
-        const response = await axios.post(
-          "/api/ftp/upload",
-          uploadFormData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        const response = await axios.post("/api/ftp/upload", uploadFormData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
 
         // Cập nhật đường dẫn ảnh từ kết quả trả về API
-        formData.linkAnh = response.data.filePath;
+        formData.linkAnh = getFullFtpUrl(response.data.filePath) ;
       } catch (error) {
         console.error("Error uploading file:", error);
         alert("Không thể tải lên tệp. Vui lòng thử lại sau.");
@@ -254,7 +249,9 @@ export default {
     // Get file name from path
     const getFileName = (path) => {
       if (!path) return "";
-      return path.split("/").pop();
+      console.log(getFullFtpUrl(path));
+      const fullPath = getFullFtpUrl(path);
+      return fullPath.split("/").pop();
     };
 
     // Format date for display
@@ -270,16 +267,10 @@ export default {
 
         if (!state.isEditing) {
           delete postData.id;
-          await axios.post(
-            "/api/ThongTinSuKien",
-            postData
-          );
+          await axios.post("/api/ThongTinSuKien", postData);
           alert("Thêm bài viết mới thành công!");
         } else {
-          await axios.put(
-            `/api/ThongTinSuKien/${postData.id}`,
-            postData
-          );
+          await axios.put(`/api/ThongTinSuKien/${postData.id}`, postData);
           alert("Cập nhật bài viết thành công!");
         }
 
@@ -298,7 +289,8 @@ export default {
     const editPost = (post) => {
       formData.id = post.id;
       formData.tieuDe = post.tieuDe;
-      formData.linkAnh = post.linkAnh;
+      formData.linkAnh = getFullFtpUrl(post.linkAnh);
+      // formData.linkAnh = post.linkAnh;
       formData.noiDung = post.noiDung;
       // Xử lý ngày tháng an toàn hơn
       try {
@@ -344,10 +336,7 @@ export default {
 
       try {
         const updatedPost = { ...post, status: "XX" };
-        await axios.put(
-          `/api/ThongTinSuKien/${post.id}`,
-          updatedPost
-        );
+        await axios.put(`/api/ThongTinSuKien/${post.id}`, updatedPost);
         alert("Đã xóa bài viết thành công!");
         await fetchPosts();
       } catch (error) {
@@ -362,10 +351,7 @@ export default {
       updatedPost.status = updatedPost.status === "OK" ? "NA" : "OK";
 
       try {
-        await axios.put(
-          `/api/ThongTinSuKien/${post.id}`,
-          updatedPost
-        );
+        await axios.put(`/api/ThongTinSuKien/${post.id}`, updatedPost);
         await fetchPosts();
       } catch (error) {
         console.error("Error updating post status:", error);

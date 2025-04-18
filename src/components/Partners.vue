@@ -10,19 +10,33 @@
 </template>
 
 <script>
+import axios from "@/utils/axios";
+import getFullFtpUrl from "@/utils/pathHelper";
+
 export default {
-  name: 'Partners',
+  name: "Partners",
   data() {
     return {
-      partners: [
-        { image: '/api/placeholder/180/80', name: 'WinMart' },
-        { image: '/api/placeholder/180/80', name: 'CoopMart' },
-        { image: '/api/placeholder/180/80', name: 'VietMark' },
-        { image: '/api/placeholder/180/80', name: 'Circle K' },
-        { image: '/api/placeholder/180/80', name: 'AEON' },
-        { image: '/api/placeholder/180/80', name: 'GS25' },
-      ],
+      partners: [],
     };
+  },
+  async mounted() {
+    await this.fetchPartners();
+  },
+  methods: {
+    async fetchPartners() {
+      try {
+        const res = await axios.get("/api/MISC?cat=DOITAC");
+        this.partners = res.data
+          .filter((item) => item.status === "OK")
+          .map((item) => ({
+            image: getFullFtpUrl(item.vaL2),
+            name: item.val,
+          }));
+      } catch (err) {
+        console.error("Lỗi khi tải thương hiệu:", err);
+      }
+    },
   },
 };
 </script>
@@ -52,44 +66,35 @@ export default {
 }
 
 .partner-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* 👈 canh giữa khi ít */
+  gap: 16px; /* 👈 khoảng cách giữa các thẻ */
 }
 
 .partner-card {
+  width: 102.59px;
+  height: 102.59px;
   background-color: #fff;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
 }
 
 .partner-card img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover; /* 👌 cắt ảnh gọn đẹp */
 }
 
-@media (max-width: 1024px) {
-  .partner-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
+/* Responsive: nếu màn hình nhỏ thì giãn đều vẫn giữ kích thước */
 @media (max-width: 768px) {
   .partner-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
-  .partner-grid {
-    grid-template-columns: 1fr;
+    gap: 12px;
   }
 }
 </style>
+

@@ -43,6 +43,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "../../utils/axios";
+import getFullFtpUrl from "@/utils/pathHelper";
 
 const brandName = ref("");
 const selectedFile = ref(null);
@@ -51,7 +52,13 @@ const fileInput = ref(null);
 const fetchBrands = async () => {
   try {
     const res = await axios.get("/api/MISC?cat=THUONGHIEU");
-    brandList.value = res.data.filter((item) => item.status === "OK");
+    console.log("Dữ liệu từ API:", res.data);
+    brandList.value = res.data
+      .filter((item) => item.status === "OK")
+      .map((item) => ({
+        ...item,
+        val2: getFullFtpUrl(item.vaL2),
+      }));
   } catch (err) {
     console.error("Lỗi tải thương hiệu:", err);
   }

@@ -37,7 +37,8 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from '../../utils/axios';
+import axios from '@/utils/axios';
+import getFullFtpUrl from "@/utils/pathHelper";
 
 const partnerName = ref("");
 const selectedFile = ref(null);
@@ -48,7 +49,13 @@ const fetchPartners = async () => {
     const res = await axios.get(
       "/api/MISC?cat=DOITAC"
     );
-    partnerList.value = res.data.filter((item) => item.status === "OK");
+    partnerList.value = res.data
+      .filter((item) => item.status === "OK")
+      .map((item) => ({
+        ...item,
+        val2: getFullFtpUrl(item.vaL2),
+      }));
+
   } catch (err) {
     console.error("Lỗi tải đối tác:", err);
   }

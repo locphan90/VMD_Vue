@@ -2,30 +2,52 @@
   <section class="news">
     <h2 class="section-title">THÔNG TIN & SỰ KIỆN</h2>
     <div class="news-grid">
-      <div class="news-card" v-for="(item, index) in news" :key="index">
+      <router-link
+        :to="`/news/${item.id}`"
+        class="news-card"
+        v-for="(item, index) in news"
+        :key="index"
+      >
         <div class="news-image">
-          <img :src="item.image" :alt="item.title" />
+          <img :src="item.image" />
         </div>
         <div class="news-content">
-          <h3 class="news-title">{{ item.title }}</h3>
+          <h3 class="news-title">{{ item.tieude }}</h3>
         </div>
-      </div>
+      </router-link>
     </div>
   </section>
 </template>
 
 <script>
+import axios from "@/utils/axios";
+import getFullFtpUrl from "@/utils/pathHelper";
+
 export default {
-  name: 'News',
+  name: "News",
   data() {
     return {
-      news: [
-        { image: '/api/placeholder/280/150', title: 'Khai trương cửa hàng tại Thủ Đức' },
-        { image: '/api/placeholder/280/150', title: 'Ký kết hợp tác phân phối với công ty ABC Miền Trung' },
-        { image: '/api/placeholder/280/150', title: 'Chương trình khuyến mãi ra mắt sản phẩm' },
-        { image: '/api/placeholder/280/150', title: 'Đại hội nhà phân phối toàn quốc năm 2025' },
-      ],
+      news: [],
     };
+  },
+  async mounted() {
+    await this.fetchNews();
+  },
+  methods: {
+    async fetchNews() {
+      try {
+        const res = await axios.get("/api/THONGTINSUKIEN");
+        this.news = res.data
+          .filter((item) => item.status === "OK")
+          .map((item) => ({
+            id: item.id,
+            image: getFullFtpUrl(item.linkAnh),
+            tieude: item.tieuDe,
+          }));
+      } catch (err) {
+        console.error("Lỗi khi tải thương hiệu:", err);
+      }
+    },
   },
 };
 </script>
@@ -46,7 +68,7 @@ export default {
 }
 
 .section-title::after {
-  content: '';
+  content: "";
   display: block;
   width: 50px;
   height: 3px;

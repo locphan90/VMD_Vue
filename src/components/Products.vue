@@ -13,7 +13,7 @@
         <div
           class="slider-track"
           :style="{
-            transform: `translateX(-${currentIndex * (100 / visibleCount)}%)`,
+            transform: `translateX(-${currentIndex * 240}px)`, // 240 là 228 + 12 khoảng cách
           }"
         >
           <div
@@ -117,6 +117,21 @@ export default {
     clearInterval(this.autoPlayInterval);
     window.removeEventListener("resize", this.updateVisibleCount);
   },
+  updateVisibleCount() {
+    const containerWidth = window.innerWidth;
+
+    if (containerWidth >= 1200) {
+      this.visibleCount = 5;
+    } else if (containerWidth >= 992) {
+      this.visibleCount = 4;
+    } else if (containerWidth >= 768) {
+      this.visibleCount = 3;
+    } else if (containerWidth >= 500) {
+      this.visibleCount = 2;
+    } else {
+      this.visibleCount = 1;
+    }
+  },
 };
 </script>
 
@@ -134,20 +149,20 @@ export default {
 }
 
 .slider-wrapper {
-  overflow: hidden;
+  overflow-x: hidden;
   width: 100%;
 }
 
 .slider-track {
   display: flex;
   transition: transform 0.5s ease;
-  padding: 0 5px; /* Thêm padding nhẹ hai bên */
+  width: max-content; /* 👈 Cho phép dài hơn màn hình */
 }
 
 .product-card {
-  flex: 0 0 calc(20% - 12px); /* ✅ Giữ 5 sản phẩm / 1 hàng trong 1200px */
-  max-width: calc(20% - 12px);
-  box-sizing: border-box;
+  flex: 0 0 228px; /* 👈 Giữ cố định kích thước sản phẩm */
+  width: 228px;
+  height: auto;
   margin: 0 6px;
   padding: 10px;
   background: #fff;

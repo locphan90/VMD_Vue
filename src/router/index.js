@@ -6,7 +6,9 @@ import ProductForm from '../views/Admin/ProductForm.vue';
 import BrandForm from '../views/Admin/BrandForm.vue';
 import Partners from '../views/Admin/PartnerForm.vue';
 import Events from '../views/Admin/EventForm.vue';
-
+import EventDisplay from '../views/EventDisplay.vue';
+import DaiLyForm from '../components/DaiLyForm.vue';
+import DaiLyManager from '../views/Admin/DaiLyManager.vue';
 const routes = [
   {
     path: '/',
@@ -47,7 +49,23 @@ const routes = [
     name: 'Events',
     component: Events,
     meta: { requiresAuth: true, requiresAdmin: true }
-  }
+  },
+  {
+    path: '/news/:id',
+    name: 'EventDisplay.vue',
+    component: EventDisplay
+  },
+  {
+    path: '/dangkydaily',
+    name: 'DaiLyForm',
+    component: DaiLyForm
+  },
+  {
+    path: '/admin/dailymanager',
+    name: 'DaiLyManager',
+    component: DaiLyManager,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
 ];
 
 const router = createRouter({
