@@ -1,5 +1,5 @@
 <template>
-  <div class="partner-wrapper scroll-target">
+  <div class="partner-wrapper">
     <!-- Form nhập đối tác -->
     <div class="partner-form">
       <h2>Thêm đối tác</h2>

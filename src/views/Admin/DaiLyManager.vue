@@ -1,5 +1,5 @@
 <template>
-  <div class="manager-wrapper scroll-target">
+  <div class="manager-wrapper">
     <h2>Danh sách đăng ký Đại lý (Chờ duyệt)</h2>
 
     <div class="grid">
@@ -52,14 +52,14 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from "axios";
+import axios from '@/utils/axios';
 
 const daiLyListChoDuyet = ref([]);
 const daiLyListDaXuLy = ref([]);
 
 const fetchData = async () => {
   try {
-    const res = await axios.get("https://localhost:7210/api/DaiLy");
+    const res = await axios.get("/api/DaiLy");
     const all = res.data;
 
     daiLyListChoDuyet.value = all.filter((x) => x.status === "QQ");
@@ -72,7 +72,7 @@ const fetchData = async () => {
 const users = ref([]);
 
 const fetchUsers = async () => {
-  const res = await axios.get("https://localhost:7210/api/User");
+  const res = await axios.get("/api/User");
   users.value = res.data;
 };
 
@@ -92,7 +92,7 @@ const updateStatus = async (id, status) => {
 
     const ngayDuyet = new Date().toISOString();
 
-    await axios.put(`https://localhost:7210/api/DaiLy/${id}`, {
+    await axios.put(`/api/DaiLy/${id}`, {
       Status: status,
       NguoiDuyet: userId, // ✅ chính xác ID user
       NgayDuyet: ngayDuyet,

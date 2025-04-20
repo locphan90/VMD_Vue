@@ -1,5 +1,12 @@
 <template>
-  <div class="all-products scroll-fix">
+  <div class="all-products">
+    <div class="search-bar">
+      <input
+        type="text"
+        v-model="searchQuery"
+        placeholder="Tìm kiếm sản phẩm..."
+      />
+    </div>
     <div class="filter-bar">
       <select v-model="filterCat">
         <option value="">Tất cả</option>
@@ -13,6 +20,13 @@
         <option value="Mẹ & Bé">Mẹ & Bé</option>
         <option value="HealthCare">HealthCare</option>
         <option value="Industry">Industry</option>
+      </select>
+
+      <select v-model="filterThuongHieu">
+        <option value="">Tất cả thương hiệu</option>
+        <option v-for="brand in uniqueThuongHieu" :key="brand" :value="brand">
+          {{ brand }}
+        </option>
       </select>
 
       <select v-model="filterPrice">
@@ -50,18 +64,22 @@
           </label>
         </div>
 
-        <!-- Nội dung sản phẩm, click mới điều hướng -->
-        <div class="product-clickable" @click="goToDetail(product.tenSP)">
-          <div class="product-image">
-            <img :src="product.fileFTP" :alt="product.tenSP" />
-          </div>
+        <!-- Nội dung sản phẩm -->
+        <div class="product-clickable">
+          <!-- Bọc chỉ phần hình ảnh -->
+          <router-link :to="`/sanpham/${product.id}`" class="product-item-link">
+            <div class="product-image">
+              <img :src="product.fileFTP" :alt="product.tenSP" />
+            </div>
+          </router-link>
+
           <h3>{{ product.tenSP }}</h3>
           <div class="product-info">
             <span>{{ product.mota }}</span>
-            <span class="product-price"
-              >{{ product.giaThamKhao.toLocaleString()
-              }}<span class="currency">đ</span></span
-            >
+            <span class="product-price">
+              {{ product.giaThamKhao.toLocaleString() }}
+              <span class="currency">đ</span>
+            </span>
           </div>
         </div>
       </div>
@@ -77,111 +95,114 @@
   </div>
 </template>
 
-<script>
-import axios from "axios";
+<script setup>
+import { ref, computed, watch, onMounted } from "vue";
+import axios from "@/utils/axios";
+import getFullFtpUrl from "@/utils/pathHelper";
 
-export default {
-  name: "AllProducts",
-  data() {
-    return {
-      products: [],
-      isAdmin: false, // Dùng biến này trong template
-      filterType: "",
-      currentPage: 1,
-      perPage: 12,
-      filterCat: "",
-      filterNganh: "",
-      filterPrice: "",
-    };
-  },
-  computed: {
-    filteredProducts() {
-      return this.products.filter((p) => {
-        const matchCat = this.filterCat ? p.cat === this.filterCat : true;
-        const matchNganh = this.filterNganh
-          ? p.nganh === this.filterNganh
-          : true;
+const products = ref([]);
+const isAdmin = ref(false);
+const filterType = ref("");
+const currentPage = ref(1);
+const perPage = 12;
+const filterCat = ref("");
+const filterNganh = ref("");
+const filterPrice = ref("");
+const filterThuongHieu = ref("");
+const searchQuery = ref("");
 
-        let matchGia = true;
-        if (this.filterPrice === "1") matchGia = p.giaThamKhao < 5000000;
-        else if (this.filterPrice === "2")
-          matchGia = p.giaThamKhao >= 5000000 && p.giaThamKhao <= 10000000;
-        else if (this.filterPrice === "3") matchGia = p.giaThamKhao > 10000000;
+const uniqueThuongHieu = computed(() => {
+  const brands = products.value.map((p) => p.thuongHieu).filter(Boolean);
+  return [...new Set(brands)];
+});
 
-        return matchCat && matchNganh && matchGia;
+const filteredProducts = computed(() => {
+  return products.value.filter((p) => {
+    const matchCat = filterCat.value ? p.cat === filterCat.value : true;
+    const matchNganh = filterNganh.value ? p.nganh === filterNganh.value : true;
+    const matchThuongHieu = filterThuongHieu.value
+      ? p.thuongHieu === filterThuongHieu.value
+      : true;
+    let matchGia = true;
+    if (filterPrice.value === "1") matchGia = p.giaThamKhao < 5000000;
+    else if (filterPrice.value === "2")
+      matchGia = p.giaThamKhao >= 5000000 && p.giaThamKhao <= 10000000;
+    else if (filterPrice.value === "3") matchGia = p.giaThamKhao > 10000000;
+
+    const matchSearch = searchQuery.value
+      ? p.tenSP.toLowerCase().includes(searchQuery.value.toLowerCase())
+      : true;
+
+    return matchCat && matchNganh && matchGia && matchThuongHieu && matchSearch;
+  });
+});
+
+const paginatedProducts = computed(() => {
+  const start = (currentPage.value - 1) * perPage;
+  return filteredProducts.value.slice(start, start + perPage);
+});
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredProducts.value.length / perPage);
+});
+
+const fetchProducts = async () => {
+  try {
+    const res = await axios.get("/api/sanpham");
+    products.value = res.data
+      .filter((p) => p.status !== "XX")
+      .map((product) => {
+        product.fileFTP = getFullFtpUrl(product.fileFTP);
+        return product;
       });
-    },
-    paginatedProducts() {
-      const start = (this.currentPage - 1) * this.perPage;
-      return this.filteredProducts.slice(start, start + this.perPage);
-    },
-    totalPages() {
-      return Math.ceil(this.filteredProducts.length / this.perPage);
-    },
-  },
-  mounted() {
-    this.fetchProducts();
-
-    const adminFlag = localStorage.getItem("isAdmin");
-    this.isAdmin = adminFlag === "true"; // ✅ Cập nhật biến đúng nơi
-  },
-  methods: {
-    async fetchProducts() {
-      try {
-        const res = await axios.get("https://localhost:7210/api/sanpham");
-        this.products = res.data.filter((p) => p.status !== "XX");
-      } catch (err) {
-        console.error("Lỗi khi tải sản phẩm:", err);
-      }
-    },
-    async toggleShowUp(id, checked) {
-      const showUpValue = checked;
-      try {
-        await axios.put(`https://localhost:7210/api/sanpham/${id}`, {
-          showUp: showUpValue,
-        });
-        const product = this.products.find((p) => p.id === id);
-        if (product) product.showUp = showUpValue;
-      } catch (err) {
-        console.error("Lỗi cập nhật showUp:", err);
-      }
-    },
-    async markProductDeleted(id) {
-      if (!confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) return;
-      try {
-        await axios.put(`https://localhost:7210/api/sanpham/${id}`, {
-          status: "XX",
-        });
-        this.fetchProducts();
-      } catch (err) {
-        console.error("Lỗi khi xóa sản phẩm:", err);
-      }
-    },
-    prevPage() {
-      if (this.currentPage > 1) this.currentPage--;
-    },
-    nextPage() {
-      if (this.currentPage < this.totalPages) this.currentPage++;
-    },
-
-  },
-  watch: {
-    filterType() {
-      this.currentPage = 1;
-    },
-    filterCat() {
-      this.currentPage = 1;
-    },
-    filterNganh() {
-      this.currentPage = 1;
-    },
-    filterPrice() {
-      this.currentPage = 1;
-    },
-  },
+  } catch (err) {
+    console.error("Lỗi khi tải sản phẩm:", err);
+  }
 };
-</script>
 
+const toggleShowUp = async (id, checked) => {
+  try {
+    await axios.put(`/api/sanpham/${id}`, {
+      showUp: checked,
+    });
+    const product = products.value.find((p) => p.id === id);
+    if (product) product.showUp = checked;
+  } catch (err) {
+    console.error("Lỗi cập nhật showUp:", err);
+  }
+};
+
+const markProductDeleted = async (id) => {
+  if (!confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) return;
+  try {
+    await axios.put(`/api/sanpham/${id}`, { status: "XX" });
+    fetchProducts();
+  } catch (err) {
+    console.error("Lỗi khi xóa sản phẩm:", err);
+  }
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--;
+};
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++;
+};
+
+watch(
+  [filterType, filterCat, filterNganh, filterPrice, filterThuongHieu],
+  () => {
+    currentPage.value = 1;
+  }
+);
+
+onMounted(() => {
+  fetchProducts();
+  const adminFlag = localStorage.getItem("isAdmin");
+  isAdmin.value = adminFlag === "true";
+});
+</script>
 
 <style scoped>
 .all-products {
@@ -192,7 +213,18 @@ export default {
 }
 
 .filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
   margin-bottom: 20px;
+  justify-content: center;
+}
+
+.filter-bar select {
+  min-width: 150px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
 }
 
 .filter-bar button {
@@ -332,8 +364,25 @@ export default {
   color: #007bff;
 }
 
-.scroll-fix {
-  margin-top: 150px; /* hoặc đúng chiều cao của header */
+.search-bar {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.search-bar input {
+  width: calc(4 * 150px + 3 * 16px); /* 4 ô filter + 3 khoảng cách */
+  max-width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  transition: border-color 0.3s;
+}
+
+.search-bar input:focus {
+  outline: none;
+  border-color: #007bff;
 }
 
 /* Responsive */
@@ -346,6 +395,17 @@ export default {
 @media (max-width: 768px) {
   .product-card {
     flex: 0 0 calc(50% - 20px);
+  }
+  .search-bar input {
+    width: 100%;
+  }
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-bar select {
+    width: 100%;
   }
 }
 

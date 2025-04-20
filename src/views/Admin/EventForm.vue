@@ -1,5 +1,5 @@
 <template>
-  <div class="blog-post-manager scroll-target">
+  <div class="blog-post-manager">
     <h2>{{ state.isEditing ? "Chỉnh sửa bài viết" : "Thêm bài viết mới" }}</h2>
 
     <!-- Form nhập liệu -->

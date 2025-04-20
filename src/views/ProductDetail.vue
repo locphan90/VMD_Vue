@@ -1,151 +1,232 @@
 <template>
-  <section class="product-detail">
-    <div class="back-button">
-      <router-link to="/">← Quay lại</router-link>
-    </div>
-    <div class="detail-wrapper">
-      <div class="product-image">
-        <img :src="product.image" :alt="product.name" />
-      </div>
-      <div class="product-info">
-        <h1 class="product-title">{{ product.name }}</h1>
-        <p class="product-price">Giá: {{ product.price }}</p>
-        <p class="product-description">{{ product.description }}</p>
-        <div class="product-meta">
-          <span class="badge">{{ product.hot }}</span>
-          <span class="badge">{{ product.status }}</span>
+  <div class="product-detail-container" v-if="product">
+    <div class="content-wrapper">
+      <button class="back-button" @click="$router.back()">
+        <i class="fas fa-arrow-left"></i> Quay lại
+      </button>
+      
+      <div class="product-detail-wrapper">
+        <div class="product-image-container">
+          <img :src="product.fileFTP" :alt="product.tenSP" class="product-image" />
+        </div>
+        
+        <div class="product-info">
+          <h1 class="product-title">{{ product.tenSP }}</h1>
+          
+          <div class="product-price">
+            <span class="price-label">Giá tham khảo:</span>
+            <span class="price-value" v-if="product.giaThamKhao">
+              {{ product.giaThamKhao.toLocaleString() }}<sup>đ</sup>
+            </span>
+            <span class="price-value" v-else>Chưa cập nhật</span>
+          </div>
+          
+          <div class="product-details">
+            <div class="detail-item">
+              <span class="detail-label">Loại:</span>
+              <span class="detail-value">{{ product.loai }}</span>
+            </div>
+            
+            <div class="detail-item">
+              <span class="detail-label">Thương hiệu:</span>
+              <span class="detail-value">{{ product.thuongHieu || 'Chưa cập nhật' }}</span>
+            </div>
+            
+            <div class="detail-item">
+              <span class="detail-label">Mô tả:</span>
+              <span class="detail-value">{{ product.mota }}</span>
+            </div>
+          </div>
+          
+          <div class="product-description">
+            <h3 class="description-title">Chi tiết sản phẩm</h3>
+            <p class="description-content">{{ product.chiTietSP || 'Chưa có chi tiết' }}</p>
+          </div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
 </template>
 
-<script>
-export default {
-  name: 'ProductDetail',
-  data() {
-    return {
-      product: {
-        name: '',
-        price: '',
-        image: '',
-        description: '',
-        hot: '',
-        status: '',
-      },
-    };
-  },
-  mounted() {
-    const products = [
-      { image: '/api/placeholder/240/200', name: 'Cà Phê Nguyên Chất Cao Cấp K-Coffee', price: '450.000 đ', hot: 'Hot: 10%', status: 'New', description: 'Hương vị đậm đà, thơm ngon từ hạt cà phê tuyển chọn.' },
-      { image: '/api/placeholder/240/200', name: 'Trà Hoa Táo Vị Đào Cam Sả', price: '150.000 đ', hot: 'Hot: 15%', status: 'Sale', description: 'Sự kết hợp hoàn hảo giữa vị trà thanh mát và hương thơm nhẹ nhàng.' },
-      { image: '/api/placeholder/240/200', name: 'Sữa Đậu Lúa Mạch Đông', price: '150.000 đ', hot: 'Hot: 18%', status: 'New', description: 'Dinh dưỡng từ đậu nành và lúa mạch, tốt cho sức khỏe.' },
-      { image: '/api/placeholder/240/200', name: 'Mỳ Rong Rưỡng Vị Măng Ngọt', price: '240.000 đ', hot: 'Hot: 22%', status: 'Sale', description: 'Hương vị măng ngọt tự nhiên, thơm ngon hấp dẫn.' },
-      { image: '/api/placeholder/240/200', name: 'Phở Vina Hương Vị Gà Xé', price: '280.000 đ', hot: 'Hot: 25%', status: 'New', description: 'Phở Việt truyền thống với hương vị gà xé đậm đà.' },
-      { image: '/api/placeholder/240/200', name: 'Trà Sen Vàng', price: '170.000 đ', hot: 'Hot: 12%', status: 'New', description: 'Trà sen vàng, tinh hoa của thiên nhiên Việt Nam.' },
-      { image: '/api/placeholder/240/200', name: 'Nước ép Táo Tươi', price: '220.000 đ', hot: 'Hot: 18%', status: 'Sale', description: 'Nước ép táo tươi nguyên chất, giàu vitamin.' },
-      { image: '/api/placeholder/240/200', name: 'Sữa Chua Uống Men Sống', price: '130.000 đ', hot: 'Hot: 20%', status: 'New', description: 'Sữa chua uống men sống, tốt cho hệ tiêu hóa.' },
-    ];
-    const name = this.$route.params.name;
-    this.product = products.find(p => p.name === name) || products[0];
-  },
-};
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import axios from "@/utils/axios";
+import getFullFtpUrl from '@/utils/pathHelper';
+
+const product = ref(null);
+const route = useRoute();
+
+onMounted(async () => {
+  const id = route.params.id;
+  try {
+    const res = await axios.get(`/api/sanpham/${id}`);
+    if (res.data && res.data.status === "OK") {
+      res.data.fileFTP = getFullFtpUrl(res.data.fileFTP);
+      product.value = res.data;
+    }
+  } catch (err) {
+    console.error("Lỗi khi tải chi tiết sản phẩm:", err);
+  }
+});
 </script>
 
+
 <style scoped>
-.product-detail {
+.product-detail-container {
+  min-height: 100vh;
+  padding: 40px 20px;
+  background-color: #f8f9fa;
+  display: flex;
+  justify-content: center;
+}
+
+.content-wrapper {
+  width: 100%;
   max-width: 1200px;
-  margin: 40px auto;
-  padding: 0 15px;
+  margin: 0 auto;
 }
 
 .back-button {
-  margin-bottom: 20px;
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 30px;
+  background-color: transparent;
+  border: none;
+  font-size: 16px;
+  color: #3498db;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  padding: 10px 0;
 }
 
-.back-button a {
-  text-decoration: none;
-  color: #e74c3c;
-  font-weight: bold;
+.back-button:hover {
+  color: #2980b9;
 }
 
-.detail-wrapper {
+.back-button i {
+  margin-right: 8px;
+}
+
+.product-detail-wrapper {
   display: flex;
-  gap: 40px;
   flex-wrap: wrap;
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  gap: 40px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  padding: 30px;
+}
+
+.product-image-container {
+  flex: 1;
+  min-width: 320px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 .product-image {
-  flex: 1 1 400px;
-}
-
-.product-image img {
   width: 100%;
+  max-width: 500px;
+  height: auto;
+  object-fit: contain;
   border-radius: 8px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
 .product-info {
-  flex: 1 1 400px;
+  flex: 1;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .product-title {
   font-size: 28px;
-  margin-bottom: 20px;
+  font-weight: 700;
   color: #333;
+  margin: 0;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
 }
 
 .product-price {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.price-label {
+  font-size: 16px;
+  color: #666;
+  margin-right: 10px;
+}
+
+.price-value {
   color: #e74c3c;
-  font-size: 22px;
-  font-weight: bold;
-  margin-bottom: 15px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.product-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail-item {
+  display: flex;
+  line-height: 1.6;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #555;
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.detail-value {
+  color: #666;
 }
 
 .product-description {
-  margin-bottom: 20px;
-  line-height: 1.6;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.description-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.description-content {
+  line-height: 1.7;
   color: #555;
 }
 
-.product-meta .badge {
-  display: inline-block;
-  background: #e74c3c;
-  color: #fff;
-  padding: 4px 8px;
-  border-radius: 4px;
-  margin-right: 8px;
-  font-size: 12px;
-}
-
-.buy-button {
-  display: inline-block;
-  background: #e74c3c;
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 4px;
-  text-decoration: none;
-  transition: background 0.3s;
-}
-
-.buy-button:hover {
-  background: #c0392b;
-}
-
 @media (max-width: 768px) {
-  .detail-wrapper {
+  .product-detail-wrapper {
+    flex-direction: column;
+    padding: 20px;
+  }
+  
+  .product-title {
+    font-size: 24px;
+  }
+  
+  .detail-item {
     flex-direction: column;
   }
-
-  .product-title {
-    font-size: 22px;
-  }
-
-  .product-price {
-    font-size: 18px;
+  
+  .detail-label {
+    width: auto;
+    margin-bottom: 4px;
   }
 }
 </style>

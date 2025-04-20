@@ -1,7 +1,28 @@
 <template>
-  <div class="news-detail" v-if="news">
-    <h1 class="news-title">{{ news.tieuDe }}</h1>
-    <div class="news-content" v-html="news.noiDung"></div>
+  <div class="product-detail-container" v-if="product">
+    <button class="back-button" @click="$router.back()">← Quay lại</button>
+    <div class="product-detail-wrapper">
+      <div class="product-image">
+        <img :src="product.fileFTP" :alt="product.tenSP" />
+      </div>
+      <div class="product-info">
+        <h1 class="product-title">{{ product.tenSP }}</h1>
+        <p class="product-price">
+          Giá tham khảo:
+          <span v-if="product.giaThamKhao">
+            {{ product.giaThamKhao.toLocaleString() }}<sup>đ</sup>
+          </span>
+          <span v-else>Chưa cập nhật</span>
+        </p>
+        <p class="product-meta">Loại: {{ product.loai }}</p>
+        <p class="product-meta">Thương hiệu: {{ product.thuongHieu || 'Chưa cập nhật' }}</p>
+        <p class="product-meta">Mô tả: {{ product.mota }}</p>
+        <div class="product-description">
+          <strong>Chi tiết sản phẩm:</strong>
+          <p>{{ product.chiTietSP || 'Chưa có chi tiết' }}</p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -9,73 +30,79 @@
 import axios from "@/utils/axios";
 
 export default {
-  name: "NewsDetail",
+  name: "ProductDetail",
   data() {
     return {
-      news: null,
+      product: null,
     };
   },
   async mounted() {
     const id = this.$route.params.id;
     try {
-      const res = await axios.get(`/api/THONGTINSUKIEN/${id}`);
+      const res = await axios.get(`/api/sanpham/${id}`);
       if (res.data && res.data.status === "OK") {
-        this.news = res.data;
+        this.product = res.data;
       }
     } catch (err) {
-      console.error("Lỗi khi tải chi tiết sự kiện:", err);
+      console.error("Lỗi khi tải chi tiết sản phẩm:", err);
     }
   },
 };
 </script>
 
 <style scoped>
-.news-detail {
-  max-width: 1200px;
-  margin: 40px auto;
-  padding: 135px 15px 40px; /* 👈 Thêm padding-top = chiều cao header */
-  scroll-margin-top: 135px;
-}
-
-.news-title {
-  font-size: 28px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  text-align: center;
-  color: #333;
-}
-
-.news-content {
-  font-size: 16px;
-  line-height: 1.8;
-  color: #444;
-  background: #fff;
+.product-detail-container {
   padding: 20px;
+}
+
+.back-button {
+  margin-bottom: 20px;
+  background-color: transparent;
+  border: none;
+  font-size: 16px;
+  color: #007bff;
+  cursor: pointer;
+}
+
+.product-detail-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.product-image img {
+  width: 400px;
+  height: auto;
+  object-fit: cover;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .news-title {
-    font-size: 22px;
-  }
-
-  .news-content {
-    font-size: 15px;
-    padding: 15px;
-  }
+.product-info {
+  flex: 1;
+  min-width: 280px;
 }
 
-@media (max-width: 480px) {
-  .news-title {
-    font-size: 20px;
-  }
-
-  .news-content {
-    font-size: 14px;
-    padding: 12px;
-  }
+.product-title {
+  font-size: 24px;
+  margin-bottom: 10px;
 }
 
+.product-price {
+  color: red;
+  font-size: 18px;
+  margin-bottom: 10px;
+  opacity: 0.8;
+}
+
+.product-meta {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.product-description {
+  margin-top: 16px;
+  font-size: 14px;
+  color: #444;
+}
 </style>

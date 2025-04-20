@@ -1,12 +1,12 @@
 <template>
-  <div class="product-form scroll-target">
+  <div class="product-form">
     <h2>Nhập sản phẩm</h2>
     <form @submit.prevent="handleSubmit">
       <div class="form-group">
         <label>Loại:</label>
         <select v-model="product.cat">
-          <option value="Mới">Mới</option>
-          <option value="Nổi bật">Nổi bật</option>
+          <option value="MOI">Mới</option>
+          <option value="NOIBAT">Nổi bật</option>
         </select>
       </div>
 
@@ -29,7 +29,10 @@
         <label>Mô tả:</label>
         <input type="text" v-model="product.mota" />
       </div>
-
+      <div class="form-group">
+        <label>Chi tiết sản phẩm:</label>
+        <textarea v-model="product.chiTietSP" rows="5"></textarea>
+      </div>
       <div class="form-group">
         <label>Phân loại:</label>
         <select v-model="product.loai">
@@ -47,7 +50,14 @@
           <option value="Industry">Industry</option>
         </select>
       </div>
-
+<div class="form-group">
+  <label>Thương hiệu:</label>
+  <select v-model="product.thuongHieu">
+    <option v-for="item in thuongHieuList" :key="item.val" :value="item.val">
+      {{ item.val }}
+    </option>
+  </select>
+</div>
       <div class="form-group">
         <label>File hình ảnh sản phẩm:</label>
         <input type="file" @change="onFileChange" />
@@ -95,15 +105,25 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from "axios";
+import axios from "@/utils/axios";
 import { formatInputCurrency } from "@/utils/formatter";
 import getFullFtpUrl from "@/utils/pathHelper";
-
+const thuongHieuList = ref([]);
+const fetchThuongHieu = async () => {
+  try {
+    const res = await axios.get("/api/MISC?cat=THUONGHIEU");
+    thuongHieuList.value = res.data;
+  } catch (err) {
+    console.error("Lỗi khi tải thương hiệu:", err);
+  }
+};
 const product = ref({
   cat: "Mới",
   tenSP: "",
   giaThamKhao: "",
   mota: "",
+  chiTietSP: "", // 👈 thêm dòng này
+  thuongHieu:"",
   loai: "New",
   nganh: "FMCG",
   fileFTP: "",
@@ -120,7 +140,6 @@ const onPriceInput = (event) => {
 const onFileChange = (event) => {
   selectedFile.value = event.target.files[0];
 };
-
 const handleSubmit = async () => {
   if (!selectedFile.value) {
     alert("Vui lòng chọn file sản phẩm!");
@@ -131,24 +150,29 @@ const handleSubmit = async () => {
   formData.append("file", selectedFile.value);
 
   try {
-    const uploadResponse = await axios.post(
-      "https://localhost:7210/api/ftp/upload",
-      formData
-    );
-    product.value.fileFTP = uploadResponse.data.filePath;
+
+    const formData = new FormData();
+    formData.append("file", selectedFile.value);
+
+    const uploadRes = await axios.post("/api/ftp/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    product.value.fileFTP = uploadRes.data.filePath;
 
     const cleanGia = Number(product.value.giaThamKhao.replace(/\D/g, ""));
     const payload = {
       ...product.value,
       giaThamKhao: cleanGia,
     };
-
-    await axios.post("https://localhost:7210/api/sanpham", payload);
+    console.log(payload);
+    await axios.post("/api/sanpham", payload);
     alert("Thêm sản phẩm thành công!");
     resetForm();
     await fetchTodayProducts();
   } catch (error) {
-    console.error("Lỗi khi lưu sản phẩm:", error);
+    console.error("Lỗi khi lưu sản phẩm:", error.response?.data || error);
     alert("Có lỗi xảy ra khi lưu sản phẩm!");
   }
 };
@@ -159,8 +183,10 @@ const resetForm = () => {
     tenSP: "",
     giaThamKhao: "",
     mota: "",
+    chiTietSP: "",
     loai: "New",
     nganh: "FMCG",
+    thuongHieu: "",
     fileFTP: "",
     showUp: false,
   };
@@ -171,7 +197,7 @@ const resetForm = () => {
 const todayProducts = ref([]);
 const fetchTodayProducts = async () => {
   try {
-    const res = await axios.get("https://localhost:7210/api/sanpham");
+    const res = await axios.get("/api/sanpham");
     const today = new Date().toISOString().split("T")[0];
     // todayProducts = res.data.filter((p) => p.status !== "XX");
     todayProducts.value = res.data
@@ -191,7 +217,7 @@ const fetchTodayProducts = async () => {
 const deleteProduct = async (id) => {
   if (confirm("Bạn chắc chắn muốn xóa sản phẩm này?")) {
     try {
-      await axios.put(`https://localhost:7210/api/sanpham/${id}`, {
+      await axios.put(`/api/sanpham/${id}`, {
         status: "XX",
       });
       fetchTodayProducts();
@@ -203,6 +229,7 @@ const deleteProduct = async (id) => {
 
 onMounted(() => {
   fetchTodayProducts();
+  fetchThuongHieu();
 });
 </script>
 
@@ -369,6 +396,21 @@ button:hover {
   font-size: 12px;
   text-align: left;
   color: #007bff;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 100px;
+}
+
+textarea:focus {
+  border-color: #e74c3c;
+  outline: none;
 }
 @media (max-width: 992px) {
   .product-card {

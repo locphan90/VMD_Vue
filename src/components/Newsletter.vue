@@ -13,22 +13,27 @@
   </section>
 </template>
 
-<script>
-export default {
-  name: "Newsletter",
-  data() {
-    return {
-      email: "",
-    };
-  },
-  methods: {
-    submitForm() {
-      alert(`Email đăng ký: ${this.email}`);
-      this.email = "";
-    },
-  },
+<script setup>
+import { ref } from 'vue';
+import axios from "@/utils/axios";
+
+const email = ref('');
+
+const submitForm = async () => {
+  try {
+    const response = await axios.post("/api/DangKy", { email: email.value });
+
+    alert("Đăng ký thành công!");
+    email.value = "";
+  } catch (error) {
+    const message =
+      error.response?.data || error.message || "Đăng ký thất bại!";
+    alert("Lỗi: " + message);
+  }
 };
 </script>
+
+
 
 <style scoped>
 .newsletter {

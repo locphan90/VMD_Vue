@@ -1,5 +1,5 @@
 <template>
-  <div class="brand-wrapper scroll-target">
+  <div class="brand-wrapper">
     <!-- Form nhập thương hiệu -->
     <div class="brand-form">
       <h2>Thêm thương hiệu</h2>
@@ -42,7 +42,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from "../../utils/axios";
+import axios from "@/utils/axios";
 import getFullFtpUrl from "@/utils/pathHelper";
 
 const brandName = ref("");

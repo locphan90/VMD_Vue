@@ -9,6 +9,8 @@ import Events from '../views/Admin/EventForm.vue';
 import EventDisplay from '../views/EventDisplay.vue';
 import DaiLyForm from '../components/DaiLyForm.vue';
 import DaiLyManager from '../views/Admin/DaiLyManager.vue';
+import EmailManager from '../views/Admin/RegisteredEmails.vue';
+import BannerManager from '../views/Admin/BannerManager.vue';
 const routes = [
   {
     path: '/',
@@ -19,12 +21,6 @@ const routes = [
     path: '/products',
     name: 'AllProducts',
     component: AllProducts
-  },
-  {
-    path: '/product/:name',
-    name: 'ProductDetail',
-    component: ProductDetail,
-    props: true,
   },
   {
     path: '/admin/products',
@@ -66,6 +62,25 @@ const routes = [
     component: DaiLyManager,
     meta: { requiresAuth: true, requiresAdmin: true }
   },
+  {
+    path: '/admin/emailmanager',
+    name: 'EmailManager',
+    component: EmailManager,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  // routes.js
+  {
+    path: '/sanpham/:id',
+    name: 'ProductDetail',
+    component: ProductDetail,
+    props: true
+  },
+  {
+    path: '/admin/bannermanager',
+    name: 'BannerManager',
+    component: BannerManager,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
 ];
 
 const router = createRouter({
@@ -75,16 +90,16 @@ const router = createRouter({
 
 // 👇 Thêm đoạn kiểm tra trước mỗi lần chuyển route
 router.beforeEach((to, from, next) => {
-    const isAuthenticated = !!localStorage.getItem('username');
-    const isAdmin = localStorage.getItem('role') === 'Admin';
-  
-    if (to.meta.requiresAuth && !isAuthenticated) {
-      next('/'); // Chưa đăng nhập
-    } else if (to.meta.requiresAdmin && !isAdmin) {
-      next('/'); // Không phải admin
-    } else {
-      next(); // Cho đi tiếp
-    }
-  });
+  const isAuthenticated = !!localStorage.getItem('username');
+  const isAdmin = localStorage.getItem('role') === 'Admin';
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    next('/'); // Chưa đăng nhập
+  } else if (to.meta.requiresAdmin && !isAdmin) {
+    next('/'); // Không phải admin
+  } else {
+    next(); // Cho đi tiếp
+  }
+});
 
 export default router;

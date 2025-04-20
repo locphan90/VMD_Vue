@@ -5,6 +5,9 @@
         <img src="#" alt="Logo" />
       </div>
       <div class="utils">
+        <router-link to="/products" class="search-btn" title="Tìm kiếm">
+          <i class="search-icon">&#128269;</i>
+        </router-link>
         <router-link to="/dangkydaily" class="register-link"
           >ĐĂNG KÝ ĐẠI LÝ</router-link
         >
@@ -31,25 +34,29 @@
         <li>
           <a href="#" @click.prevent="scrollToSection('footer')">LIÊN HỆ</a>
         </li>
+        <li>
+          <a href="#" @click.prevent="scrollToSection('categories')"
+            >HỆ THỐNG ĐẠI LÝ</a
+          >
+        </li>
+
+        <!-- Nếu chưa đăng nhập -->
         <li v-if="!isLoggedIn">
           <a href="#" @click.prevent="openLogin"> <i></i> ĐĂNG NHẬP </a>
         </li>
+
+        <!-- Nếu đã đăng nhập -->
         <li v-else class="dropdown" @click="toggleUserMenu">
           <a href="#">{{ username }}</a>
           <ul
-            v-if="showUserMenu"
             class="dropdown-menu"
+            :class="{ show: showUserMenu }"
             @mouseenter="isHovering = true"
             @mouseleave="handleMouseLeave"
           >
             <li>
               <router-link to="/products" @click.native="closeUserMenu"
                 >Sản phẩm</router-link
-              >
-            </li>
-            <li>
-              <router-link to="/admin/dailymanager" @click.native="closeUserMenu"
-                >Quản lý đăng ký đại lý</router-link
               >
             </li>
             <li>
@@ -68,6 +75,28 @@
               >
             </li>
             <li>
+              <router-link
+                to="/admin/bannermanager"
+                @click.native="closeUserMenu"
+                >Quản lý banner</router-link
+              >
+            </li>
+            <li>
+              <router-link
+                to="/admin/dailymanager"
+                @click.native="closeUserMenu"
+                >Quản lý đăng ký đại lý</router-link
+              >
+            </li>
+            <li>
+              <router-link
+                to="/admin/emailmanager"
+                @click.native="closeUserMenu"
+                >Quản lý email đăng ký</router-link
+              >
+            </li>
+
+            <li>
               <router-link to="/admin/partners" @click.native="closeUserMenu"
                 >Nhập đối tác</router-link
               >
@@ -77,21 +106,20 @@
                 <i></i> Đổi mật khẩu
               </a>
             </li>
-            <li>
-              <a href="#" @click.prevent="logout">Đăng xuất</a>
-            </li>
+            <li><a href="#" @click.prevent="logout">Đăng xuất</a></li>
           </ul>
         </li>
       </ul>
     </nav>
-    <!-- Form đăng nhập modal -->
+
+    <!-- Form đăng nhập -->
     <LoginForm
       v-if="showLogin"
       @close="closeLogin"
       @login-success="handleLoginSuccess"
     />
 
-    <!-- Form đổi mật khẩu modal -->
+    <!-- Form đổi mật khẩu -->
     <ChangePasswordForm
       v-if="showChangePassword"
       @close="closeChangePassword"
@@ -100,11 +128,12 @@
 </template>
 
 <script setup>
+import { ref } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import LoginForm from "./LoginForm.vue";
 import ChangePasswordForm from "./ChangePasswordForm.vue";
 import eventBus from "../eventBus";
-import { ref } from "vue";
-import { useRouter, useRoute } from "vue-router";
+
 const isHovering = ref(false);
 const isMenuOpen = ref(false);
 const showLogin = ref(false);
@@ -114,6 +143,7 @@ const showUserMenu = ref(false);
 const showChangePassword = ref(false);
 const router = useRouter();
 const route = useRoute();
+
 const scrollToSection = (section) => {
   eventBus.emit("scrollTo", section);
 };
@@ -134,11 +164,14 @@ const handleLoginSuccess = (name) => {
   username.value = name;
   isLoggedIn.value = true;
   showLogin.value = false;
-  showUserMenu.value = false;
 };
 
 const toggleUserMenu = () => {
   showUserMenu.value = !showUserMenu.value;
+};
+
+const closeUserMenu = () => {
+  showUserMenu.value = false;
 };
 
 const logout = () => {
@@ -146,11 +179,10 @@ const logout = () => {
   username.value = "";
   showUserMenu.value = false;
   localStorage.clear();
-  // Nếu đang ở trang AllProducts thì reload
   if (route.name === "AllProducts") {
-    router.go(); // Reload lại trang
+    router.go();
   } else {
-    router.push("/"); // Chuyển về trang chủ
+    router.push("/");
   }
   alert("Bạn đã đăng xuất!");
 };
@@ -162,10 +194,6 @@ const changePassword = () => {
 
 const closeChangePassword = () => {
   showChangePassword.value = false;
-};
-
-const closeUserMenu = () => {
-  showUserMenu.value = false;
 };
 
 const handleMouseLeave = () => {
@@ -182,7 +210,7 @@ const handleMouseLeave = () => {
 header {
   width: 100%;
   background: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   position: relative;
   z-index: 100;
 }
@@ -198,21 +226,56 @@ header {
 
 .logo img {
   height: 60px;
+  transition: transform 0.3s;
+}
+
+.logo img:hover {
+  transform: scale(1.05);
 }
 
 .utils {
-  position: static;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.search-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f8f8f8;
+  color: #333;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.search-btn:hover {
+  background-color: #e74c3c;
+  color: white;
+  transform: scale(1.05);
+}
+
+.search-icon {
+  font-size: 20px;
+  line-height: 1;
 }
 
 .register-link {
   text-decoration: none;
   color: #333;
   font-weight: bold;
-  transition: color 0.3s;
+  padding: 10px 15px;
+  border-radius: 4px;
+  transition: all 0.3s;
+  background-color: #f8f8f8;
 }
 
 .register-link:hover {
-  color: #e74c3c;
+  color: white;
+  background-color: #e74c3c;
 }
 
 .menu-toggle {
@@ -221,12 +284,18 @@ header {
   display: none;
   background: none;
   border: none;
+  transition: color 0.3s;
+}
+
+.menu-toggle:hover {
+  color: #e74c3c;
 }
 
 nav {
   max-width: 1200px;
   margin: 0 auto;
   text-align: center;
+  border-top: 1px solid #f0f0f0;
 }
 
 nav ul {
@@ -250,10 +319,27 @@ nav ul li a {
   padding: 15px 5px;
   display: inline-block;
   transition: color 0.3s, border-bottom 0.3s;
+  font-weight: 500;
+  position: relative;
+}
+
+nav ul li a:after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 10px;
+  left: 0;
+  background-color: #e74c3c;
+  transition: width 0.3s ease;
 }
 
 nav ul li a:hover {
   color: #e74c3c;
+}
+
+nav ul li a:hover:after {
+  width: 100%;
 }
 
 /* Dropdown menu */
@@ -266,19 +352,28 @@ nav ul li a:hover {
   top: 100%;
   left: 0;
   background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #eee;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
   list-style: none;
   margin: 8px 0 0 0;
   padding: 8px 0;
   min-width: 240px;
   z-index: 1000;
   text-align: left;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.dropdown-menu.show {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .dropdown-menu li {
   width: 100%;
+  margin: 0;
 }
 
 .dropdown-menu li a {
@@ -288,16 +383,21 @@ nav ul li a:hover {
   text-decoration: none;
   transition: background 0.3s, color 0.3s;
   text-transform: none;
+  border-radius: 4px;
+  margin: 2px 5px;
 }
 
 .dropdown-menu li a:hover {
   background-color: #e74c3c;
   color: white;
-  border-radius: 4px;
+}
+
+.dropdown-menu li a:after {
+  display: none;
 }
 
 .main-content {
-  padding-top: 80px;
+  padding-top: 120px;
 }
 
 header {
@@ -310,17 +410,42 @@ header {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  margin: 8px 0 0 0;
+  padding: 8px 0;
+  min-width: 240px;
+  z-index: 1000;
+  text-align: left;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+}
+
+.dropdown-menu.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .top-bar {
     flex-wrap: wrap;
+    padding: 10px;
   }
 
   .menu-toggle {
     display: block;
     order: 3;
-    width: 100%;
-    text-align: right;
     margin-top: 10px;
   }
 
@@ -328,21 +453,48 @@ header {
     display: none;
     width: 100%;
     background: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 8px 8px;
   }
 
   nav.open {
     display: block;
+    animation: slideDown 0.3s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   nav ul {
     flex-direction: column;
     text-align: left;
+    padding: 10px 0;
   }
 
   nav ul li {
     margin: 0;
     border-bottom: 1px solid #eee;
+  }
+
+  nav ul li:last-child {
+    border-bottom: none;
+  }
+
+  nav ul li a {
+    padding: 12px 15px;
+    display: block;
+  }
+
+  nav ul li a:after {
+    display: none;
   }
 
   .utils {
@@ -354,23 +506,37 @@ header {
     order: 1;
     width: auto;
   }
+
   .dropdown-menu {
     position: static;
     box-shadow: none;
     border: none;
-    background: transparent;
+    background: #f8f8f8;
     padding: 0;
     margin: 0;
+    border-radius: 0;
+    opacity: 1;
+    transform: none;
   }
 
   .dropdown-menu li a {
-    padding: 10px;
+    padding: 10px 20px;
     color: #333;
   }
 
   .dropdown-menu li a:hover {
     background: #e74c3c;
-    /* color: #007bff; */
+    color: white;
+  }
+
+  .search-btn {
+    width: 35px;
+    height: 35px;
+  }
+
+  .register-link {
+    padding: 8px 12px;
+    font-size: 14px;
   }
 }
 </style>
