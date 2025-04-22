@@ -91,7 +91,7 @@ const handleSubmit = async () => {
       VAL: brandName.value,
       VAL2: fileUrl,
     };
-
+console.log(postData);
     await axios.post("/api/MISC", postData);
     await fetchBrands();
 
@@ -106,12 +106,26 @@ const handleSubmit = async () => {
   }
 };
 
+// const deleteBrand = async (id) => {
+//   const confirmDelete = confirm("Bạn có chắc chắn muốn xoá thương hiệu này?");
+//   if (!confirmDelete) return;
+
+//   try {
+//     await axios.put(`/api/MISC/${id}`, {
+//       status: "XX",
+//     });
+//     await fetchBrands();
+//   } catch (err) {
+//     console.error("Lỗi xóa thương hiệu:", err);
+//     alert("Xóa không thành công.");
+//   }
+// };
 const deleteBrand = async (id) => {
   const confirmDelete = confirm("Bạn có chắc chắn muốn xoá thương hiệu này?");
   if (!confirmDelete) return;
 
   try {
-    await axios.put(`/api/MISC/${id}`, {
+    await axios.post(`/api/MISC/update/${id}`, {
       status: "XX",
     });
     await fetchBrands();
@@ -120,6 +134,7 @@ const deleteBrand = async (id) => {
     alert("Xóa không thành công.");
   }
 };
+
 
 onMounted(fetchBrands);
 </script>

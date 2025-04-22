@@ -1,5 +1,5 @@
 <template>
-  <div class="daily-form-wrapper scroll-target">
+  <div class="daily-form-wrapper">
     <h2>Đăng ký Đại lý</h2>
     <form @submit.prevent="handleSubmit">
       <div class="form-group">

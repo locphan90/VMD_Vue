@@ -92,9 +92,9 @@ const updateStatus = async (id, status) => {
 
     const ngayDuyet = new Date().toISOString();
 
-    await axios.put(`/api/DaiLy/${id}`, {
+    await axios.post(`/api/DaiLy/update/${id}`, {
       Status: status,
-      NguoiDuyet: userId, // ✅ chính xác ID user
+      NguoiDuyet: userId,
       NgayDuyet: ngayDuyet,
     });
 

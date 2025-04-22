@@ -106,8 +106,8 @@ const deletePartner = async (id) => {
   if (!confirmDelete) return;
 
   try {
-    await axios.put(`/api/MISC/${id}`, {
-      status: "XX",
+    await axios.post(`/api/MISC/update/${id}`, {
+      Status: "XX",
     });
     await fetchPartners();
   } catch (err) {

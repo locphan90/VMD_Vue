@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../Home.vue';
 import AllProducts from '../views/AllProducts.vue';
+import AllBrands from '../views/AllBrands.vue';
+import AllEvents from '../views/AllEvents.vue';
 import ProductDetail from '../views/ProductDetail.vue';
 import ProductForm from '../views/Admin/ProductForm.vue';
 import BrandForm from '../views/Admin/BrandForm.vue';
@@ -11,6 +13,7 @@ import DaiLyForm from '../components/DaiLyForm.vue';
 import DaiLyManager from '../views/Admin/DaiLyManager.vue';
 import EmailManager from '../views/Admin/RegisteredEmails.vue';
 import BannerManager from '../views/Admin/BannerManager.vue';
+import GTDLManager from '../views/Admin/GTDLManager.vue';
 const routes = [
   {
     path: '/',
@@ -21,6 +24,16 @@ const routes = [
     path: '/products',
     name: 'AllProducts',
     component: AllProducts
+  },
+  {
+    path: '/allbrands',
+    name: 'allbrands',
+    component: AllBrands
+  },
+  {
+    path: '/allevents',
+    name: 'allevent',
+    component: AllEvents
   },
   {
     path: '/admin/products',
@@ -48,7 +61,7 @@ const routes = [
   },
   {
     path: '/news/:id',
-    name: 'EventDisplay.vue',
+    name: 'EventDisplay',
     component: EventDisplay
   },
   {
@@ -79,6 +92,12 @@ const routes = [
     path: '/admin/bannermanager',
     name: 'BannerManager',
     component: BannerManager,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/admin/gtdlmanager',
+    name: 'GTDLManager',
+    component: GTDLManager,
     meta: { requiresAuth: true, requiresAdmin: true }
   },
 ];

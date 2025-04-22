@@ -3,7 +3,10 @@
     <h2 class="section-title">ĐỐI TÁC</h2>
     <div class="partner-grid">
       <div class="partner-card" v-for="(partner, index) in partners" :key="index">
-        <img :src="partner.image" :alt="partner.name" />
+        <div class="partner-logo">
+          <img :src="partner.image" :alt="partner.name" @error="handleImageError($event, partner.name)" />
+        </div>
+        <div class="partner-name">{{ partner.name }}</div>
       </div>
     </div>
   </section>
@@ -34,12 +37,16 @@ export default {
             name: item.val,
           }));
       } catch (err) {
-        console.error("Lỗi khi tải thương hiệu:", err);
+        console.error("Lỗi khi tải đối tác:", err);
       }
+    },
+    handleImageError(event, name) {
+      event.target.src = `https://via.placeholder.com/150?text=${encodeURIComponent(name)}`;
     },
   },
 };
 </script>
+
 
 <style scoped>
 .partners {
@@ -68,33 +75,58 @@ export default {
 .partner-grid {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center; /* 👈 canh giữa khi ít */
-  gap: 16px; /* 👈 khoảng cách giữa các thẻ */
+  justify-content: center; /* 👉 Canh giữa */
+  gap: 16px;
 }
 
 .partner-card {
-  width: 102.59px;
-  height: 102.59px;
+  width: 120px;
+  height: 120px;
   background-color: #fff;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  text-align: center;
 }
 
-.partner-card img {
+.partner-logo {
   width: 100%;
-  height: 100%;
-  object-fit: cover; /* 👌 cắt ảnh gọn đẹp */
+  height: 70%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
-/* Responsive: nếu màn hình nhỏ thì giãn đều vẫn giữ kích thước */
+.partner-logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.partner-name {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .partner-grid {
     gap: 12px;
   }
 }
+
+@media (max-width: 480px) {
+  .partner-grid {
+    gap: 12px;
+  }
+}
+
 </style>
 

@@ -1,108 +1,181 @@
 <template>
-  <div class="product-detail-container" v-if="product">
-    <button class="back-button" @click="$router.back()">← Quay lại</button>
-    <div class="product-detail-wrapper">
-      <div class="product-image">
-        <img :src="product.fileFTP" :alt="product.tenSP" />
+  <div class="news-detail-container">
+    <!-- Nút quay lại -->
+    <div class="back-button" @click="goBack">
+      <i class="arrow-left"></i> Quay lại
+    </div>
+    
+    <!-- Loading indicator -->
+    <div v-if="loading" class="loading">
+      <p>Đang tải dữ liệu...</p>
+    </div>
+    
+    <!-- Error message -->
+    <div v-if="error" class="error-message">
+      <p>{{ error }}</p>
+    </div>
+    
+    <!-- News detail -->
+    <div v-if="!loading && !error && newsItem" class="news-detail">
+      <h1 class="news-title">{{ newsItem.tieuDe }}</h1>
+      <div class="news-meta">
+        <span class="news-date">{{ formatDate(newsItem.fstUpdate) }}</span>
       </div>
-      <div class="product-info">
-        <h1 class="product-title">{{ product.tenSP }}</h1>
-        <p class="product-price">
-          Giá tham khảo:
-          <span v-if="product.giaThamKhao">
-            {{ product.giaThamKhao.toLocaleString() }}<sup>đ</sup>
-          </span>
-          <span v-else>Chưa cập nhật</span>
-        </p>
-        <p class="product-meta">Loại: {{ product.loai }}</p>
-        <p class="product-meta">Thương hiệu: {{ product.thuongHieu || 'Chưa cập nhật' }}</p>
-        <p class="product-meta">Mô tả: {{ product.mota }}</p>
-        <div class="product-description">
-          <strong>Chi tiết sản phẩm:</strong>
-          <p>{{ product.chiTietSP || 'Chưa có chi tiết' }}</p>
-        </div>
+      
+      <div class="news-image">
+        <img :src="getImageUrl(newsItem.linkAnh)" :alt="newsItem.tieuDe" />
       </div>
+      
+      <div class="news-content">
+        <p v-html="formatContent(newsItem.noiDung)"></p>
+      </div>
+    </div>
+    
+    <!-- Not found message -->
+    <div v-if="!loading && !error && !newsItem" class="not-found">
+      <p>Không tìm thấy bài viết</p>
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import axios from "@/utils/axios";
+import getFullFtpUrl from "@/utils/pathHelper";
 
-export default {
-  name: "ProductDetail",
-  data() {
-    return {
-      product: null,
-    };
-  },
-  async mounted() {
-    const id = this.$route.params.id;
-    try {
-      const res = await axios.get(`/api/sanpham/${id}`);
-      if (res.data && res.data.status === "OK") {
-        this.product = res.data;
-      }
-    } catch (err) {
-      console.error("Lỗi khi tải chi tiết sản phẩm:", err);
-    }
-  },
-};
+
+const route = useRoute()
+const router = useRouter()
+
+const newsItem = ref(null)
+const loading = ref(true)
+const error = ref(null)
+
+const fetchNewsDetail = async () => {
+  try {
+    loading.value = true
+    const id = route.params.id
+
+    const response = await axios.get(`/api/ThongTinSuKien/${id}`)
+    newsItem.value = response.data
+  } catch (err) {
+    error.value = 'Đã xảy ra lỗi khi tải chi tiết tin tức: ' + err.message
+  } finally {
+    loading.value = false
+  }
+}
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  return new Intl.DateTimeFormat('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date)
+}
+
+const getImageUrl = (url) => {
+  if (url && url.startsWith('ftp://')) {
+    return getFullFtpUrl(url);
+  }
+  return url || '/placeholder-image.jpg'
+}
+
+const formatContent = (content) => {
+  return content ? content.replace(/\n/g, '<br>') : ''
+}
+
+const goBack = () => {
+  router.go(-1)
+}
+
+onMounted(fetchNewsDetail)
 </script>
 
+
 <style scoped>
-.product-detail-container {
+.news-detail-container {
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 20px;
+  font-family: 'Roboto', Arial, sans-serif;
 }
 
 .back-button {
+  display: inline-flex;
+  align-items: center;
   margin-bottom: 20px;
-  background-color: transparent;
-  border: none;
-  font-size: 16px;
-  color: #007bff;
   cursor: pointer;
+  color: #2196f3;
+  font-weight: 500;
 }
 
-.product-detail-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+.arrow-left {
+  border: solid #2196f3;
+  border-width: 0 2px 2px 0;
+  display: inline-block;
+  padding: 3px;
+  margin-right: 8px;
+  transform: rotate(135deg);
 }
 
-.product-image img {
-  width: 400px;
-  height: auto;
-  object-fit: cover;
+.loading, .error-message, .not-found {
+  text-align: center;
+  padding: 20px;
+  margin: 20px 0;
+  background-color: #f9f9f9;
   border-radius: 8px;
 }
 
-.product-info {
-  flex: 1;
-  min-width: 280px;
+.error-message {
+  color: #d32f2f;
+  background-color: #ffebee;
 }
 
-.product-title {
-  font-size: 24px;
-  margin-bottom: 10px;
+.not-found {
+  color: #ff9800;
+  background-color: #fff3e0;
 }
 
-.product-price {
-  color: red;
-  font-size: 18px;
-  margin-bottom: 10px;
-  opacity: 0.8;
+.news-detail {
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.product-meta {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 8px;
+.news-title {
+  margin: 20px 20px 10px;
+  color: #333;
+  font-size: 2rem;
+  line-height: 1.3;
 }
 
-.product-description {
-  margin-top: 16px;
-  font-size: 14px;
-  color: #444;
+.news-meta {
+  margin: 0 20px 20px;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.news-image {
+  width: 100%;
+  max-height: 500px;
+  overflow: hidden;
+}
+
+.news-image img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.news-content {
+  padding: 30px 20px;
+  color: #333;
+  line-height: 1.8;
+  font-size: 1.1rem;
 }
 </style>

@@ -1,104 +1,110 @@
 <template>
-  <div class="all-products">
-    <div class="search-bar">
-      <input
-        type="text"
-        v-model="searchQuery"
-        placeholder="Tìm kiếm sản phẩm..."
-      />
-    </div>
-    <div class="filter-bar">
-      <select v-model="filterCat">
-        <option value="">Tất cả</option>
-        <option value="MOI">Mới</option>
-        <option value="NOIBAT">Nổi bật</option>
-      </select>
+  <MainLayout>
+    <div class="all-products">
+      <div class="search-bar">
+        <input
+          type="text"
+          v-model="searchQuery"
+          placeholder="Tìm kiếm sản phẩm..."
+        />
+      </div>
+      <div class="filter-bar">
+        <select v-model="filterCat">
+          <option value="">Tất cả</option>
+          <option value="MOI">Mới</option>
+          <option value="NOIBAT">Nổi bật</option>
+        </select>
 
-      <select v-model="filterNganh">
-        <option value="">Tất cả Ngành</option>
-        <option value="FMCG">FMCG</option>
-        <option value="Mẹ & Bé">Mẹ & Bé</option>
-        <option value="HealthCare">HealthCare</option>
-        <option value="Industry">Industry</option>
-      </select>
+        <select v-model="filterNganh">
+          <option value="">Tất cả Ngành</option>
+          <option value="FMCG">FMCG</option>
+          <option value="Mẹ & Bé">Mẹ & Bé</option>
+          <option value="HealthCare">HealthCare</option>
+          <option value="Industry">Industry</option>
+        </select>
 
-      <select v-model="filterThuongHieu">
-        <option value="">Tất cả thương hiệu</option>
-        <option v-for="brand in uniqueThuongHieu" :key="brand" :value="brand">
-          {{ brand }}
-        </option>
-      </select>
+        <select v-model="filterThuongHieu">
+          <option value="">Tất cả thương hiệu</option>
+          <option v-for="brand in uniqueThuongHieu" :key="brand" :value="brand">
+            {{ brand }}
+          </option>
+        </select>
 
-      <select v-model="filterPrice">
-        <option value="">Tất cả giá</option>
-        <option value="1">Dưới 5 triệu</option>
-        <option value="2">Từ 5–10 triệu</option>
-        <option value="3">Trên 10 triệu</option>
-      </select>
-    </div>
-    <div class="product-grid">
-      <div
-        v-for="product in paginatedProducts"
-        :key="product.id"
-        class="product-card"
-      >
-        <!-- Nút X -->
-        <button
-          v-if="isAdmin"
-          class="delete-btn"
-          @click.stop="markProductDeleted(product.id)"
-          title="Xóa sản phẩm"
+        <select v-model="filterPrice">
+          <option value="">Tất cả giá</option>
+          <option value="1">Dưới 5 triệu</option>
+          <option value="2">Từ 5–10 triệu</option>
+          <option value="3">Trên 10 triệu</option>
+        </select>
+      </div>
+      <div class="product-grid">
+        <div
+          v-for="product in paginatedProducts"
+          :key="product.id"
+          class="product-card"
         >
-          ❌
-        </button>
+          <!-- Nút X -->
+          <button
+            v-if="isAdmin"
+            class="delete-btn"
+            @click.stop="markProductDeleted(product.id)"
+            title="Xóa sản phẩm"
+          >
+            ❌
+          </button>
 
-        <!-- Hiển thị trang chủ -->
-        <div v-if="isAdmin" class="checkbox-showup">
-          <label>
-            <input
-              type="checkbox"
-              :checked="product.showUp"
-              @change.stop="toggleShowUp(product.id, $event.target.checked)"
-            />
-            Hiển thị lên trang chủ
-          </label>
-        </div>
+          <!-- Hiển thị trang chủ -->
+          <div v-if="isAdmin" class="checkbox-showup">
+            <label>
+              <input
+                type="checkbox"
+                :checked="product.showUp"
+                @change.stop="toggleShowUp(product.id, $event.target.checked)"
+              />
+              Hiển thị lên trang chủ
+            </label>
+          </div>
 
-        <!-- Nội dung sản phẩm -->
-        <div class="product-clickable">
-          <!-- Bọc chỉ phần hình ảnh -->
-          <router-link :to="`/sanpham/${product.id}`" class="product-item-link">
-            <div class="product-image">
-              <img :src="product.fileFTP" :alt="product.tenSP" />
+          <!-- Nội dung sản phẩm -->
+          <div class="product-clickable">
+            <!-- Bọc chỉ phần hình ảnh -->
+            <router-link
+              :to="`/sanpham/${product.id}`"
+              class="product-item-link"
+            >
+              <div class="product-image">
+                <img :src="product.fileFTP" :alt="product.tenSP" />
+              </div>
+            </router-link>
+
+            <h3>{{ product.tenSP }}</h3>
+            <div class="product-info">
+              <span>{{ product.mota }}</span>
+              <span class="product-price">
+                {{ product.giaThamKhao.toLocaleString() }}
+                <span class="currency">đ</span>
+              </span>
             </div>
-          </router-link>
-
-          <h3>{{ product.tenSP }}</h3>
-          <div class="product-info">
-            <span>{{ product.mota }}</span>
-            <span class="product-price">
-              {{ product.giaThamKhao.toLocaleString() }}
-              <span class="currency">đ</span>
-            </span>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="pagination">
-      <button @click="prevPage" :disabled="currentPage === 1">◀</button>
-      <span>Trang {{ currentPage }} / {{ totalPages }}</span>
-      <button @click="nextPage" :disabled="currentPage === totalPages">
-        ▶
-      </button>
+      <div class="pagination">
+        <button @click="prevPage" :disabled="currentPage === 1">◀</button>
+        <span>Trang {{ currentPage }} / {{ totalPages }}</span>
+        <button @click="nextPage" :disabled="currentPage === totalPages">
+          ▶
+        </button>
+      </div>
     </div>
-  </div>
+  </MainLayout>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
 import axios from "@/utils/axios";
 import getFullFtpUrl from "@/utils/pathHelper";
+import MainLayout from "@/layouts/MainLayout.vue";
 
 const products = ref([]);
 const isAdmin = ref(false);
@@ -162,7 +168,7 @@ const fetchProducts = async () => {
 
 const toggleShowUp = async (id, checked) => {
   try {
-    await axios.put(`/api/sanpham/${id}`, {
+    await axios.post(`/api/sanpham/update/${id}`, {
       showUp: checked,
     });
     const product = products.value.find((p) => p.id === id);
@@ -175,7 +181,7 @@ const toggleShowUp = async (id, checked) => {
 const markProductDeleted = async (id) => {
   if (!confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) return;
   try {
-    await axios.put(`/api/sanpham/${id}`, { status: "XX" });
+    await axios.post(`/api/sanpham/update/${id}`, { status: "XX" });
     fetchProducts();
   } catch (err) {
     console.error("Lỗi khi xóa sản phẩm:", err);

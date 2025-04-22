@@ -234,7 +234,7 @@ export default {
         });
 
         // Cập nhật đường dẫn ảnh từ kết quả trả về API
-        formData.linkAnh = getFullFtpUrl(response.data.filePath) ;
+        formData.linkAnh = getFullFtpUrl(response.data.filePath);
       } catch (error) {
         console.error("Error uploading file:", error);
         alert("Không thể tải lên tệp. Vui lòng thử lại sau.");
@@ -261,6 +261,29 @@ export default {
       return date.toLocaleDateString("vi-VN");
     };
 
+    // const savePost = async () => {
+    //   try {
+    //     const postData = { ...formData };
+
+    //     if (!state.isEditing) {
+    //       delete postData.id;
+    //       await axios.post("/api/ThongTinSuKien", postData);
+    //       alert("Thêm bài viết mới thành công!");
+    //     } else {
+    //       await axios.put(`/api/ThongTinSuKien/${postData.id}`, postData);
+    //       alert("Cập nhật bài viết thành công!");
+    //     }
+
+    //     await fetchPosts();
+    //     resetForm();
+    //   } catch (error) {
+    //     console.error(
+    //       "Lỗi khi lưu bài viết:",
+    //       error.response?.data || error.message
+    //     );
+    //     alert("Có lỗi xảy ra khi lưu bài viết. Vui lòng thử lại.");
+    //   }
+    // };
     const savePost = async () => {
       try {
         const postData = { ...formData };
@@ -270,7 +293,10 @@ export default {
           await axios.post("/api/ThongTinSuKien", postData);
           alert("Thêm bài viết mới thành công!");
         } else {
-          await axios.put(`/api/ThongTinSuKien/${postData.id}`, postData);
+          await axios.post(
+            `/api/ThongTinSuKien/update/${postData.id}`,
+            postData
+          );
           alert("Cập nhật bài viết thành công!");
         }
 
@@ -336,7 +362,7 @@ export default {
 
       try {
         const updatedPost = { ...post, status: "XX" };
-        await axios.put(`/api/ThongTinSuKien/${post.id}`, updatedPost);
+        await axios.post(`/api/ThongTinSuKien/update/${post.id}`, updatedPost);
         alert("Đã xóa bài viết thành công!");
         await fetchPosts();
       } catch (error) {
@@ -351,7 +377,7 @@ export default {
       updatedPost.status = updatedPost.status === "OK" ? "NA" : "OK";
 
       try {
-        await axios.put(`/api/ThongTinSuKien/${post.id}`, updatedPost);
+        await axios.post(`/api/ThongTinSuKien/update/${post.id}`, updatedPost);
         await fetchPosts();
       } catch (error) {
         console.error("Error updating post status:", error);

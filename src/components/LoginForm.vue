@@ -20,8 +20,7 @@
 </template>
 
 <script>
-import axios from "axios";
-
+import axios from "@/utils/axios";
 export default {
   emits: ["close", "login-success"],
   data() {
@@ -36,7 +35,7 @@ export default {
         console.log("Gửi yêu cầu login:", this.username, this.password);
 
         const response = await axios.post(
-          "https://localhost:7210/api/auth/login",
+          "/api/auth/login",
           {
             UserName: this.username,
             Password: this.password, // ❗️Không mã hoá, gửi plain text như Postman

@@ -1,39 +1,14 @@
 <template>
   <div>
-    <section ref="bannerSection" class="scroll-target">
-      <Banner />
-    </section>
-
-    <section ref="aboutSection" class="scroll-target">
-      <About />
-    </section>
-
-    <section ref="categoriesSection" class="scroll-target">
-      <Categories />
-    </section>
-
-    <section ref="productSection" class="scroll-target">
-      <Products title="SẢN PHẨM NỔI BẬT" type="NOIBAT" />
-    </section>
-
-    <section ref="brandsSection" class="scroll-target">
-      <Brands />
-    </section>
-
+    <Banner />
+    <About />
+    <Categories />
+    <Products title="SẢN PHẨM NỔI BẬT" type="NOIBAT" />
+    <Brands />
     <Products title="SẢN PHẨM MỚI" type="MOI" />
-    <!-- Không cần scroll -->
-
-    <section ref="partnersSection" class="scroll-target">
-      <Partners />
-    </section>
-
-    <section ref="newsSection" class="scroll-target">
-      <News />
-    </section>
-
-    <section ref="footerSection" class="scroll-target">
-      <Newsletter />
-    </section>
+    <Partners />
+    <News />
+    <Newsletter />
   </div>
 </template>
 
@@ -99,6 +74,6 @@ onBeforeUnmount(() => {
 <style scoped>
 /* Nếu cần style riêng cho trang Home thì thêm vào đây */
 .scroll-target {
-  scroll-margin-top: 300px; /* Chỉnh theo đúng chiều cao header của bạn */
+  scroll-margin-top: 135px; /* Chỉnh theo đúng chiều cao header của bạn */
 }
 </style>

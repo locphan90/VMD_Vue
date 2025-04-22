@@ -214,10 +214,23 @@ const fetchTodayProducts = async () => {
   }
 };
 
+// const deleteProduct = async (id) => {
+//   if (confirm("Bạn chắc chắn muốn xóa sản phẩm này?")) {
+//     try {
+//       await axios.put(`/api/sanpham/${id}`, {
+//         status: "XX",
+//       });
+//       fetchTodayProducts();
+//     } catch (error) {
+//       console.error("Lỗi khi xoá:", error);
+//     }
+//   }
+// };
+
 const deleteProduct = async (id) => {
   if (confirm("Bạn chắc chắn muốn xóa sản phẩm này?")) {
     try {
-      await axios.put(`/api/sanpham/${id}`, {
+      await axios.post(`/api/sanpham/update/${id}`, {
         status: "XX",
       });
       fetchTodayProducts();

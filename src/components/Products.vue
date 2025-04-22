@@ -22,7 +22,11 @@
             class="product-card"
           >
             <div class="product-image">
-              <img :src="product.fileFTP" :alt="product.tenSP" />
+              <img
+                :src="product.fileFTP"
+                :alt="product.tenSP"
+                @click="goToDetail(product.id)"
+              />
             </div>
             <h3>{{ product.tenSP }}</h3>
             <div class="product-info">
@@ -47,92 +51,94 @@
 </template>
 
 
-<script>
-import axios from "axios";
+<script setup>
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import axios from "@/utils/axios";
+import getFullFtpUrl from "@/utils/pathHelper";
+import { useRouter } from "vue-router";
+const router = useRouter();
 
-export default {
-  name: "Products",
-  props: {
-    title: String,
-    type: String,
-  },
-  data() {
-    return {
-      products: [],
-      currentIndex: 0,
-      visibleCount: 5,
-      autoPlayInterval: null,
-    };
-  },
-  computed: {
-    filteredProducts() {
-      return this.products.filter(
-        (p) => p.cat === this.type && p.showUp === true && p.status === "OK"
-      );
-    },
-    totalItems() {
-      return this.filteredProducts.length;
-    },
-  },
-  methods: {
-    async fetchProducts() {
-      try {
-        const response = await axios.get("https://localhost:7210/api/sanpham");
-        this.products = response.data;
-      } catch (error) {
-        console.error("Lỗi khi tải sản phẩm:", error);
-      }
-    },
-    nextSlide() {
-      this.currentIndex = (this.currentIndex + 1) % this.totalItems;
-    },
-    prevSlide() {
-      this.currentIndex =
-        (this.currentIndex - 1 + this.totalItems) % this.totalItems;
-    },
-    startAutoPlay() {
-      this.autoPlayInterval = setInterval(this.nextSlide, 3000);
-    },
-    stopAutoPlay() {
-      clearInterval(this.autoPlayInterval);
-    },
-    updateVisibleCount() {
-      const width = window.innerWidth;
-      if (width >= 1200) {
-        this.visibleCount = 5;
-      } else if (width >= 768) {
-        this.visibleCount = 3;
-      } else {
-        this.visibleCount = 1;
-      }
-    },
-  },
-  mounted() {
-    this.fetchProducts();
-    this.startAutoPlay();
-    this.updateVisibleCount();
-    window.addEventListener("resize", this.updateVisibleCount);
-  },
-  beforeUnmount() {
-    clearInterval(this.autoPlayInterval);
-    window.removeEventListener("resize", this.updateVisibleCount);
-  },
-  updateVisibleCount() {
-    const containerWidth = window.innerWidth;
-
-    if (containerWidth >= 1200) {
-      this.visibleCount = 5;
-    } else if (containerWidth >= 992) {
-      this.visibleCount = 4;
-    } else if (containerWidth >= 768) {
-      this.visibleCount = 3;
-    } else if (containerWidth >= 500) {
-      this.visibleCount = 2;
-    } else {
-      this.visibleCount = 1;
-    }
-  },
+const goToDetail = (id) => {
+  router.push(`/sanpham/${id}`);
 };
+
+const props = defineProps({
+  title: String,
+  type: String,
+});
+
+// State
+const products = ref([]);
+const currentIndex = ref(0);
+const visibleCount = ref(5);
+let autoPlayInterval = null;
+
+// Computed
+const filteredProducts = computed(() =>
+  products.value.filter(
+    (p) => p.cat === props.type && p.showUp === true && p.status === "OK"
+  )
+);
+
+const totalItems = computed(() => filteredProducts.value.length);
+
+// Methods
+const fetchProducts = async () => {
+  try {
+    const response = await axios.get("/api/sanpham");
+    products.value = response.data.map((product) => ({
+      ...product,
+      fileFTP: getFullFtpUrl(product.fileFTP), // 👈 Gán lại đường dẫn đầy đủ
+    }));
+  } catch (error) {
+    console.error("Lỗi khi tải sản phẩm:", error);
+  }
+};
+
+const nextSlide = () => {
+  currentIndex.value = (currentIndex.value + 1) % totalItems.value;
+};
+
+const prevSlide = () => {
+  currentIndex.value =
+    (currentIndex.value - 1 + totalItems.value) % totalItems.value;
+};
+
+const startAutoPlay = () => {
+  autoPlayInterval = setInterval(nextSlide, 3000);
+};
+
+const stopAutoPlay = () => {
+  clearInterval(autoPlayInterval);
+};
+
+const updateVisibleCount = () => {
+  const width = window.innerWidth;
+  if (width >= 1200) {
+    visibleCount.value = 5;
+  } else if (width >= 992) {
+    visibleCount.value = 4;
+  } else if (width >= 768) {
+    visibleCount.value = 3;
+  } else if (width >= 500) {
+    visibleCount.value = 2;
+  } else {
+    visibleCount.value = 1;
+  }
+};
+
+// Lifecycle
+onMounted(() => {
+  fetchProducts();
+  startAutoPlay();
+  updateVisibleCount();
+  window.addEventListener("resize", updateVisibleCount);
+});
+
+onBeforeUnmount(() => {
+  stopAutoPlay();
+  window.removeEventListener("resize", updateVisibleCount);
+});
 </script>
 
 <style scoped>
@@ -179,6 +185,12 @@ export default {
   width: 100%;
   padding-top: 100%; /* ✅ Vuông */
   position: relative;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.product-image:hover {
+  transform: scale(1.05);
 }
 
 .product-card:hover {

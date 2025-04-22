@@ -3,7 +3,14 @@
     <h2 class="section-title">THƯƠNG HIỆU</h2>
     <div class="brand-grid">
       <div class="brand-card" v-for="(brand, index) in brands" :key="index">
-        <img :src="brand.image" :alt="brand.name" />
+        <div class="brand-logo">
+          <img
+            :src="brand.image"
+            :alt="brand.name"
+            @error="handleImageError($event, brand.name)"
+          />
+        </div>
+        <div class="brand-name">{{ brand.name }}</div>
       </div>
     </div>
   </section>
@@ -37,6 +44,11 @@ export default {
         console.error("Lỗi khi tải thương hiệu:", err);
       }
     },
+    handleImageError(event, name) {
+      event.target.src = `https://via.placeholder.com/150?text=${encodeURIComponent(
+        name
+      )}`;
+    },
   },
 };
 </script>
@@ -57,7 +69,7 @@ export default {
 }
 
 .section-title::after {
-  content: '';
+  content: "";
   display: block;
   width: 50px;
   height: 3px;
@@ -68,32 +80,57 @@ export default {
 .brand-grid {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center; /* 👈 canh giữa khi ít */
-  gap: 16px; /* 👈 khoảng cách giữa các thẻ */
+  justify-content: center; /* 👉 Canh giữa */
+  gap: 16px;
 }
 
 .brand-card {
-  width: 102.59px;
-  height: 102.59px;
+  width: 120px;
+  height: 120px;
   background-color: #fff;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  text-align: center;
 }
 
-.brand-card img {
+.brand-logo {
   width: 100%;
-  height: 100%;
-  object-fit: cover; /* 👌 cắt ảnh gọn đẹp */
+  height: 70%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
-/* Responsive: nếu màn hình nhỏ thì giãn đều vẫn giữ kích thước */
+.brand-logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.brand-name {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .brand-grid {
+    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 </style>

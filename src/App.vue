@@ -4,7 +4,7 @@
     <main class="main-content">
       <router-view />
     </main>
-    <footer ref="footerSection">
+    <footer>
       <Footer />
     </footer>
   </div>
@@ -27,7 +27,7 @@ function handleScroll(target) {
 }
 
 onMounted(() => {
-  eventBus.on("scrollTo", handleScroll);
+  // eventBus.on("scrollTo", handleScroll);
   const username = localStorage.getItem("username");
   const role = localStorage.getItem("role");
 
@@ -38,7 +38,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  eventBus.off("scrollTo", handleScroll);
+  // eventBus.off("scrollTo", handleScroll);
 });
 </script>
 

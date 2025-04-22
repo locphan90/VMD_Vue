@@ -2,15 +2,15 @@
   <header class="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
     <div class="top-bar">
       <div class="logo">
-        <img src="#" alt="Logo" />
+        <img :src="logo" alt="Logo" />
       </div>
       <div class="utils">
         <router-link to="/products" class="search-btn" title="Tìm kiếm">
           <i class="search-icon">&#128269;</i>
         </router-link>
         <router-link to="/dangkydaily" class="register-link"
-          >ĐĂNG KÝ ĐẠI LÝ</router-link
-        >
+          >ĐĂNG KÝ ĐẠI LÝ
+        </router-link>
       </div>
       <div class="menu-toggle" @click="toggleMenu">☰</div>
     </div>
@@ -20,17 +20,14 @@
         <li>
           <a href="#" @click.prevent="scrollToSection('about')">VỀ CHÚNG TÔI</a>
         </li>
-        <li>
-          <a href="#" @click.prevent="scrollToSection('brands')">THƯƠNG HIỆU</a>
-        </li>
+
+        <li><router-link to="/allbrands">THƯƠNG HIỆU</router-link></li>
         <li>
           <a href="#" @click.prevent="scrollToSection('categories')"
             >NGÀNH HÀNG</a
           >
         </li>
-        <li>
-          <a href="#" @click.prevent="scrollToSection('news')">TIN TỨC</a>
-        </li>
+        <li><router-link to="/allevents">TIN TỨC</router-link></li>
         <li>
           <a href="#" @click.prevent="scrollToSection('footer')">LIÊN HỆ</a>
         </li>
@@ -102,6 +99,11 @@
               >
             </li>
             <li>
+              <router-link to="/admin/gtdlmanager" @click.native="closeUserMenu"
+                >Sửa trang hệ thống đại lý</router-link
+              >
+            </li>
+            <li>
               <a href="#" @click.prevent="changePassword">
                 <i></i> Đổi mật khẩu
               </a>
@@ -128,11 +130,14 @@
 </template>
 
 <script setup>
+
 import { ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import LoginForm from "./LoginForm.vue";
 import ChangePasswordForm from "./ChangePasswordForm.vue";
 import eventBus from "../eventBus";
+import logo from '../assets/logo VMD.png'
+import { onMounted } from "vue";
 
 const isHovering = ref(false);
 const isMenuOpen = ref(false);
@@ -164,6 +169,10 @@ const handleLoginSuccess = (name) => {
   username.value = name;
   isLoggedIn.value = true;
   showLogin.value = false;
+
+  // Lưu vào localStorage
+  localStorage.setItem("isLoggedIn", "true");
+  localStorage.setItem("username", name);
 };
 
 const toggleUserMenu = () => {
@@ -204,6 +213,15 @@ const handleMouseLeave = () => {
     }
   }, 200);
 };
+onMounted(() => {
+  const savedLogin = localStorage.getItem("isLoggedIn");
+  const savedUsername = localStorage.getItem("username");
+
+  if (savedLogin === "true" && savedUsername) {
+    isLoggedIn.value = true;
+    username.value = savedUsername;
+  }
+});
 </script>
 
 <style scoped>

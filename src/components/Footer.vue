@@ -3,7 +3,7 @@
     <div class="footer-container">
       <div class="company-info">
         <div class="footer-logo">
-          <img src="#" alt="VMD Logo" />
+          <img :src="logo" alt="VMD Logo" />
         </div>
         <p><strong>CÔNG TY CỔ PHẦN PHÁT TRIỂN THỊ TRƯỜNG VIỆT NAM</strong></p>
         <p>Địa chỉ: Lầu 5, 88 Lê Lai, Phường Bến Thành, Quận 1, TP.HCM</p>
@@ -45,14 +45,11 @@
   </footer>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      currentYear: new Date().getFullYear()
-    }
-  }
-}
+<script setup>
+import { ref } from "vue";
+import logo from "../assets/logo VMD.png";
+
+const currentYear = new Date().getFullYear();
 </script>
 
 <style scoped>

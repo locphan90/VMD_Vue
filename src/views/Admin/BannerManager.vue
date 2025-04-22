@@ -327,50 +327,49 @@ const handleMainBannerUpload = async (event) => {
 const handleSecondaryBannerUpload = async (event, valIndex) => {
   const file = event.target.files[0];
   if (!file) return;
-  
-  const secondaryIndex = valIndex - 2; // Chuyển đổi từ val (2,3,4) sang index array (0,1,2)
-  
+
+  const secondaryIndex = valIndex - 2; // Chuyển từ val (2,3,4) sang index array (0,1,2)
+
   try {
     uploadingSecondary.value[secondaryIndex] = true;
-    
+
     // Upload file lên FTP
     const formData = new FormData();
     formData.append('file', file);
-    
+
     const ftpResponse = await axios.post('api/ftp/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     });
-    console.log(ftpResponse.data);
+
     if (ftpResponse.data && ftpResponse.data.filePath) {
       const existingBanner = secondaryBanners.value[secondaryIndex];
-      const originalUrl = ftpResponse.data.filePath; // Lưu URL gốc từ API trả về
-      const linkUrl = secondaryBannerLinks.value[secondaryIndex]; // Lấy link trang web
-      
+      const originalUrl = ftpResponse.data.filePath;
+      const linkUrl = secondaryBannerLinks.value[secondaryIndex];
+
       if (existingBanner) {
-        // Cập nhật banner phụ hiện có
-        await axios.put(`api/MISC/${existingBanner.id}`, {
-          ...existingBanner,
-          vaL2: originalUrl, // Sử dụng URL gốc cho API
-          vaL3: linkUrl // Thêm link trang web
+        // Cập nhật banner phụ hiện có bằng POST /update/{id}
+        await axios.post(`api/MISC/update/${existingBanner.id}`, {
+          vaL2: originalUrl,
+          vaL3: linkUrl
         });
       } else {
         // Tạo banner phụ mới nếu chưa có
         await axios.post('api/MISC', {
           cat: 'BANNER',
           val: valIndex.toString(),
-          vaL2: originalUrl, // Sử dụng URL gốc cho API
-          vaL3: linkUrl, // Thêm link trang web
+          vaL2: originalUrl,
+          vaL3: linkUrl,
           status: 'OK'
         });
       }
-      
-      // Refresh danh sách banner sau khi upload
+
+      // Làm mới danh sách banner
       await fetchBanners();
       showNotification(`Tải lên banner phụ ${secondaryIndex + 1} thành công`, 'success');
     }
-    
+
     // Reset input file
     event.target.value = '';
   } catch (error) {
@@ -381,22 +380,22 @@ const handleSecondaryBannerUpload = async (event, valIndex) => {
   }
 };
 
+
 // Hàm cập nhật chỉ link của banner phụ (không cần upload lại hình)
 const updateSecondaryBannerLink = async (index) => {
   const banner = secondaryBanners.value[index];
   const linkUrl = secondaryBannerLinks.value[index];
   
   if (!banner) return;
-  
+
   try {
-    await axios.put(`api/MISC/${banner.id}`, {
-      ...banner,
+    await axios.post(`/api/MISC/update/${banner.id}`, {
       vaL3: linkUrl // Chỉ cập nhật link
     });
-    
+
     // Cập nhật UI
     secondaryBanners.value[index].vaL3 = linkUrl;
-    
+
     showNotification(`Cập nhật link banner phụ ${index + 1} thành công`, 'success');
   } catch (error) {
     showNotification(`Lỗi khi cập nhật link banner phụ ${index + 1}`, 'error');
@@ -404,22 +403,22 @@ const updateSecondaryBannerLink = async (index) => {
   }
 };
 
+
 // Hàm toggle trạng thái banner (hiện/ẩn)
 const toggleBannerStatus = async (banner) => {
   try {
     const newStatus = banner.status === 'OK' ? 'NA' : 'OK';
-    
-    await axios.put(`api/MISC/${banner.id}`, {
-      ...banner,
-      status: newStatus
+
+    await axios.post(`api/MISC/update/${banner.id}`, {
+      status: newStatus,
     });
-    
+
     // Cập nhật UI
     const index = mainBanners.value.findIndex(b => b.id === banner.id);
     if (index !== -1) {
       mainBanners.value[index].status = newStatus;
     }
-    
+
     showNotification(
       `Banner đã được ${newStatus === 'OK' ? 'hiện' : 'ẩn'} thành công`,
       'success'
@@ -430,12 +429,31 @@ const toggleBannerStatus = async (banner) => {
   }
 };
 
+
 // Hàm xóa banner
+// const deleteBanner = async (banner) => {
+//   if (!confirm('Bạn có chắc chắn muốn xóa banner này?')) return;
+  
+//   try {
+//     await axios.put(`api/MISC/${banner.id}`, {
+//       ...banner,
+//       status: 'XX'
+//     });
+    
+//     // Xóa banner khỏi danh sách
+//     mainBanners.value = mainBanners.value.filter(b => b.id !== banner.id);
+    
+//     showNotification('Xóa banner thành công', 'success');
+//   } catch (error) {
+//     showNotification('Lỗi khi xóa banner', 'error');
+//     console.error('Error deleting banner:', error);
+//   }
+// };
 const deleteBanner = async (banner) => {
   if (!confirm('Bạn có chắc chắn muốn xóa banner này?')) return;
   
   try {
-    await axios.put(`api/MISC/${banner.id}`, {
+    await axios.post(`api/MISC/update/${banner.id}`, {
       ...banner,
       status: 'XX'
     });
