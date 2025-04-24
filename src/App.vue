@@ -1,10 +1,10 @@
 <template>
   <div>
-    <Header />
+    <Header :username="username" />
     <main class="main-content">
       <router-view />
     </main>
-    <footer>
+    <footer ref="footerSection">
       <Footer />
     </footer>
   </div>
@@ -14,34 +14,37 @@
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import Header from "./components/Header.vue";
 import Footer from "./components/Footer.vue";
-import eventBus from "./eventBus";
+// import eventBus from './eventBus'; // nếu chưa dùng thì có thể bỏ
 
-// Tạo ref cho footer
+const username = ref(null);
+
+// Đọc username khi app khởi động
+onMounted(() => {
+  username.value = localStorage.getItem("username");
+
+  const storedRole = localStorage.getItem("role");
+  if (!username.value || !storedRole) {
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
+  }
+});
+
+// Scroll to footer nếu cần dùng
 const footerSection = ref(null);
-
-// Xử lý scroll tới footer
 function handleScroll(target) {
   if (target === "footer") {
     footerSection.value?.scrollIntoView({ behavior: "smooth" });
   }
 }
 
-onMounted(() => {
-  // eventBus.on("scrollTo", handleScroll);
-  const username = localStorage.getItem("username");
-  const role = localStorage.getItem("role");
-
-  if (!username || !role) {
-    localStorage.removeItem("username");
-    localStorage.removeItem("role");
-  }
-});
+// onMounted(() => {
+//   eventBus.on('scrollTo', handleScroll);
+// });
 
 onBeforeUnmount(() => {
-  // eventBus.off("scrollTo", handleScroll);
+  // eventBus.off('scrollTo', handleScroll);
 });
 </script>
-
 
 <style>
 body {
@@ -51,17 +54,14 @@ body {
   color: #333;
   line-height: 1.6;
 }
-
 * {
   box-sizing: border-box;
 }
-
 img {
   max-width: 100%;
   height: auto;
   display: block;
 }
-
 .app-wrapper {
   max-width: 1200px;
   margin: 0 auto;
@@ -69,13 +69,11 @@ img {
   background-color: #fff;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
-
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 15px;
 }
-
 .section-title {
   margin-bottom: 20px;
   text-align: center;
@@ -83,7 +81,6 @@ img {
   color: #333;
   position: relative;
 }
-
 .section-title::after {
   content: "";
   display: block;
@@ -92,18 +89,26 @@ img {
   background-color: #e74c3c;
   margin: 10px auto;
 }
-
 .main-content {
-  padding-top: 135px; /* hoặc đúng chiều cao header của bạn */
+  padding-top: 135px;
 }
-
 @media (max-width: 480px) {
   body {
     font-size: 14px;
   }
-
   .section-title {
     font-size: 18px;
+  }
+}
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  .section-title {
+    font-size: 18px;
+  }
+  .main-content {
+    padding-top: 80px;
   }
 }
 </style>

@@ -1,143 +1,160 @@
 <template>
-  <header class="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
-    <div class="top-bar">
-      <div class="logo">
-        <img :src="logo" alt="Logo" />
+  <div>
+    <header class="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
+      <div class="top-bar">
+        <div class="logo">
+          <router-link to="/" @click="closeMenu">
+            <img :src="logo" alt="Logo" />
+          </router-link>
+        </div>
+        <div class="utils">
+          <router-link to="/products" class="search-btn" title="Tìm kiếm" @click="closeMenu">
+            <i class="search-icon">&#128269;</i>
+          </router-link>
+          <router-link to="/dangkydaily" class="register-link" @click="closeMenu">
+            ĐĂNG KÝ ĐẠI LÝ
+          </router-link>
+        </div>
+        <div class="menu-toggle" @click="toggleMenu">☰</div>
       </div>
-      <div class="utils">
-        <router-link to="/products" class="search-btn" title="Tìm kiếm">
-          <i class="search-icon">&#128269;</i>
-        </router-link>
-        <router-link to="/dangkydaily" class="register-link"
-          >ĐĂNG KÝ ĐẠI LÝ
-        </router-link>
+      <nav :class="{ open: isMenuOpen }">
+        <ul>
+          <li><router-link to="/" @click="closeMenu">TRANG CHỦ</router-link></li>
+          <li>
+            <a href="#" @click.prevent="loadContent('VECHUNGTOI'); closeMenu()">
+              VỀ CHÚNG TÔI
+            </a>
+          </li>
+
+          <li><router-link to="/allbrands" @click="closeMenu">THƯƠNG HIỆU</router-link></li>
+          <li>
+            <a href="#" @click.prevent="loadContent('MOTANGANHHANG'); closeMenu()">
+              NGÀNH HÀNG
+            </a>
+          </li>
+          <li><router-link to="/allevents" @click="closeMenu">TIN TỨC</router-link></li>
+          <li>
+            <a href="#" @click.prevent="loadContent('LIENHE'); closeMenu()">LIÊN HỆ</a>
+          </li>
+          <li>
+            <a href="#" @click.prevent="loadContent('HETHONGDAILY'); closeMenu()">
+              HỆ THỐNG ĐẠI LÝ
+            </a>
+          </li>
+
+          <!-- Nếu chưa đăng nhập -->
+          <li v-if="!isLoggedIn">
+            <a href="#" @click.prevent="openLogin(); closeMenu()"> <i></i> ĐĂNG NHẬP </a>
+          </li>
+
+          <!-- Nếu đã đăng nhập -->
+          <li v-else class="dropdown">
+            <a href="#" @click.prevent="toggleUserMenu">{{ username }} <span class="dropdown-arrow">▼</span></a>
+            <ul
+              class="dropdown-menu"
+              :class="{ show: showUserMenu }"
+              @mouseenter="isHovering = true"
+              @mouseleave="handleMouseLeave"
+            >
+              <li>
+                <router-link to="/products" @click="closeUserMenu(); closeMenu()">
+                  Sản phẩm
+                </router-link>
+              </li>
+              <li>
+                <router-link to="/admin/products" @click="closeUserMenu(); closeMenu()">
+                  Nhập sản phẩm
+                </router-link>
+              </li>
+              <li>
+                <router-link to="/admin/brands" @click="closeUserMenu(); closeMenu()">
+                  Nhập thương hiệu
+                </router-link>
+              </li>
+              <li>
+                <router-link to="/admin/partners" @click="closeUserMenu(); closeMenu()">
+                  Nhập đối tác
+                </router-link>
+              </li>
+              <li>
+                <router-link to="/admin/events" @click="closeUserMenu(); closeMenu()">
+                  Nhập thông tin sự kiện
+                </router-link>
+              </li>
+              <li>
+                <router-link to="/admin/bannermanager" @click="closeUserMenu(); closeMenu()">
+                  Quản lý banner
+                </router-link>
+              </li>
+              <li>
+                <router-link to="/admin/dailymanager" @click="closeUserMenu(); closeMenu()">
+                  Quản lý đăng ký đại lý
+                </router-link>
+              </li>
+              <li>
+                <router-link to="/admin/emailmanager" @click="closeUserMenu(); closeMenu()">
+                  Quản lý email đăng ký
+                </router-link>
+              </li>
+
+              <li>
+                <router-link to="/admin/staticpagemanager" @click="closeUserMenu(); closeMenu()">
+                  Sửa trang tĩnh
+                </router-link>
+              </li>
+              <li>
+                <a href="#" @click.prevent="changePassword(); closeMenu()">
+                  <i></i> Đổi mật khẩu
+                </a>
+              </li>
+              <li><a href="#" @click.prevent="logout(); closeMenu()">Đăng xuất</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Form đăng nhập -->
+      <LoginForm
+        v-if="showLogin"
+        @close="closeLogin"
+        @login-success="handleLoginSuccess"
+      />
+
+      <!-- Form đổi mật khẩu -->
+      <ChangePasswordForm
+        v-if="showChangePassword"
+        @close="closeChangePassword"
+      />
+    </header>
+
+    <!-- Container cho nội dung TinyMCE -->
+    <div class="content-container" v-if="showContentModal">
+      <div class="content-modal">
+        <div class="content-header">
+          <h2>{{ contentTitle }}</h2>
+          <button class="close-btn" @click="closeContentModal">×</button>
+        </div>
+        <div class="content-body" v-if="!contentLoading">
+          <div v-html="contentHTML"></div>
+        </div>
+        <div class="content-loading" v-else>
+          <div class="loader"></div>
+        </div>
       </div>
-      <div class="menu-toggle" @click="toggleMenu">☰</div>
     </div>
-    <nav :class="{ open: isMenuOpen }">
-      <ul>
-        <li><router-link to="/">TRANG CHỦ</router-link></li>
-        <li>
-          <a href="#" @click.prevent="scrollToSection('about')">VỀ CHÚNG TÔI</a>
-        </li>
-
-        <li><router-link to="/allbrands">THƯƠNG HIỆU</router-link></li>
-        <li>
-          <a href="#" @click.prevent="scrollToSection('categories')"
-            >NGÀNH HÀNG</a
-          >
-        </li>
-        <li><router-link to="/allevents">TIN TỨC</router-link></li>
-        <li>
-          <a href="#" @click.prevent="scrollToSection('footer')">LIÊN HỆ</a>
-        </li>
-        <li>
-          <a href="#" @click.prevent="scrollToSection('categories')"
-            >HỆ THỐNG ĐẠI LÝ</a
-          >
-        </li>
-
-        <!-- Nếu chưa đăng nhập -->
-        <li v-if="!isLoggedIn">
-          <a href="#" @click.prevent="openLogin"> <i></i> ĐĂNG NHẬP </a>
-        </li>
-
-        <!-- Nếu đã đăng nhập -->
-        <li v-else class="dropdown" @click="toggleUserMenu">
-          <a href="#">{{ username }}</a>
-          <ul
-            class="dropdown-menu"
-            :class="{ show: showUserMenu }"
-            @mouseenter="isHovering = true"
-            @mouseleave="handleMouseLeave"
-          >
-            <li>
-              <router-link to="/products" @click.native="closeUserMenu"
-                >Sản phẩm</router-link
-              >
-            </li>
-            <li>
-              <router-link to="/admin/products" @click.native="closeUserMenu"
-                >Nhập sản phẩm</router-link
-              >
-            </li>
-            <li>
-              <router-link to="/admin/brands" @click.native="closeUserMenu"
-                >Nhập thương hiệu</router-link
-              >
-            </li>
-            <li>
-              <router-link to="/admin/events" @click.native="closeUserMenu"
-                >Nhập thông tin sự kiện</router-link
-              >
-            </li>
-            <li>
-              <router-link
-                to="/admin/bannermanager"
-                @click.native="closeUserMenu"
-                >Quản lý banner</router-link
-              >
-            </li>
-            <li>
-              <router-link
-                to="/admin/dailymanager"
-                @click.native="closeUserMenu"
-                >Quản lý đăng ký đại lý</router-link
-              >
-            </li>
-            <li>
-              <router-link
-                to="/admin/emailmanager"
-                @click.native="closeUserMenu"
-                >Quản lý email đăng ký</router-link
-              >
-            </li>
-
-            <li>
-              <router-link to="/admin/partners" @click.native="closeUserMenu"
-                >Nhập đối tác</router-link
-              >
-            </li>
-            <li>
-              <router-link to="/admin/gtdlmanager" @click.native="closeUserMenu"
-                >Sửa trang hệ thống đại lý</router-link
-              >
-            </li>
-            <li>
-              <a href="#" @click.prevent="changePassword">
-                <i></i> Đổi mật khẩu
-              </a>
-            </li>
-            <li><a href="#" @click.prevent="logout">Đăng xuất</a></li>
-          </ul>
-        </li>
-      </ul>
-    </nav>
-
-    <!-- Form đăng nhập -->
-    <LoginForm
-      v-if="showLogin"
-      @close="closeLogin"
-      @login-success="handleLoginSuccess"
-    />
-
-    <!-- Form đổi mật khẩu -->
-    <ChangePasswordForm
-      v-if="showChangePassword"
-      @close="closeChangePassword"
-    />
-  </header>
+  </div>
 </template>
 
 <script setup>
-
 import { ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import LoginForm from "./LoginForm.vue";
 import ChangePasswordForm from "./ChangePasswordForm.vue";
 import eventBus from "../eventBus";
-import logo from '../assets/logo VMD.png'
+import logo from "../assets/logo VMD.png";
 import { onMounted } from "vue";
+import axios from "@/utils/axios";
+import getFullFtpUrl from "@/utils/pathHelper";
 
 const isHovering = ref(false);
 const isMenuOpen = ref(false);
@@ -149,12 +166,29 @@ const showChangePassword = ref(false);
 const router = useRouter();
 const route = useRoute();
 
+// Biến cho nội dung TinyMCE
+const showContentModal = ref(false);
+const contentHTML = ref("");
+const contentLoading = ref(false);
+const contentTitle = ref("");
+const categoryTitles = {
+  VECHUNGTOI: "VỀ CHÚNG TÔI",
+  MOTANGANHHANG: "NGÀNH HÀNG",
+  LIENHE: "LIÊN HỆ",
+  HETHONGDAILY: "HỆ THỐNG ĐẠI LÝ",
+};
+
 const scrollToSection = (section) => {
   eventBus.emit("scrollTo", section);
 };
 
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
+};
+
+// Thêm hàm closeMenu mới để đóng menu khi click vào item
+const closeMenu = () => {
+  isMenuOpen.value = false;
 };
 
 const openLogin = () => {
@@ -169,13 +203,19 @@ const handleLoginSuccess = (name) => {
   username.value = name;
   isLoggedIn.value = true;
   showLogin.value = false;
+  // Đảm bảo rằng menu user mặc định luôn đóng
+  showUserMenu.value = false;
 
   // Lưu vào localStorage
   localStorage.setItem("isLoggedIn", "true");
   localStorage.setItem("username", name);
 };
 
-const toggleUserMenu = () => {
+const toggleUserMenu = (event) => {
+  // Ngăn sự kiện click lan toả
+  if (event) {
+    event.stopPropagation();
+  }
   showUserMenu.value = !showUserMenu.value;
 };
 
@@ -213,6 +253,34 @@ const handleMouseLeave = () => {
     }
   }, 200);
 };
+
+// Hàm xử lý hiển thị nội dung
+const loadContent = async (category) => {
+  contentLoading.value = true;
+  contentTitle.value = categoryTitles[category];
+  contentHTML.value = "";
+  showContentModal.value = true;
+  console.log(category);
+  try {
+    const response = await axios.get(`api/MISC?cat=${category}`);
+    
+    if (response.data && response.data.length > 0) {
+      contentHTML.value = response.data[0].vaL3 || "";
+    } else {
+      contentHTML.value = "<p>Không có nội dung để hiển thị</p>";
+    }
+  } catch (error) {
+    console.error("Lỗi khi lấy nội dung:", error);
+    contentHTML.value = "<p>Đã xảy ra lỗi khi tải nội dung</p>";
+  } finally {
+    contentLoading.value = false;
+  }
+};
+
+const closeContentModal = () => {
+  showContentModal.value = false;
+};
+
 onMounted(() => {
   const savedLogin = localStorage.getItem("isLoggedIn");
   const savedUsername = localStorage.getItem("username");
@@ -220,7 +288,27 @@ onMounted(() => {
   if (savedLogin === "true" && savedUsername) {
     isLoggedIn.value = true;
     username.value = savedUsername;
+    // Đảm bảo menu user đóng khi trang được load
+    showUserMenu.value = false;
   }
+
+  // Kiểm tra query param khi trang load
+  const urlParams = new URLSearchParams(window.location.search);
+  const category = urlParams.get("category");
+  if (category && Object.keys(categoryTitles).includes(category)) {
+    loadContent(category);
+  }
+  
+  // Click bên ngoài để đóng menu user
+  document.addEventListener('click', (e) => {
+    if (showUserMenu.value) {
+      const dropdown = document.querySelector('.dropdown-menu');
+      const trigger = document.querySelector('.dropdown > a');
+      if (dropdown && !dropdown.contains(e.target) && trigger && !trigger.contains(e.target)) {
+        showUserMenu.value = false;
+      }
+    }
+  });
 });
 </script>
 
@@ -360,6 +448,17 @@ nav ul li a:hover:after {
   width: 100%;
 }
 
+/* Thêm mũi tên cho dropdown */
+.dropdown-arrow {
+  margin-left: 5px;
+  font-size: 10px;
+  transition: transform 0.3s;
+}
+
+.dropdown:has(.dropdown-menu.show) .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
 /* Dropdown menu */
 .dropdown {
   position: relative;
@@ -382,11 +481,13 @@ nav ul li a:hover:after {
   opacity: 0;
   transform: translateY(10px);
   transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
 }
 
 .dropdown-menu.show {
   opacity: 1;
   transform: translateY(0);
+  pointer-events: auto;
 }
 
 .dropdown-menu li {
@@ -414,10 +515,6 @@ nav ul li a:hover:after {
   display: none;
 }
 
-.main-content {
-  padding-top: 120px;
-}
-
 header {
   position: fixed;
   top: 0;
@@ -428,30 +525,166 @@ header {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.dropdown-menu {
-  position: absolute;
-  top: 100%;
+/* Content Modal Styles */
+.content-container {
+  position: fixed;
+  top: 0;
   left: 0;
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-  list-style: none;
-  margin: 8px 0 0 0;
-  padding: 8px 0;
-  min-width: 240px;
-  z-index: 1000;
-  text-align: left;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.3s, transform 0.3s;
-  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
 }
 
-.dropdown-menu.show {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
+.content-modal {
+  width: 100%;
+  max-width: 900px;
+  max-height: 80vh;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.3s ease;
+}
+
+.content-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  background-color: #f8f8f8;
+  border-bottom: 1px solid #eee;
+}
+
+.content-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.25rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #e74c3c;
+}
+
+.content-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.content-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.loader {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #e74c3c;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Content Styling */
+.content-body :deep(h1),
+.content-body :deep(h2),
+.content-body :deep(h3) {
+  color: #333;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.content-body :deep(p) {
+  margin-bottom: 1em;
+  line-height: 1.6;
+}
+
+.content-body :deep(ul),
+.content-body :deep(ol) {
+  margin-bottom: 1em;
+  padding-left: 2em;
+}
+
+.content-body :deep(li) {
+  margin-bottom: 0.5em;
+}
+
+.content-body :deep(a) {
+  color: #e74c3c;
+  text-decoration: none;
+}
+
+.content-body :deep(a:hover) {
+  text-decoration: underline;
+}
+
+.content-body :deep(img) {
+  max-width: 100%;
+  height: auto;
+  margin: 1em 0;
+}
+
+.content-body :deep(blockquote) {
+  border-left: 4px solid #e74c3c;
+  padding-left: 1em;
+  margin-left: 0;
+  color: #666;
+  font-style: italic;
+}
+
+.content-body :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+.content-body :deep(th),
+.content-body :deep(td) {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.content-body :deep(th) {
+  background-color: #f8f8f8;
 }
 
 /* Responsive */
@@ -533,12 +766,21 @@ header {
     padding: 0;
     margin: 0;
     border-radius: 0;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transform: none;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+  }
+
+  .dropdown-menu.show {
     opacity: 1;
+    max-height: 1000px; /* Đủ cao để hiện thị hết các items */
     transform: none;
   }
 
   .dropdown-menu li a {
-    padding: 10px 20px;
+    padding: 10px 20px 10px 30px; /* Thêm padding trái để tạo hiệu ứng lùi vào */
     color: #333;
   }
 
@@ -555,6 +797,23 @@ header {
   .register-link {
     padding: 8px 12px;
     font-size: 14px;
+  }
+
+  .content-modal {
+    width: 95%;
+    max-height: 90vh;
+  }
+  
+  /* Điều chỉnh kiểu cho dropdown khi ở mobile */
+  .dropdown > a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .dropdown-arrow {
+    position: absolute;
+    right: 15px;
   }
 }
 </style>

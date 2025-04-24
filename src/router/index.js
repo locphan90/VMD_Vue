@@ -13,7 +13,8 @@ import DaiLyForm from '../components/DaiLyForm.vue';
 import DaiLyManager from '../views/Admin/DaiLyManager.vue';
 import EmailManager from '../views/Admin/RegisteredEmails.vue';
 import BannerManager from '../views/Admin/BannerManager.vue';
-import GTDLManager from '../views/Admin/GTDLManager.vue';
+import StaticPageManager from '../views/Admin/StaticPageManager.vue';
+
 const routes = [
   {
     path: '/',
@@ -95,9 +96,9 @@ const routes = [
     meta: { requiresAuth: true, requiresAdmin: true }
   },
   {
-    path: '/admin/gtdlmanager',
-    name: 'GTDLManager',
-    component: GTDLManager,
+    path: '/admin/staticpagemanager',
+    name: 'StaticPageManager',
+    component: StaticPageManager,
     meta: { requiresAuth: true, requiresAdmin: true }
   },
 ];
@@ -105,6 +106,10 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  scrollBehavior(to, from, savedPosition) {
+    // Luôn scroll lên đầu trang khi route thay đổi
+    return { top: 0 }
+  }
 });
 
 // 👇 Thêm đoạn kiểm tra trước mỗi lần chuyển route

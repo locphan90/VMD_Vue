@@ -72,8 +72,4 @@ onBeforeUnmount(() => {
 
 
 <style scoped>
-/* Nếu cần style riêng cho trang Home thì thêm vào đây */
-.scroll-target {
-  scroll-margin-top: 135px; /* Chỉnh theo đúng chiều cao header của bạn */
-}
 </style>

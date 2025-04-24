@@ -31,13 +31,19 @@
       </div>
       <div class="form-group">
         <label>Chi tiết sản phẩm:</label>
-        <textarea v-model="product.chiTietSP" rows="5"></textarea>
+        <editor
+          v-model="product.chiTietSP"
+          :init="tinymceInit"
+          api-key="6q1jkwu75mpqv0rx5y0uj9ldflybe17q9hetjj02lp5skf2t"
+        />
       </div>
       <div class="form-group">
         <label>Phân loại:</label>
         <select v-model="product.loai">
           <option value="New">New</option>
           <option value="Sale">Sale</option>
+          <option value="Hot">Hot</option>
+          <option value="Pre-order">Pre-order</option>
         </select>
       </div>
 
@@ -50,18 +56,60 @@
           <option value="Industry">Industry</option>
         </select>
       </div>
-<div class="form-group">
-  <label>Thương hiệu:</label>
-  <select v-model="product.thuongHieu">
-    <option v-for="item in thuongHieuList" :key="item.val" :value="item.val">
-      {{ item.val }}
-    </option>
-  </select>
-</div>
+
       <div class="form-group">
-        <label>File hình ảnh sản phẩm:</label>
-        <input type="file" @change="onFileChange" />
+        <label>Thương hiệu:</label>
+        <select v-model="product.thuongHieu">
+          <option
+            v-for="item in thuongHieuList"
+            :key="item.val"
+            :value="item.val"
+          >
+            {{ item.val }}
+          </option>
+        </select>
       </div>
+
+      <!-- Hình ảnh chính sản phẩm -->
+      <div class="form-group">
+        <label>Hình ảnh chính sản phẩm:</label>
+        <div class="file-upload">
+          <input type="file" @change="onMainFileChange" ref="mainFileInput" />
+          <div v-if="mainFilePreview" class="image-preview">
+            <img :src="mainFilePreview" alt="Preview hình chính" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Hình ảnh tham chiếu -->
+      <div class="form-group">
+        <label>Hình ảnh tham chiếu sản phẩm:</label>
+        <div class="file-upload">
+          <input
+            type="file"
+            @change="onReferenceFilesChange"
+            multiple
+            ref="refFileInput"
+          />
+          <div class="preview-grid">
+            <div
+              v-for="(preview, index) in referenceFilePreviews"
+              :key="index"
+              class="ref-image-preview"
+            >
+              <img :src="preview" alt="Preview hình tham chiếu" />
+              <button
+                type="button"
+                class="remove-btn"
+                @click="removeReferenceFile(index)"
+              >
+                X
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="form-group">
         <label class="checkbox-label">
           <input type="checkbox" v-model="product.ShowUp" />
@@ -69,46 +117,227 @@
         </label>
       </div>
 
-      <button type="submit">Lưu sản phẩm</button>
+      <button type="submit">
+        {{ isEditing ? "Cập nhật sản phẩm" : "Lưu sản phẩm" }}
+      </button>
+      <button
+        v-if="isEditing"
+        type="button"
+        class="cancel-btn"
+        @click="cancelEdit"
+      >
+        Hủy
+      </button>
     </form>
     <hr style="margin: 40px 0" />
-    <!-- Danh sách sản phẩm đã nhập trong ngày -->
 
-    <div class="product-grid">
-      <div class="product-card" v-for="item in todayProducts" :key="item.id">
-        <!-- Nút xóa -->
-        <button
-          class="delete-btn"
-          @click="deleteProduct(item.id)"
-          title="Xóa sản phẩm"
-        >
-          X
-        </button>
-
-        <!-- Hình ảnh sản phẩm -->
-        <div class="product-image">
-          <img :src="item.fileFTP" alt="Hình sản phẩm" />
+    <!-- Phần tìm kiếm và lọc -->
+    <div class="search-filter">
+      <h3>Tìm kiếm và lọc sản phẩm</h3>
+      <div class="filter-container">
+        <div class="filter-group">
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Nhập tên sản phẩm..."
+            @input="handleSearch"
+            class="search-input"
+          />
         </div>
 
-        <!-- Thông tin -->
-        <div class="product-info">
-          <strong>{{ item.tenSP }}</strong>
-          <span class="product-price">
-            {{ item.giaThamKhao.toLocaleString() }}
-            <span class="currency">đ</span>
-          </span>
+        <div class="filter-group">
+          <select v-model="filters.cat" @change="applyFilters">
+            <option value="">-- Loại --</option>
+            <option value="MOI">Mới</option>
+            <option value="NOIBAT">Nổi bật</option>
+          </select>
         </div>
+
+        <div class="filter-group">
+          <select v-model="filters.loai" @change="applyFilters">
+            <option value="">-- Phân loại --</option>
+            <option value="New">New</option>
+            <option value="Sale">Sale</option>
+            <option value="Hot">Hot</option>
+            <option value="Pre-order">Pre-order</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <select v-model="filters.nganh" @change="applyFilters">
+            <option value="">-- Ngành --</option>
+            <option value="FMCG">FMCG</option>
+            <option value="Mẹ & Bé">Mẹ & Bé</option>
+            <option value="HealthCare">HealthCare</option>
+            <option value="Industry">Industry</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <select v-model="filters.thuongHieu" @change="applyFilters">
+            <option value="">-- Thương hiệu --</option>
+            <option
+              v-for="item in thuongHieuList"
+              :key="item.val"
+              :value="item.val"
+            >
+              {{ item.val }}
+            </option>
+          </select>
+        </div>
+
+        <button @click="resetFilters" class="reset-btn">Đặt lại</button>
       </div>
+    </div>
+
+    <!-- Danh sách sản phẩm -->
+    <div class="product-table-container">
+      <table class="product-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tên sản phẩm</th>
+            <th>Loại</th>
+            <th>Phân loại</th>
+            <th>Giá tham khảo</th>
+            <th>Ngành</th>
+            <th>Thương hiệu</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in displayedProducts" :key="item.id">
+            <td>{{ item.id }}</td>
+            <td>{{ item.tenSP }}</td>
+            <td>{{ item.cat }}</td>
+            <td>{{ item.loai }}</td>
+            <td>
+              {{ item.giaThamKhao.toLocaleString() }}
+              <span class="currency">đ</span>
+            </td>
+            <td>{{ item.nganh }}</td>
+            <td>{{ item.thuongHieu }}</td>
+            <td class="action-cell">
+              <button
+                class="edit-btn table-btn"
+                @click="editProduct(item)"
+                title="Sửa sản phẩm"
+              >
+                ✎
+              </button>
+              <button
+                class="delete-btn table-btn"
+                @click="deleteProduct(item.id)"
+                title="Xóa sản phẩm"
+              >
+                X
+              </button>
+            </td>
+          </tr>
+          <tr v-if="displayedProducts.length === 0">
+            <td colspan="8" class="no-data">Không có sản phẩm nào</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Phân trang -->
+    <div class="pagination">
+      <!-- Nút lùi trang -->
+      <span>
+        <button
+          @click="changePage(currentPage - 1)"
+          :disabled="currentPage === 1"
+          class="page-btn nav-btn"
+        >
+          &lt;
+        </button>
+      </span>
+
+      <span v-for="page in displayedPages" :key="page">
+        <button
+          v-if="page !== '...'"
+          @click="changePage(page)"
+          :class="['page-btn', page === currentPage ? 'active' : '']"
+        >
+          {{ page }}
+        </button>
+        <span v-else class="ellipsis">...</span>
+      </span>
+
+      <!-- Nút qua trang -->
+      <span>
+        <button
+          @click="changePage(currentPage + 1)"
+          :disabled="currentPage === totalPages"
+          class="page-btn nav-btn"
+        >
+          &gt;
+        </button>
+      </span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import axios from "@/utils/axios";
 import { formatInputCurrency } from "@/utils/formatter";
 import getFullFtpUrl from "@/utils/pathHelper";
+import Editor from '@tinymce/tinymce-vue';
+
 const thuongHieuList = ref([]);
+const isEditing = ref(false);
+const editingProductId = ref(null);
+const mainFilePreview = ref(null);
+const referenceFilePreviews = ref([]);
+const referenceFiles = ref([]);
+const mainFileInput = ref(null);
+const refFileInput = ref(null);
+
+// TinyMCE Configuration
+const tinymceInit = {
+  height: 300,
+  menubar: true,
+  plugins: [
+    'advlist autolink lists link image charmap print preview anchor',
+    'searchreplace visualblocks code fullscreen',
+    'insertdatetime media table paste code help wordcount'
+  ],
+  toolbar:
+    'undo redo | formatselect | bold italic backcolor | \
+    alignleft aligncenter alignright alignjustify | \
+    bullist numlist outdent indent | removeformat | help'
+};
+
+// Trang hiện tại và số sản phẩm trên mỗi trang
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
+const totalPages = ref(1);
+
+// Tìm kiếm và lọc
+const searchQuery = ref("");
+const filters = ref({
+  cat: "",
+  loai: "",
+  nganh: "",
+  thuongHieu: "",
+});
+
+// Tạo TRX ngẫu nhiên
+const generateTRX = () => {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < 20; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
+const trxHinhAnh = ref(generateTRX());
+const productHinhAnhThamChieu = ref([]);
+
 const fetchThuongHieu = async () => {
   try {
     const res = await axios.get("/api/MISC?cat=THUONGHIEU");
@@ -117,13 +346,14 @@ const fetchThuongHieu = async () => {
     console.error("Lỗi khi tải thương hiệu:", err);
   }
 };
+
 const product = ref({
-  cat: "Mới",
+  cat: "MOI",
   tenSP: "",
   giaThamKhao: "",
   mota: "",
-  chiTietSP: "", // 👈 thêm dòng này
-  thuongHieu:"",
+  chiTietSP: "",
+  thuongHieu: "",
   loai: "New",
   nganh: "FMCG",
   fileFTP: "",
@@ -131,55 +361,192 @@ const product = ref({
 });
 
 const selectedFile = ref(null);
-const products = ref([]);
+const allProducts = ref([]);
+const filteredProducts = ref([]);
+
+// Lấy danh sách sản phẩm hiển thị dựa trên phân trang
+const displayedProducts = computed(() => {
+  const startIndex = (currentPage.value - 1) * itemsPerPage.value;
+  const endIndex = startIndex + itemsPerPage.value;
+  return filteredProducts.value.slice(startIndex, endIndex);
+});
+
+// Tính toán số trang và hiển thị số trang trên UI
+const displayedPages = computed(() => {
+  if (totalPages.value <= 7) {
+    return Array.from({ length: totalPages.value }, (_, i) => i + 1);
+  }
+
+  const pages = [];
+  if (currentPage.value <= 3) {
+    for (let i = 1; i <= 5; i++) {
+      pages.push(i);
+    }
+    pages.push("...");
+    pages.push(totalPages.value);
+  } else if (currentPage.value >= totalPages.value - 2) {
+    pages.push(1);
+    pages.push("...");
+    for (let i = totalPages.value - 4; i <= totalPages.value; i++) {
+      pages.push(i);
+    }
+  } else {
+    pages.push(1);
+    pages.push("...");
+    for (let i = currentPage.value - 1; i <= currentPage.value + 1; i++) {
+      pages.push(i);
+    }
+    pages.push("...");
+    pages.push(totalPages.value);
+  }
+
+  return pages;
+});
 
 const onPriceInput = (event) => {
   product.value.giaThamKhao = formatInputCurrency(event.target.value);
 };
 
-const onFileChange = (event) => {
+const onMainFileChange = (event) => {
   selectedFile.value = event.target.files[0];
+  if (selectedFile.value) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      mainFilePreview.value = e.target.result;
+    };
+    reader.readAsDataURL(selectedFile.value);
+  } else {
+    mainFilePreview.value = null;
+  }
 };
+
+const onReferenceFilesChange = (event) => {
+  const newFiles = Array.from(event.target.files);
+
+  // Thêm files mới vào danh sách
+  referenceFiles.value = [...referenceFiles.value, ...newFiles];
+
+  // Tạo previews cho các files mới
+  newFiles.forEach((file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      referenceFilePreviews.value.push(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  });
+};
+
+const removeReferenceFile = (index) => {
+  referenceFiles.value.splice(index, 1);
+  referenceFilePreviews.value.splice(index, 1);
+};
+
 const handleSubmit = async () => {
-  if (!selectedFile.value) {
-    alert("Vui lòng chọn file sản phẩm!");
+  if (!selectedFile.value && !isEditing.value) {
+    alert("Vui lòng chọn file hình ảnh chính cho sản phẩm!");
     return;
   }
 
-  const formData = new FormData();
-  formData.append("file", selectedFile.value);
+  // Kiểm tra độ dài của chiTietSP
+  if (product.value.chiTietSP && product.value.chiTietSP.length > 2500) {
+    alert("Chi tiết sản phẩm không được vượt quá 2500 ký tự!");
+    return;
+  }
 
   try {
+    let sanPhamID;
 
-    const formData = new FormData();
-    formData.append("file", selectedFile.value);
+    // Xử lý hình ảnh chính nếu có thay đổi
+    if (selectedFile.value) {
+      const formData = new FormData();
+      formData.append("file", selectedFile.value);
 
-    const uploadRes = await axios.post("/api/ftp/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    product.value.fileFTP = uploadRes.data.filePath;
+      const uploadRes = await axios.post("/api/ftp/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      product.value.fileFTP = uploadRes.data.filePath;
+    }
 
-    const cleanGia = Number(product.value.giaThamKhao.replace(/\D/g, ""));
+    const cleanGia = Number(
+      product.value.giaThamKhao.toString().replace(/\D/g, "")
+    );
     const payload = {
       ...product.value,
       giaThamKhao: cleanGia,
+      // chiTietSP already contains HTML from TinyMCE
     };
-    console.log(payload);
-    await axios.post("/api/sanpham", payload);
-    alert("Thêm sản phẩm thành công!");
+
+    // Nếu đang sửa hoặc tạo mới sản phẩm
+    if (isEditing.value) {
+      await axios.post(
+        `/api/sanpham/update/${editingProductId.value}`,
+        payload
+      );
+      sanPhamID = editingProductId.value;
+    } else {
+      const res = await axios.post("/api/sanpham", payload);
+      sanPhamID = res.data.id; // Giả định API trả về ID của sản phẩm vừa tạo
+    }
+
+    // Xử lý upload tất cả hình ảnh tham chiếu
+    if (referenceFiles.value.length > 0) {
+      const referenceData = [];
+
+      for (const file of referenceFiles.value) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const uploadRes = await axios.post("/api/ftp/upload", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        referenceData.push({
+          SanPhamID: sanPhamID,
+          LinkHinhAnh: uploadRes.data.filePath,
+          FstUser: 1, // Có thể thay đổi tùy theo yêu cầu
+          FstUpdate: new Date(),
+          Status: "OK",
+          TRXHinhAnh: trxHinhAnh.value,
+        });
+      }
+
+      // Gửi tất cả hình ảnh tham chiếu cùng một lần
+      await axios.post("/api/HinhAnhSanPham", referenceData);
+
+      // Gọi API cập nhật SanPhamID cho các hình ảnh tham chiếu
+      await axios.post("/api/HinhAnhSanPham/UpdateBySanPham", {
+        SanPhamID: sanPhamID,
+        TRXHinhAnh: trxHinhAnh.value,
+      });
+    }
+
+    alert(
+      isEditing.value
+        ? "Cập nhật sản phẩm thành công!"
+        : "Thêm sản phẩm thành công!"
+    );
     resetForm();
-    await fetchTodayProducts();
+    await fetchAllProducts();
   } catch (error) {
-    console.error("Lỗi khi lưu sản phẩm:", error.response?.data || error);
-    alert("Có lỗi xảy ra khi lưu sản phẩm!");
+    console.error(
+      isEditing.value ? "Lỗi khi cập nhật sản phẩm:" : "Lỗi khi lưu sản phẩm:",
+      error.response?.data || error
+    );
+    alert(
+      isEditing.value
+        ? "Có lỗi xảy ra khi cập nhật sản phẩm!"
+        : "Có lỗi xảy ra khi lưu sản phẩm!"
+    );
   }
 };
 
 const resetForm = () => {
   product.value = {
-    cat: "Mới",
+    cat: "MOI",
     tenSP: "",
     giaThamKhao: "",
     mota: "",
@@ -191,41 +558,94 @@ const resetForm = () => {
     showUp: false,
   };
   selectedFile.value = null;
+  mainFilePreview.value = null;
+  referenceFiles.value = [];
+  referenceFilePreviews.value = [];
+  isEditing.value = false;
+  editingProductId.value = null;
+  trxHinhAnh.value = generateTRX();
+  productHinhAnhThamChieu.value = [];
+
+  // Reset file inputs
+  if (mainFileInput.value) mainFileInput.value.value = "";
+  if (refFileInput.value) refFileInput.value.value = "";
 };
 
-// Lấy danh sách sản phẩm đã nhập trong ngày
-const todayProducts = ref([]);
-const fetchTodayProducts = async () => {
+// Lấy tất cả sản phẩm
+const fetchAllProducts = async () => {
   try {
     const res = await axios.get("/api/sanpham");
-    const today = new Date().toISOString().split("T")[0];
-    // todayProducts = res.data.filter((p) => p.status !== "XX");
-    todayProducts.value = res.data
-      .filter((sp) => {
-        const updatedDate = new Date(sp.fstUpdate).toISOString().split("T")[0];
-        return sp.status !== "XX" && updatedDate === today;
-      })
+    allProducts.value = res.data
+      .filter((sp) => sp.status !== "XX")
       .map((sp) => ({
         ...sp,
-        fileFTP: getFullFtpUrl(sp.fileFTP), // ✅ xử lý đường dẫn ảnh tại đây
+        fileFTP: getFullFtpUrl(sp.fileFTP),
       }));
+    applyFilters();
   } catch (err) {
-    console.error("Lỗi khi tải sản phẩm hôm nay:", err);
+    console.error("Lỗi khi tải sản phẩm:", err);
   }
 };
 
-// const deleteProduct = async (id) => {
-//   if (confirm("Bạn chắc chắn muốn xóa sản phẩm này?")) {
-//     try {
-//       await axios.put(`/api/sanpham/${id}`, {
-//         status: "XX",
-//       });
-//       fetchTodayProducts();
-//     } catch (error) {
-//       console.error("Lỗi khi xoá:", error);
-//     }
-//   }
-// };
+const fetchProductImages = async (productId) => {
+  try {
+    const res = await axios.get(`/api/HinhAnhSanPham/sanpham/${productId}`);
+    productHinhAnhThamChieu.value = res.data.map((img) => ({
+      ...img,
+      linkHinhAnh: getFullFtpUrl(img.linkHinhAnh),
+    }));
+    // Hiển thị preview các hình ảnh tham chiếu đã có
+    referenceFilePreviews.value = productHinhAnhThamChieu.value.map(
+      (img) => img.linkHinhAnh
+    );
+  } catch (err) {
+    console.error("Lỗi khi tải hình ảnh tham chiếu:", err);
+    productHinhAnhThamChieu.value = [];
+  }
+};
+
+const editProduct = async (item) => {
+  try {
+    isEditing.value = true;
+    editingProductId.value = item.id;
+
+    // Điền thông tin sản phẩm vào form
+    product.value = {
+      cat: item.cat || "MOI",
+      tenSP: item.tenSP || "",
+      giaThamKhao: item.giaThamKhao ? item.giaThamKhao.toLocaleString() : "",
+      mota: item.mota || "",
+      chiTietSP: item.chiTietSP || "",
+      thuongHieu: item.thuongHieu || "",
+      loai: item.loai || "New",
+      nganh: item.nganh || "FMCG",
+      fileFTP: item.fileFTP || "",
+      showUp: item.showUp || false,
+    };
+
+    // Hiển thị preview hình ảnh chính
+    mainFilePreview.value = item.fileFTP;
+
+    // Lấy và hiển thị preview các hình ảnh tham chiếu
+    await fetchProductImages(item.id);
+
+    // Tạo TRX mới cho phiên chỉnh sửa
+    trxHinhAnh.value = generateTRX();
+
+    // Cuộn trang lên trên để người dùng thấy form
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  } catch (error) {
+    console.error("Lỗi khi chỉnh sửa sản phẩm:", error);
+    alert("Có lỗi xảy ra khi tải thông tin sản phẩm!");
+  }
+};
+
+const cancelEdit = () => {
+  resetForm();
+};
 
 const deleteProduct = async (id) => {
   if (confirm("Bạn chắc chắn muốn xóa sản phẩm này?")) {
@@ -233,24 +653,96 @@ const deleteProduct = async (id) => {
       await axios.post(`/api/sanpham/update/${id}`, {
         status: "XX",
       });
-      fetchTodayProducts();
+      fetchAllProducts();
     } catch (error) {
       console.error("Lỗi khi xoá:", error);
     }
   }
 };
 
+// Chức năng tìm kiếm
+const handleSearch = () => {
+  currentPage.value = 1;
+  applyFilters();
+};
+
+// Chức năng lọc
+const applyFilters = () => {
+  let results = [...allProducts.value];
+
+  // Lọc theo từ khóa tìm kiếm
+  if (searchQuery.value.trim()) {
+    const query = searchQuery.value.toLowerCase().trim();
+    results = results.filter(
+      (item) =>
+        item.tenSP?.toLowerCase().includes(query) ||
+        item.mota?.toLowerCase().includes(query)
+    );
+  }
+
+  // Lọc theo các tiêu chí khác
+  if (filters.value.cat) {
+    results = results.filter((item) => item.cat === filters.value.cat);
+  }
+
+  if (filters.value.loai) {
+    results = results.filter((item) => item.loai === filters.value.loai);
+  }
+
+  if (filters.value.nganh) {
+    results = results.filter((item) => item.nganh === filters.value.nganh);
+  }
+
+  if (filters.value.thuongHieu) {
+    results = results.filter(
+      (item) => item.thuongHieu === filters.value.thuongHieu
+    );
+  }
+
+  filteredProducts.value = results;
+  totalPages.value =
+    Math.ceil(filteredProducts.value.length / itemsPerPage.value) || 1;
+
+  // Kiểm tra xem trang hiện tại có vượt quá số trang sau khi lọc không
+  if (currentPage.value > totalPages.value) {
+    currentPage.value = totalPages.value;
+  }
+};
+
+// Reset bộ lọc
+const resetFilters = () => {
+  searchQuery.value = "";
+  filters.value = {
+    cat: "",
+    loai: "",
+    nganh: "",
+    thuongHieu: "",
+  };
+  applyFilters();
+};
+
+// Chuyển trang
+const changePage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+};
+
+// Watch để cập nhật khi có sự thay đổi trong danh sách sản phẩm
+watch([allProducts], () => {
+  applyFilters();
+});
+
 onMounted(() => {
-  fetchTodayProducts();
+  fetchAllProducts();
   fetchThuongHieu();
 });
 </script>
 
-
 <style scoped>
 .product-form {
-  max-width: 725px;
-  margin: 50px auto; /* ✅ Khoảng cách so với header & footer */
+  max-width: 1000px;
+  margin: 50px auto;
   background: #fff;
   padding: 30px;
   border-radius: 8px;
@@ -300,115 +792,31 @@ button {
   cursor: pointer;
   font-size: 16px;
   transition: background 0.3s;
+  margin-bottom: 10px;
 }
 
 button:hover {
   background-color: #c0392b;
 }
+
+.cancel-btn {
+  background-color: #7f8c8d;
+}
+
+.cancel-btn:hover {
+  background-color: #636e72;
+}
+
 .checkbox-label {
   display: flex;
   align-items: center;
   font-size: 14px;
-  gap: 8px; /* khoảng cách giữa checkbox và text */
+  gap: 8px;
 }
 
 .checkbox-label input[type="checkbox"] {
   width: 20px;
   height: 20px;
-}
-
-.scroll-target {
-  margin-top: 170px; /* đúng với chiều cao header */
-}
-
-.product-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center;
-  margin-top: 30px;
-  max-width: 100%;
-}
-
-.product-card {
-  width: calc((100% - 40px) / 3); /* 3 sản phẩm mỗi hàng, 2 khoảng cách 20px */
-  text-decoration: none;
-  color: inherit;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 10px;
-  text-align: center;
-  background: #fff;
-  transition: transform 0.3s, box-shadow 0.3s;
-  position: relative;
-  box-sizing: border-box;
-}
-
-.product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-}
-
-.product-image {
-  width: 100%;
-  padding-top: 100%;
-  position: relative;
-  pointer-events: none;
-}
-
-.product-image img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.product-info {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  margin-top: 10px;
-}
-
-.product-price {
-  font-weight: bold;
-  color: #e74c3c;
-}
-
-.currency {
-  font-size: 0.7em;
-  vertical-align: super;
-}
-
-.delete-btn {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  background: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  line-height: 22px;
-  padding: 0;
-  z-index: 10;
-  width: 28px;
-  height: 28px;
-  font-size: 16px;
-  line-height: 28px;
-}
-
-.delete-btn:hover {
-  background: #c0392b;
-}
-
-.checkbox-showup {
-  margin-top: 8px;
-  font-size: 12px;
-  text-align: left;
-  color: #007bff;
 }
 
 textarea {
@@ -425,15 +833,260 @@ textarea:focus {
   border-color: #e74c3c;
   outline: none;
 }
+
+/* Phần style mới cho Preview hình ảnh */
+.file-upload {
+  margin-top: 10px;
+}
+
+.image-preview {
+  margin-top: 15px;
+  max-width: 100%;
+  height: 200px;
+  border: 1px dashed #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.image-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.preview-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.ref-image-preview {
+  width: calc(25% - 8px);
+  height: 100px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.ref-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.ref-image-preview .remove-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: rgba(231, 76, 60, 0.8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+}
+
+.ref-image-preview .remove-btn:hover {
+  background: rgba(192, 57, 43, 1);
+}
+
+/* Phần style mới cho bảng và phân trang */
+.search-filter {
+  margin-bottom: 30px;
+}
+
+.search-filter h3 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.filter-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 150px;
+}
+
+.search-input {
+  width: 100%;
+}
+
+.reset-btn {
+  background-color: #3498db;
+  padding: 10px 15px;
+  width: auto;
+  margin-bottom: 0;
+}
+
+.reset-btn:hover {
+  background-color: #2980b9;
+}
+
+.product-table-container {
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+.product-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.product-table th,
+.product-table td {
+  padding: 10px 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.product-table th {
+  background-color: #f4f4f4;
+  font-weight: 600;
+  color: #555;
+}
+
+.product-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+.product-table .no-data {
+  text-align: center;
+  padding: 20px;
+  color: #888;
+}
+
+.action-cell {
+  white-space: nowrap;
+  width: 100px;
+}
+
+.table-btn {
+  width: 32px;
+  height: 32px;
+  margin: 0 5px 0 0;
+  padding: 0;
+  line-height: 32px;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.currency {
+  font-size: 0.85em;
+  vertical-align: super;
+}
+
+/* Phân trang */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 5px;
+  flex-wrap: wrap;
+  flex-wrap: nowrap; /* Ngăn chia dòng */
+}
+
+.page-btn {
+  min-width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0 10px;
+  background-color: #f4f4f4;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.page-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.page-btn.active {
+  background-color: #e74c3c;
+  color: white;
+  border-color: #e74c3c;
+}
+
+.page-btn:disabled {
+  background-color: #f4f4f4;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.ellipsis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  font-size: 14px;
+  color: #333;
+}
+.pagination > span {
+  display: flex;
+  align-items: center;
+}
+.pagination button,
+.pagination .ellipsis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-btn:hover:not(:disabled) {
+  background-color: #c0392b;
+  color: white;
+}
+
+.page-btn.active {
+  background-color: #e74c3c;
+  color: white;
+  border-color: #e74c3c;
+}
+
 @media (max-width: 992px) {
-  .product-card {
-    width: calc((100% - 20px) / 2); /* 2 sản phẩm trên mỗi hàng */
+  .filter-group {
+    min-width: calc(50% - 10px);
+  }
+
+  .ref-image-preview {
+    width: calc(33.33% - 7px);
   }
 }
 
 @media (max-width: 600px) {
-  .product-card {
-    width: 100%; /* 1 sản phẩm trên mỗi hàng */
+  .filter-group {
+    min-width: 100%;
+  }
+
+  .ref-image-preview {
+    width: calc(50% - 5px);
+  }
+
+  .pagination {
+    gap: 3px;
+  }
+
+  .page-btn {
+    min-width: 35px;
+    height: 35px;
+    font-size: 14px;
   }
 }
 </style>
