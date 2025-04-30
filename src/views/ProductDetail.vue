@@ -74,16 +74,68 @@
               <span class="detail-value">{{ product.mota }}</span>
             </div>
           </div>
+
+          <!-- Phần chia sẻ mạng xã hội -->
+          <div class="social-share">
+            <p class="share-label">Chia sẻ sản phẩm:</p>
+            <div class="social-buttons">
+              <a :href="getFacebookShareUrl()" target="_blank" class="social-button facebook">
+                <i class="fab fa-facebook-f"></i>
+              </a>
+              <a :href="getZaloShareUrl()" target="_blank" class="social-button zalo">
+                <span class="zalo-icon">Z</span>
+              </a>
+              <a :href="getMessengerShareUrl()" target="_blank" class="social-button messenger">
+                <i class="fab fa-facebook-messenger"></i>
+              </a>
+              <a :href="getViberShareUrl()" target="_blank" class="social-button viber">
+                <i class="fab fa-viber"></i>
+              </a>
+              <button @click="copyProductLink()" class="social-button copy-link">
+                <i class="fas fa-link"></i>
+              </button>
+            </div>
+            <span v-if="linkCopied" class="copy-notification">Đã sao chép đường dẫn!</span>
+          </div>
         </div>
       </div>
 
-      <!-- Product description moved below the image section -->
-      <div class="product-description">
-        <h3 class="description-title">Chi tiết sản phẩm</h3>
-        <div
-          class="description-content"
-          v-html="product.chiTietSP || 'Chưa có chi tiết'"
-        ></div>
+      <!-- Tabs for Product Description and Usage Guide -->
+      <div class="product-tabs">
+        <div class="tabs-header">
+          <button 
+            class="tab-button" 
+            :class="{ active: activeTab === 'description' }"
+            @click="activeTab = 'description'"
+          >
+            Chi tiết sản phẩm
+          </button>
+          <button 
+            class="tab-button" 
+            :class="{ active: activeTab === 'guide' }"
+            @click="activeTab = 'guide'"
+          >
+            Hướng dẫn sử dụng
+          </button>
+        </div>
+        
+        <div class="tabs-content">
+          <!-- Product Description Tab -->
+          <div v-if="activeTab === 'description'" class="tab-pane">
+            <div
+              class="description-content"
+              v-html="product.chiTietSP || 'Chưa có chi tiết'"
+            ></div>
+          </div>
+          
+          <!-- Usage Guide Tab -->
+          <div v-if="activeTab === 'guide'" class="tab-pane">
+            <div
+              class="guide-content"
+              v-html="product.huongDanSD || 'Chưa có hướng dẫn sử dụng'"
+            ></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -92,13 +144,54 @@
 <script setup>
 import { ref, onMounted, nextTick, watch } from "vue";
 import { useRoute } from "vue-router";
-import axios from "/src/utils/axios";
-import getFullFtpUrl from "/src/utils/pathHelper";
+import axios from "@/utils/axios";
+import getFullFtpUrl from "@/utils/pathHelper";
 
 const product = ref(null);
 const productImages = ref([]);
 const selectedImage = ref(null);
 const route = useRoute();
+const activeTab = ref('description'); // Mặc định hiển thị tab chi tiết sản phẩm
+const linkCopied = ref(false);
+
+// Các hàm xử lý chia sẻ mạng xã hội
+const getProductUrl = () => {
+  return window.location.href;
+};
+
+const getProductTitle = () => {
+  return product.value ? product.value.tenSP : '';
+};
+
+// Chia sẻ Facebook
+const getFacebookShareUrl = () => {
+  return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getProductUrl())}`;
+};
+
+// Chia sẻ Zalo
+const getZaloShareUrl = () => {
+  return `https://zalo.me/share?u=${encodeURIComponent(getProductUrl())}&t=${encodeURIComponent(getProductTitle())}`;
+};
+
+// Chia sẻ Messenger
+const getMessengerShareUrl = () => {
+  return `https://www.facebook.com/dialog/send?link=${encodeURIComponent(getProductUrl())}&app_id=YOUR_FACEBOOK_APP_ID&redirect_uri=${encodeURIComponent(getProductUrl())}`;
+};
+
+// Chia sẻ Viber
+const getViberShareUrl = () => {
+  return `viber://forward?text=${encodeURIComponent(getProductTitle() + ' ' + getProductUrl())}`;
+};
+
+// Sao chép link sản phẩm
+const copyProductLink = () => {
+  navigator.clipboard.writeText(getProductUrl()).then(() => {
+    linkCopied.value = true;
+    setTimeout(() => {
+      linkCopied.value = false;
+    }, 2000);
+  });
+};
 
 // Tạo hàm cập nhật meta tags
 const updateMetaTags = () => {
@@ -179,7 +272,7 @@ onMounted(async () => {
       if (imagesRes.data && Array.isArray(imagesRes.data)) {
         productImages.value = imagesRes.data;
       }
-      
+      console.log(imagesRes.data);
       // Cập nhật meta tags sau khi có dữ liệu sản phẩm
       updateMetaTags();
       
@@ -217,7 +310,7 @@ watch(selectedImage, () => {
 .back-button {
   display: inline-flex;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   background-color: transparent;
   border: none;
   font-size: 16px;
@@ -242,7 +335,7 @@ watch(selectedImage, () => {
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-  padding: 20px;
+  padding: 10px;
   margin-bottom: 20px;
 }
 
@@ -381,36 +474,148 @@ watch(selectedImage, () => {
   word-break: break-word;
 }
 
-.product-description {
+/* Phần chia sẻ mạng xã hội */
+.social-share {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.share-label {
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.social-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.social-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 18px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.social-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+}
+
+.social-button.facebook {
+  background-color: #3b5998;
+}
+
+.social-button.zalo {
+  background-color: #0068ff;
+  font-weight: bold;
+}
+
+.social-button.messenger {
+  background-color: #0084ff;
+}
+
+.social-button.viber {
+  background-color: #7360f2;
+}
+
+.social-button.copy-link {
+  background-color: #27ae60;
+  border: none;
+  cursor: pointer;
+}
+
+.zalo-icon {
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.copy-notification {
+  font-size: 14px;
+  color: #27ae60;
+  margin-top: 8px;
+  display: inline-block;
+}
+
+/* Tabs styling */
+.product-tabs {
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-  padding: 20px;
-  width: 100%;
+  margin-bottom: 30px;
+  overflow: hidden;
 }
 
-.description-title {
-  font-size: 18px;
+.tabs-header {
+  display: flex;
+  border-bottom: 1px solid #eee;
+}
+
+.tab-button {
+  padding: 15px 20px;
+  background: transparent;
+  border: none;
+  font-size: 16px;
   font-weight: 600;
-  color: #333;
-  margin-bottom: 15px;
+  color: #666;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
 }
 
-.description-content {
+.tab-button:hover {
+  color: #3498db;
+}
+
+.tab-button.active {
+  color: #3498db;
+}
+
+.tab-button.active:after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #3498db;
+}
+
+.tabs-content {
+  padding: 20px;
+}
+
+.tab-pane {
   line-height: 1.7;
   color: #555;
+}
+
+.description-content,
+.guide-content {
   word-break: break-word;
   overflow-wrap: break-word;
 }
 
-/* Make product description images responsive */
-.description-content img {
+/* Make images responsive */
+.description-content img,
+.guide-content img {
   max-width: 100%;
   height: auto;
 }
 
 /* Make embedded tables responsive */
-.description-content table {
+.description-content table,
+.guide-content table {
   max-width: 100%;
   overflow-x: auto;
   display: block;
@@ -454,13 +659,21 @@ watch(selectedImage, () => {
     margin-bottom: 2px;
   }
   
-  .product-description {
+  .product-tabs {
     padding: 15px;
   }
   
-  .description-title {
-    font-size: 16px;
-    margin-bottom: 10px;
+  .tabs-header {
+    flex-wrap: wrap;
+  }
+  
+  .tab-button {
+    padding: 12px 15px;
+    font-size: 14px;
+  }
+  
+  .tabs-content {
+    padding: 15px;
   }
   
   .main-image {
@@ -500,6 +713,17 @@ watch(selectedImage, () => {
   
   .back-button {
     margin-bottom: 15px;
+  }
+  
+  .social-button {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+  
+  .tab-button {
+    padding: 10px;
+    font-size: 13px;
   }
 }
 </style>

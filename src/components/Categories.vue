@@ -3,28 +3,18 @@
     <h2 class="section-title">NGÀNH HÀNG</h2>
     <div class="category-icons">
       <div class="category-icon">
-        <img
-          src="https://img.icons8.com/ios-filled/100/000000/shop.png"
-          alt="Retail"
-        />
+        <img src="/images/FMCG.png" alt="FMCG" />
+      </div>
+      <router-link to="/generalview">
+        <div class="category-icon">
+          <img src="/images/mother-day.png" alt="Mẹ & Bé" />
+        </div>
+      </router-link>
+      <div class="category-icon">
+        <img src="/images/healthcare.png" alt="HealthCare" />
       </div>
       <div class="category-icon">
-        <img
-          src="https://img.icons8.com/ios-filled/100/000000/lipstick.png"
-          alt="Beauty"
-        />
-      </div>
-      <div class="category-icon">
-        <img
-          src="https://img.icons8.com/ios-filled/100/000000/heart-health.png"
-          alt="Health"
-        />
-      </div>
-      <div class="category-icon">
-        <img
-          src="https://img.icons8.com/ios-filled/100/000000/delivery.png"
-          alt="Logistics"
-        />
+        <img src="/images/factory.png" alt="Industry" />
       </div>
     </div>
   </section>

@@ -16,6 +16,8 @@ import BannerManager from '../views/Admin/BannerManager.vue';
 import StaticPageManager from '../views/Admin/StaticPageManager.vue';
 import ContentDisplay from '../views/ContentDisplay.vue';
 import ProductCat from '../views/Admin/ProductCat.vue';
+import GeneralView from '../views/GeneralView.vue';
+import ThuongHieu from '../views/BrandView.vue';
 const routes = [
   {
     path: '/',
@@ -113,6 +115,16 @@ const routes = [
     name: 'ProductCat',
     component: ProductCat,
     meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/generalview',
+    name: 'GeneralView',
+    component: GeneralView
+  },
+  {
+    path: '/thuonghieu/:tenthuonghieu',
+    name: 'thuonghieu',
+    component: ThuongHieu
   },
 ];
 

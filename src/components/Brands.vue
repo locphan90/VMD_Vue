@@ -3,13 +3,13 @@
     <h2 class="section-title">THƯƠNG HIỆU</h2>
     <div class="brand-grid">
       <div class="brand-card" v-for="(brand, index) in brands" :key="index">
-        <div class="brand-logo">
+        <router-link :to="`/thuonghieu/${brand.name}`" class="brand-logo">
           <img
             :src="brand.image"
             :alt="brand.name"
             @error="handleImageError($event, brand.name)"
           />
-        </div>
+        </router-link>
         <div class="brand-name">{{ brand.name }}</div>
       </div>
     </div>

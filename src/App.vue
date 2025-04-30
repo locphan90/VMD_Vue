@@ -1,7 +1,7 @@
 <template>
   <div>
     <Header :username="username" />
-    <main class="main-content">
+    <main class="main-contenthome">
       <router-view />
     </main>
     <footer ref="footerSection">
@@ -89,7 +89,7 @@ img {
   background-color: #e74c3c;
   margin: 10px auto;
 }
-.main-content {
+.main-contenthome {
   padding-top: 135px;
 }
 @media (max-width: 480px) {
@@ -107,7 +107,7 @@ img {
   .section-title {
     font-size: 18px;
   }
-  .main-content {
+  .main-contenthome {
     padding-top: 80px;
   }
 }
