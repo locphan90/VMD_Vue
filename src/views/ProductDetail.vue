@@ -92,8 +92,8 @@
 <script setup>
 import { ref, onMounted, nextTick, watch } from "vue";
 import { useRoute } from "vue-router";
-import axios from "@/utils/axios";
-import getFullFtpUrl from "@/utils/pathHelper";
+import axios from "/src/utils/axios";
+import getFullFtpUrl from "/src/utils/pathHelper";
 
 const product = ref(null);
 const productImages = ref([]);

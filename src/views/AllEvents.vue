@@ -25,7 +25,7 @@
         </div>
         <div class="news-content">
           <h2 class="news-title">{{ item.tieuDe }}</h2>
-          <p class="news-description">{{ truncateContent(item.noiDung) }}</p>
+          <p class="news-description" v-html="truncateContent(item.noiDung)"></p>
           <div class="news-meta">
             <span class="news-date">{{ formatDate(item.fstUpdate) }}</span>
           </div>
@@ -38,8 +38,8 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import axios from "@/utils/axios";
-import getFullFtpUrl from "@/utils/pathHelper";
+import axios from "/src/utils/axios";
+import getFullFtpUrl from "/src/utils/pathHelper";
 
 const newsItems = ref([]);
 const loading = ref(true);

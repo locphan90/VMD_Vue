@@ -28,8 +28,8 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from "@/utils/axios";
-import getFullFtpUrl from "@/utils/pathHelper";
+import axios from "/src/utils/axios";
+import getFullFtpUrl from "/src/utils/pathHelper";
 
 const brands = ref([]);
 const loading = ref(true);

@@ -37,6 +37,14 @@
           api-key="6q1jkwu75mpqv0rx5y0uj9ldflybe17q9hetjj02lp5skf2t"
         />
       </div>
+            <div class="form-group">
+        <label>Hướng dẫn sử dụng:</label>
+        <editor
+          v-model="product.huongDanSD"
+          :init="tinymceInit"
+          api-key="6q1jkwu75mpqv0rx5y0uj9ldflybe17q9hetjj02lp5skf2t"
+        />
+      </div>
       <div class="form-group">
         <label>Phân loại:</label>
         <select v-model="product.loai">
@@ -54,6 +62,19 @@
           <option value="Mẹ & Bé">Mẹ & Bé</option>
           <option value="HealthCare">HealthCare</option>
           <option value="Industry">Industry</option>
+        </select>
+      </div>
+
+            <div class="form-group">
+        <label>Danh mục sản phẩm:</label>
+        <select v-model="product.danhMucSP">
+          <option
+            v-for="item in danhMucList"
+            :key="item.val"
+            :value="item.val"
+          >
+            {{ item.val }}
+          </option>
         </select>
       </div>
 
@@ -287,6 +308,7 @@ import getFullFtpUrl from "@/utils/pathHelper";
 import Editor from '@tinymce/tinymce-vue';
 
 const thuongHieuList = ref([]);
+const danhMucList = ref([]);
 const isEditing = ref(false);
 const editingProductId = ref(null);
 const mainFilePreview = ref(null);
@@ -347,12 +369,22 @@ const fetchThuongHieu = async () => {
   }
 };
 
+const fetchDanhMucSP = async () => {
+  try {
+    const res = await axios.get("/api/MISC?cat=DANHMUCSANPHAM");
+    danhMucList.value = res.data;
+  } catch (err) {
+    console.error("Lỗi khi tải danh mục sản phẩm:", err);
+  }
+};
+
 const product = ref({
   cat: "MOI",
   tenSP: "",
   giaThamKhao: "",
   mota: "",
   chiTietSP: "",
+  huongDanSD:"",
   thuongHieu: "",
   loai: "New",
   nganh: "FMCG",
@@ -553,6 +585,7 @@ const resetForm = () => {
     chiTietSP: "",
     loai: "New",
     nganh: "FMCG",
+    danhMucSP:"",
     thuongHieu: "",
     fileFTP: "",
     showUp: false,
@@ -616,6 +649,7 @@ const editProduct = async (item) => {
       giaThamKhao: item.giaThamKhao ? item.giaThamKhao.toLocaleString() : "",
       mota: item.mota || "",
       chiTietSP: item.chiTietSP || "",
+      danhMucSP: item.danhMucSP || "",
       thuongHieu: item.thuongHieu || "",
       loai: item.loai || "New",
       nganh: item.nganh || "FMCG",
@@ -736,6 +770,7 @@ watch([allProducts], () => {
 onMounted(() => {
   fetchAllProducts();
   fetchThuongHieu();
+  fetchDanhMucSP();
 });
 </script>
 

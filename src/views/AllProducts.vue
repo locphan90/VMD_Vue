@@ -102,9 +102,9 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
-import axios from "@/utils/axios";
-import getFullFtpUrl from "@/utils/pathHelper";
-import MainLayout from "@/layouts/MainLayout.vue";
+import axios from "/src/utils/axios";
+import getFullFtpUrl from "/src/utils/pathHelper";
+import MainLayout from "/src/layouts/MainLayout.vue";
 
 const products = ref([]);
 const isAdmin = ref(false);
@@ -204,6 +204,7 @@ watch(
 );
 
 onMounted(() => {
+  window.scrollTo(0, 0);
   fetchProducts();
   const adminFlag = localStorage.getItem("isAdmin");
   isAdmin.value = adminFlag === "true";

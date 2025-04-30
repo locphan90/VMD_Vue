@@ -1,36 +1,58 @@
 <template>
   <div class="container">
     <h1 class="page-title">Quản lý nội dung</h1>
-    
+
     <div class="content-wrapper">
       <!-- Combobox -->
       <div class="control-box">
         <label class="control-label">Danh mục</label>
         <div class="select-wrapper">
-          <select 
+          <select
             v-model="selectedCategory"
             @change="fetchContent"
             class="select-control"
           >
             <option value="VECHUNGTOI">VỀ CHÚNG TÔI</option>
-            <option value="MOTANGANHHANG">NGÀNH HÀNG</option>
             <option value="LIENHE">LIÊN HỆ</option>
             <option value="HETHONGDAILY">HỆ THỐNG ĐẠI LÝ</option>
+            <option value="CHINHSACHDAILY">CHÍNH SÁCH ĐẠI LÝ</option>
+            <option value="CHINHSACHBAOMAT">CHÍNH SÁCH BẢO MẬT</option>
+            <option value="CHINHSACHGIAONHANHANG">
+              CHÍNH SÁCH GIAO NHẬN HÀNG
+            </option>
+            <option value="HOIDAPDAILY">HỎI ĐÁP ĐẠI LÝ</option>
+            <option value="CHINHSACHDOITRA">CHÍNH SÁCH ĐỔI TRẢ</option>
+            <option value="HOTROKHACHHANG">HỖ TRỢ KHÁCH HÀNG</option>
+            <option value="TRUNGTAMHOTRO">TRUNG TÂM HỖ TRỢ</option>
+            <option value="HUONGDANMUAHANG">HƯỚNG DẪN MUA HÀNG</option>
+            <option value="DIEUKHOANSUDUNG">ĐIỀU KHOẢN SỬ DỤNG</option>
           </select>
           <div class="select-arrow">
-            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            <svg
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
             </svg>
           </div>
         </div>
       </div>
-      
+
       <!-- TinyMCE -->
       <div class="control-box">
         <label class="control-label">Nội dung</label>
         <div class="editor-container">
           <editor
-            api-key="6q1jkwu75mpqv0rx5y0uj9ldflybe17q9hetjj02lp5skf2t" 
+            api-key="6q1jkwu75mpqv0rx5y0uj9ldflybe17q9hetjj02lp5skf2t"
             v-model="content"
             :init="{
               height: 'calc(100vh - 300px)',
@@ -41,47 +63,90 @@
               plugins: [
                 'advlist autolink lists link image charmap print preview anchor',
                 'searchreplace visualblocks code fullscreen',
-                'insertdatetime media table paste code help wordcount'
+                'insertdatetime media table paste code help wordcount',
               ],
               toolbar:
                 'undo redo | formatselect | bold italic backcolor | \
                 alignleft aligncenter alignright alignjustify | \
                 bullist numlist outdent indent | removeformat | help',
               resize: true,
-              statusbar: true
+              statusbar: true,
             }"
           />
         </div>
       </div>
-      
+
       <!-- Nút Lưu/Sửa -->
       <div class="button-group">
-        <button 
-          @click="fetchContent" 
-          class="btn btn-secondary"
-        >
-          <svg class="btn-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        <button @click="fetchContent" class="btn btn-secondary">
+          <svg
+            class="btn-icon"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            ></path>
           </svg>
           Làm mới
         </button>
-        <button 
-          @click="saveContent" 
+        <button
+          @click="saveContent"
           class="btn btn-primary"
           :disabled="loading"
         >
-          <svg v-if="loading" class="btn-icon spinner" width="16" height="16" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          <svg
+            v-if="loading"
+            class="btn-icon spinner"
+            width="16"
+            height="16"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
           </svg>
-          <svg v-else class="btn-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          <svg
+            v-else
+            class="btn-icon"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 13l4 4L19 7"
+            ></path>
           </svg>
-          {{ currentId ? 'Cập nhật' : 'Lưu' }}
+          {{ currentId ? "Cập nhật" : "Lưu" }}
         </button>
       </div>
     </div>
-    
+
     <!-- Thông báo -->
     <div v-if="notification.show" :class="['notification', notification.type]">
       {{ notification.message }}
@@ -90,27 +155,48 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
-import Editor from '@tinymce/tinymce-vue';
-import axios from "@/utils/axios";
+import { ref, onMounted, onBeforeUnmount, nextTick, computed } from "vue";
+import Editor from "@tinymce/tinymce-vue";
+import axios from "/src/utils/axios";
 
 // Khai báo biến
-const selectedCategory = ref('VECHUNGTOI');
-const content = ref('');
+const selectedCategory = ref("VECHUNGTOI");
+const content = ref("");
 const currentId = ref(null);
 const loading = ref(false);
 const notification = ref({
   show: false,
-  message: '',
-  type: 'success'
+  message: "",
+  type: "success",
+});
+
+// map value -> text
+const categoryTextMap = {
+  VECHUNGTOI: "VỀ CHÚNG TÔI",
+  LIENHE: "LIÊN HỆ",
+  HETHONGDAILY: "HỆ THỐNG ĐẠI LÝ",
+  CHINHSACHDAILY: "CHÍNH SÁCH ĐẠI LÝ",
+  CHINHSACHBAOMAT: "CHÍNH SÁCH BẢO MẬT",
+  CHINHSACHGIAONHANHANG: "CHÍNH SÁCH GIAO NHẬN HÀNG",
+  HOIDAPDAILY: "HỎI ĐÁP ĐẠI LÝ",
+  CHINHSACHDOITRA: "CHÍNH SÁCH ĐỔI TRẢ",
+  HOTROKHACHHANG: "HỖ TRỢ KHÁCH HÀNG",
+  TRUNGTAMHOTRO: "TRUNG TÂM HỖ TRỢ",
+  HUONGDANMUAHANG: "HƯỚNG DẪN MUA HÀNG",
+  DIEUKHOANSUDUNG: "ĐIỀU KHOẢN SỬ DỤNG",
+};
+
+// computed để lấy text
+const selectedCategoryText = computed(() => {
+  return categoryTextMap[selectedCategory.value] || "";
 });
 
 // Hàm hiển thị thông báo
-function showNotification(message, type = 'success') {
+function showNotification(message, type = "success") {
   notification.value = {
     show: true,
     message,
-    type
+    type,
   };
 
   setTimeout(() => {
@@ -120,7 +206,7 @@ function showNotification(message, type = 'success') {
 
 // Điều chỉnh chiều cao trình soạn thảo
 function adjustEditorHeight() {
-  const editorIframe = document.querySelector('.tox-edit-area iframe');
+  const editorIframe = document.querySelector(".tox-edit-area iframe");
   if (editorIframe) {
     const windowHeight = window.innerHeight;
     const position = editorIframe.getBoundingClientRect().top;
@@ -133,18 +219,18 @@ function adjustEditorHeight() {
 async function fetchContent() {
   try {
     loading.value = true;
-    const response = await axios.get(`api/MISC?cat=${selectedCategory.value}`);
+    const response = await axios.get(`/api/MISC?cat=${selectedCategory.value}`);
     if (response.data && response.data.length > 0) {
-      content.value = response.data[0].vaL3 || '';
+      content.value = response.data[0].vaL3 || "";
       currentId.value = response.data[0].id;
     } else {
-      content.value = '';
+      content.value = "";
       currentId.value = null;
     }
   } catch (error) {
-    console.error('Lỗi khi lấy nội dung:', error);
-    showNotification('Không thể tải nội dung. Vui lòng thử lại!', 'error');
-    content.value = '';
+    console.error("Lỗi khi lấy nội dung:", error);
+    showNotification("Không thể tải nội dung. Vui lòng thử lại!", "error");
+    content.value = "";
     currentId.value = null;
   } finally {
     loading.value = false;
@@ -160,24 +246,27 @@ async function saveContent() {
     loading.value = true;
 
     if (currentId.value) {
-      await axios.post(`api/MISC/update/${currentId.value}`, {
-        vaL3: content.value
+      await axios.post(`/api/MISC/update/${currentId.value}`, {
+        vaL3: content.value,
       });
-      showNotification('Cập nhật thành công!');
+      showNotification("Cập nhật thành công!");
     } else {
-      await axios.post('api/MISC', {
+      await axios.post("/api/MISC", {
         cat: selectedCategory.value,
-        val: "",
+        val: selectedCategoryText.value,
         vaL2: "",
         vaL3: content.value,
-        status: "OK"
+        status: "OK",
       });
       await fetchContent();
-      showNotification('Lưu thành công!');
+      showNotification("Lưu thành công!");
     }
   } catch (error) {
-    console.error('Lỗi khi lưu nội dung:', error);
-    showNotification('Có lỗi xảy ra khi lưu nội dung. Vui lòng thử lại!', 'error');
+    console.error("Lỗi khi lưu nội dung:", error);
+    showNotification(
+      "Có lỗi xảy ra khi lưu nội dung. Vui lòng thử lại!",
+      "error"
+    );
   } finally {
     loading.value = false;
   }
@@ -186,11 +275,11 @@ async function saveContent() {
 // Lifecycle
 onMounted(() => {
   fetchContent();
-  window.addEventListener('resize', adjustEditorHeight);
+  window.addEventListener("resize", adjustEditorHeight);
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', adjustEditorHeight);
+  window.removeEventListener("resize", adjustEditorHeight);
 });
 </script>
 
@@ -203,7 +292,8 @@ onBeforeUnmount(() => {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   line-height: 1.6;
   color: #333;
   background-color: #f8f9fa;
@@ -387,7 +477,9 @@ body {
   border-radius: 6px !important;
 }
 
-.tox .tox-toolbar, .tox .tox-toolbar__overflow, .tox .tox-toolbar__primary {
+.tox .tox-toolbar,
+.tox .tox-toolbar__overflow,
+.tox .tox-toolbar__primary {
   background-color: #f9fafb !important;
 }
 
@@ -424,11 +516,11 @@ body {
   .container {
     padding: 16px;
   }
-  
+
   .page-title {
     font-size: 20px;
   }
-  
+
   .btn {
     padding: 8px 16px;
     font-size: 13px;
@@ -440,11 +532,11 @@ body {
     flex-direction: column;
     width: 100%;
   }
-  
+
   .btn {
     width: 100%;
   }
-  
+
   .notification {
     left: 20px;
     right: 20px;

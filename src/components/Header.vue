@@ -20,27 +20,19 @@
       <nav :class="{ open: isMenuOpen }">
         <ul>
           <li><router-link to="/" @click="closeMenu">TRANG CHỦ</router-link></li>
-          <li>
-            <a href="#" @click.prevent="loadContent('VECHUNGTOI'); closeMenu()">
-              VỀ CHÚNG TÔI
-            </a>
-          </li>
-
-          <li><router-link to="/allbrands" @click="closeMenu">THƯƠNG HIỆU</router-link></li>
+          <li><router-link to="/content/VECHUNGTOI">VỀ CHÚNG TÔI</router-link></li>
+<li><router-link to="/allbrands" @click="closeMenu">SẢN PHẨM</router-link></li>
+          
           <li>
             <a href="#" @click.prevent="loadContent('MOTANGANHHANG'); closeMenu()">
               NGÀNH HÀNG
             </a>
           </li>
-          <li><router-link to="/allevents" @click="closeMenu">TIN TỨC</router-link></li>
-          <li>
-            <a href="#" @click.prevent="loadContent('LIENHE'); closeMenu()">LIÊN HỆ</a>
-          </li>
-          <li>
-            <a href="#" @click.prevent="loadContent('HETHONGDAILY'); closeMenu()">
-              HỆ THỐNG ĐẠI LÝ
-            </a>
-          </li>
+          <li><router-link to="/allbrands" @click="closeMenu">NHÃN HIỆU</router-link></li>
+          <!-- <li><router-link to="/allevents" @click="closeMenu">TIN TỨC</router-link></li> -->
+          <li><router-link to="/content/LIENHE">CÔNG THỨC</router-link></li>
+          <!-- <li><router-link to="/content/LIENHE">TUYỂN DỤNG</router-link></li> -->
+          <li><router-link to="/content/HETHONGDAILY">HỆ THỐNG ĐẠI LÝ</router-link></li>
 
           <!-- Nếu chưa đăng nhập -->
           <li v-if="!isLoggedIn">
@@ -64,6 +56,11 @@
               <li>
                 <router-link to="/admin/products" @click="closeUserMenu(); closeMenu()">
                   Nhập sản phẩm
+                </router-link>
+              </li>
+              <li>
+                <router-link to="/admin/productcat" @click="closeUserMenu(); closeMenu()">
+                  Nhập danh mục sản phẩm
                 </router-link>
               </li>
               <li>

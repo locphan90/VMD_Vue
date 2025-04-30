@@ -20,21 +20,51 @@
       <div class="footer-menu">
         <h3>DANH MỤC</h3>
         <ul>
-          <li><a href="#">Chính sách đại lý</a></li>
-          <li><a href="#">Chính sách bảo mật</a></li>
-          <li><a href="#">Chính sách giao nhận hàng</a></li>
-          <li><a href="#">Hỏi đáp đại lý</a></li>
-          <li><a href="#">Chính sách đổi trả</a></li>
+          <li>
+            <router-link to="/content/CHINHSACHDAILY"
+              >Chính sách đại lý</router-link
+            >
+          </li>
+          <li>
+            <router-link to="/content/CHINHSACHBAOMAT"
+              >Chính sách bảo mật</router-link
+            >
+          </li>
+          <li>
+            <router-link to="/content/CHINHSACHGIAONHANHANG"
+              >Chính sách giao nhận hàng</router-link
+            >
+          </li>
+          <li>
+            <router-link to="/content/HOIDAPDAILY">Hỏi đáp đại lý</router-link>
+          </li>
+          <li>
+            <router-link to="/content/CHINHSACHDOITRA"
+              >Chính sách đổi trả</router-link
+            >
+          </li>
         </ul>
       </div>
 
       <div class="footer-menu">
         <h3>HỖ TRỢ KHÁCH HÀNG</h3>
         <ul>
-          <li><a href="#">Liên hệ</a></li>
-          <li><a href="#">Trung tâm hỗ trợ</a></li>
-          <li><a href="#">Hướng dẫn mua hàng</a></li>
-          <li><a href="#">Điều khoản sử dụng</a></li>
+          <li><router-link to="/content/LIENHE">Liên hệ</router-link></li>
+          <li>
+            <router-link to="/content/TRUNGTAMHOTRO"
+              >Trung tâm hỗ trợ</router-link
+            >
+          </li>
+          <li>
+            <router-link to="/content/HUONGDANMUAHANG"
+              >Hướng dẫn mua hàng</router-link
+            >
+          </li>
+          <li>
+            <router-link to="/content/DIEUKHOANSUDUNG"
+              >Điều khoản sử dụng</router-link
+            >
+          </li>
         </ul>
       </div>
     </div>

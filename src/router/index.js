@@ -14,7 +14,8 @@ import DaiLyManager from '../views/Admin/DaiLyManager.vue';
 import EmailManager from '../views/Admin/RegisteredEmails.vue';
 import BannerManager from '../views/Admin/BannerManager.vue';
 import StaticPageManager from '../views/Admin/StaticPageManager.vue';
-
+import ContentDisplay from '../views/ContentDisplay.vue';
+import ProductCat from '../views/Admin/ProductCat.vue';
 const routes = [
   {
     path: '/',
@@ -99,6 +100,18 @@ const routes = [
     path: '/admin/staticpagemanager',
     name: 'StaticPageManager',
     component: StaticPageManager,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/content/:category',
+    name: 'ContentDisplay',
+    component: ContentDisplay,
+    props: true
+  },
+  {
+    path: '/admin/productcat',
+    name: 'ProductCat',
+    component: ProductCat,
     meta: { requiresAuth: true, requiresAdmin: true }
   },
 ];
