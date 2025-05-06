@@ -43,6 +43,11 @@
               >Chính sách đổi trả</router-link
             >
           </li>
+          <li>
+            <router-link to="/tuyendung"
+              >Tuyển dụng</router-link
+            >
+          </li>
         </ul>
       </div>
 

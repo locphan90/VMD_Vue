@@ -18,6 +18,11 @@ import ContentDisplay from '../views/ContentDisplay.vue';
 import ProductCat from '../views/Admin/ProductCat.vue';
 import GeneralView from '../views/GeneralView.vue';
 import ThuongHieu from '../views/BrandView.vue';
+import NhapCongThuc from '../views/Admin/NhapCongThuc.vue';
+import CongThucDisplay from '../views/CongThucDisplay.vue';
+import CongThucDetail from '../views/CongThucDetail.vue';
+import TuyenDung from '../components/TuyenDung.vue';
+import DanhSachTuyenDung from '../views/Admin/DanhSachTuyenDung.vue';
 const routes = [
   {
     path: '/',
@@ -38,6 +43,11 @@ const routes = [
     path: '/allevents',
     name: 'allevent',
     component: AllEvents
+  },
+  {
+    path: '/congthuc',
+    name: 'CongThucDisplay',
+    component: CongThucDisplay
   },
   {
     path: '/admin/products',
@@ -117,14 +127,36 @@ const routes = [
     meta: { requiresAuth: true, requiresAdmin: true }
   },
   {
-    path: '/generalview',
+    path: '/nganhhang/:tennganhhang',
     name: 'GeneralView',
     component: GeneralView
   },
   {
     path: '/thuonghieu/:tenthuonghieu',
-    name: 'thuonghieu',
+    name: 'ThuongHieu',
     component: ThuongHieu
+  },
+  {
+    path: '/admin/nhapcongthuc',
+    name: 'NhapCongThuc',
+    component: NhapCongThuc,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/congthuc/:tencongthuc',
+    name: 'CongThucDetail',
+    component: CongThucDetail
+  },
+  {
+    path: '/tuyendung',
+    name: 'TuyenDung',
+    component: TuyenDung
+  },
+  {
+    path: '/admin/danhsachtuyendung',
+    name: 'DanhSachTuyenDung',
+    component: DanhSachTuyenDung,
+    meta: { requiresAuth: true, requiresAdmin: true }
   },
 ];
 

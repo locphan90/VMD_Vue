@@ -1,6 +1,6 @@
 <template>
   <section class="brands">
-    <h2 class="section-title">THƯƠNG HIỆU</h2>
+    <h2 class="section-title">NHÃN HIỆU</h2>
     <div class="brand-grid">
       <div class="brand-card" v-for="(brand, index) in brands" :key="index">
         <router-link :to="`/thuonghieu/${brand.name}`" class="brand-logo">

@@ -1,7 +1,7 @@
 <template>
   <section class="about">
     <div class="about-image">
-      <img src="#" alt="Laboratory equipment" />
+      <img src="/images/hinhdaidien.png" alt="Laboratory equipment" />
     </div>
     <div class="about-content">
       <h2>VỀ VMD</h2>

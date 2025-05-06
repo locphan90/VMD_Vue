@@ -834,6 +834,12 @@ button:hover {
   background-color: #c0392b;
 }
 
+.edit-btn {
+  background-color: #3498db;
+  color: white;
+  border: none;
+}
+
 .cancel-btn {
   background-color: #7f8c8d;
 }

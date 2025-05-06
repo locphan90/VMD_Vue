@@ -111,9 +111,9 @@
               </div>
             </td>
             <td class="action-buttons">
-              <button @click="editPost(post)" class="btn btn-edit">Sửa</button>
+              <button @click="editPost(post)" class="btn btn-edit">✎</button>
               <button @click="markAsDeleted(post)" class="btn btn-delete">
-                Xóa
+                X
               </button>
             </td>
           </tr>
