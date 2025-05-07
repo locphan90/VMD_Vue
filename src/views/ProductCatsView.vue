@@ -1,5 +1,5 @@
 <template>
-  <div class="brand-page">
+  <div class="brands-products-page">
     <!-- Back Button -->
     <div class="back-button-container">
       <button class="back-button" @click="goBack">
@@ -8,23 +8,18 @@
     </div>
 
     <div class="content-container">
-      <!-- Left Sidebar - Categories -->
-      <div class="categories-sidebar">
-        <!-- Brand Header - Now inside sidebar at top -->
-        <div class="brand-header-sidebar" v-if="brand">
-          <img :src="getFullFtpUrl(brand.vaL2)" :alt="brand.val" class="brand-image" />
-        </div>
-        
-        <h3>Danh mục sản phẩm</h3>
-        <ul class="category-list">
-          <li 
-            v-for="category in categories" 
-            :key="category"
-            :class="{ active: selectedCategory === category }"
-            @click="handleCategoryClick(category)"
+      <!-- Left Sidebar - Brands -->
+      <div class="brands-sidebar">
+        <h3>Thương hiệu</h3>
+        <ul class="brands-list">
+          <li
+            v-for="brand in brands"
+            :key="brand"
+            :class="{ active: selectedBrand === brand }"
+            @click="selectBrand(brand)"
           >
-            {{ category }}
-            <span class="category-indicator"></span>
+            {{ brand }}
+            <span class="brand-indicator"></span>
           </li>
         </ul>
       </div>
@@ -32,7 +27,7 @@
       <!-- Right Content - Products -->
       <div class="products-container">
         <div class="section-header">
-          <h2>{{ brand ? brand.val : 'Sản phẩm' }}</h2>
+          <h2>{{ selectedBrand ? selectedBrand : 'Tất cả sản phẩm' }}</h2>
           <div class="filters">
             <select v-model="sortOption" class="sort-select">
               <option value="price-asc">Giá: Thấp đến cao</option>
@@ -47,7 +42,7 @@
           <div v-for="product in filteredProducts" :key="product.id" class="product-card">
             <router-link :to="`/sanpham/${product.slug}`" class="product-item-link">
               <div class="product-image">
-                <img :src="getFullFtpUrl(product.fileFTP)" :alt="product.tenSP" />
+                <img :src="product.fileFTP" :alt="product.tenSP" />
               </div>
             </router-link>
             <h3>{{ product.tenSP }}</h3>
@@ -60,8 +55,13 @@
           </div>
         </div>
 
+        <!-- Loading state -->
+        <div v-if="loading" class="loading-state">
+          <p>Đang tải dữ liệu...</p>
+        </div>
+
         <!-- Empty State -->
-        <div v-if="filteredProducts.length === 0" class="empty-state">
+        <div v-if="!loading && filteredProducts.length === 0" class="empty-state">
           <p>Không tìm thấy sản phẩm nào phù hợp.</p>
         </div>
       </div>
@@ -70,70 +70,103 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { ref, computed, onMounted, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import axios from "@/utils/axios";
-import getFullFtpUrl from "@/utils/pathHelper";
 
-const route = useRoute();
+// Router
 const router = useRouter();
-const brandCode = ref(route.params.tenthuonghieu || ""); // Lấy mã thương hiệu từ route
+const route = useRoute();
 
 // State
-const brand = ref(null);
 const products = ref([]);
-const categories = ref([]);
-const selectedCategory = ref("Tất cả");
+const brands = ref([]);
+const selectedBrand = ref("");
+const selectedCategory = ref(route.params.tendanhmuc || route.query.category || "");
 const sortOption = ref("newest");
+const loading = ref(false);
 
 // Goback function
 const goBack = () => {
   router.go(-1); // Quay lại trang trước đó
 };
 
-// Handle category click with smooth animation
-const handleCategoryClick = (category) => {
-  selectedCategory.value = category;
-};
-
-// Fetch brand info
-const fetchBrandInfo = async () => {
+// Và đảm bảo hàm fetchProductsByCategory() xử lý dữ liệu tiếng Việt đúng cách:
+const fetchProductsByCategory = async () => {
+  if (!selectedCategory.value) return;
+  loading.value = true;
   try {
-    const response = await axios.get("/api/MISC?cat=THUONGHIEU");
-    const foundBrand = response.data.find(item => item.val === brandCode.value);
-    if (foundBrand) {
-      brand.value = foundBrand;
+    // Sử dụng encodeURIComponent để đảm bảo URL encoding đúng với tiếng Việt
+    const encodedCategory = encodeURIComponent(selectedCategory.value);
+    const response = await axios.get(`/api/sanpham/filter-or?danhMucSP=${encodedCategory}`);
+    
+    // Kiểm tra cấu trúc dữ liệu trả về và log ra để debug
+    console.log("Dữ liệu API trả về:", response);
+    
+    // Kiểm tra xem response.data có phải là mảng không
+    if (Array.isArray(response.data)) {
+      products.value = response.data;
+    } else if (response.data && typeof response.data === 'object') {
+      // Nếu response.data là một object, có thể dữ liệu thực sự nằm trong một property khác
+      // Ví dụ: response.data.items hoặc response.data.products
+      console.log("Cấu trúc response.data:", Object.keys(response.data));
+      
+      // Thử tìm mảng sản phẩm trong các thuộc tính của response.data
+      const possibleArrayProps = ['items', 'products', 'data', 'result', 'results'];
+      for (const prop of possibleArrayProps) {
+        if (Array.isArray(response.data[prop])) {
+          console.log(`Tìm thấy mảng sản phẩm trong response.data.${prop}`);
+          products.value = response.data[prop];
+          break;
+        }
+      }
+      
+      // Nếu vẫn không tìm thấy mảng, gán một mảng rỗng
+      if (!Array.isArray(products.value)) {
+        console.error("Không tìm được mảng sản phẩm trong response");
+        products.value = [];
+      }
+    } else {
+      console.error("Dữ liệu không phải là mảng hoặc object:", response.data);
+      products.value = [];
+    }
+    
+    // Chỉ xử lý brands nếu products.value là mảng
+    if (Array.isArray(products.value)) {
+      // Extract unique brands
+      const uniqueBrands = [...new Set(products.value
+        .filter(product => product && product.status === "OK" && product.showUp === true)
+        .map(product => product.thuongHieu)
+        .filter(brand => brand)) // Filter out null/empty brands
+      ];
+      
+      brands.value = uniqueBrands.sort();
+    } else {
+      brands.value = [];
     }
   } catch (error) {
-    console.error("Lỗi khi tải thông tin thương hiệu:", error);
+    console.error("Lỗi khi tải sản phẩm:", error);
+    console.error("Chi tiết lỗi:", error.response ? error.response.data : error.message);
+    products.value = [];
+    brands.value = [];
+  } finally {
+    loading.value = false;
   }
 };
-
-// Fetch products
-const fetchProducts = async () => {
-  try {
-    const response = await axios.get("/api/sanpham");
-    console.log(response.data);
-    // Lọc sản phẩm theo thương hiệu của trang
-    products.value = response.data.filter(
-      product => product.thuongHieu === brandCode.value && product.status === "OK"
-    );
-    
-    // Extract unique categories
-    const uniqueCategories = [...new Set(products.value.map(p => p.danhMucSP))];
-    categories.value = ["Tất cả", ...uniqueCategories];
-  } catch (error) {
-    console.error("Lỗi khi tải sản phẩm:", error);
-  }
+// Select brand
+const selectBrand = (brand) => {
+  selectedBrand.value = selectedBrand.value === brand ? "" : brand;
 };
 
 // Computed
 const filteredProducts = computed(() => {
-  let result = [...products.value];
+  let result = [...products.value].filter(product => 
+    product.status === "OK" && product.showUp === true
+  );
   
-  // Filter by category
-  if (selectedCategory.value !== "Tất cả") {
-    result = result.filter(p => p.danhMucSP === selectedCategory.value);
+  // Filter by brand if selected
+  if (selectedBrand.value) {
+    result = result.filter(p => p.thuongHieu === selectedBrand.value);
   }
   
   // Sort based on selected option
@@ -148,15 +181,28 @@ const filteredProducts = computed(() => {
   return result;
 });
 
+// Watch for route changes to update category
+watch(
+  [() => route.params.tendanhmuc, () => route.query.category],
+  ([newParamCategory, newQueryCategory]) => {
+    const newCategory = newParamCategory || newQueryCategory;
+    if (newCategory) {
+      selectedCategory.value = newCategory;
+      selectedBrand.value = ""; // Reset selected brand when category changes
+      fetchProductsByCategory();
+    }
+  },
+  { immediate: true }
+);
+
 // Lifecycle
-onMounted(async () => {
-  await fetchBrandInfo();
-  await fetchProducts();
+onMounted(() => {
+  fetchProductsByCategory();
 });
 </script>
 
 <style scoped>
-.brand-page {
+.brands-products-page {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px 15px;
@@ -193,29 +239,13 @@ onMounted(async () => {
   font-size: 16px;
 }
 
-/* Brand header inside sidebar */
-.brand-header-sidebar {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-  padding: 15px 0;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-}
-
-.brand-image {
-  max-height: 100px;
-  max-width: 100%;
-  object-fit: contain;
-}
-
 .content-container {
   display: flex;
   gap: 30px;
 }
 
-/* Categories Sidebar - Improved animations */
-.categories-sidebar {
+/* Brands Sidebar */
+.brands-sidebar {
   flex: 0 0 250px;
   background: #fff;
   border-radius: 8px;
@@ -223,7 +253,7 @@ onMounted(async () => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.categories-sidebar h3 {
+.brands-sidebar h3 {
   margin-bottom: 15px;
   padding-bottom: 10px;
   border-bottom: 1px solid #eee;
@@ -231,14 +261,13 @@ onMounted(async () => {
   color: #333;
 }
 
-.category-list {
+.brands-list {
   list-style: none;
-  font-size: 16px;
   padding: 0;
   margin: 0;
 }
 
-.category-list li {
+.brands-list li {
   position: relative;
   padding: 12px 8px;
   cursor: pointer;
@@ -247,20 +276,20 @@ onMounted(async () => {
   overflow: hidden;
 }
 
-.category-list li:hover {
+.brands-list li:hover {
   color: #e74c3c;
   background-color: #f9f9f9;
   padding-left: 15px;
 }
 
-.category-list li.active {
+.brands-list li.active {
   color: #e74c3c;
   font-weight: bold;
   background-color: rgba(231, 76, 60, 0.05);
   padding-left: 15px;
 }
 
-.category-indicator {
+.brand-indicator {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -270,8 +299,8 @@ onMounted(async () => {
   transition: width 0.3s ease-in-out;
 }
 
-.category-list li:hover .category-indicator,
-.category-list li.active .category-indicator {
+.brands-list li:hover .brand-indicator,
+.brands-list li.active .brand-indicator {
   width: 100%;
 }
 
@@ -392,10 +421,13 @@ onMounted(async () => {
   vertical-align: super;
 }
 
-.empty-state {
+.empty-state, .loading-state {
   text-align: center;
   padding: 40px 0;
   color: #777;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  margin-top: 20px;
 }
 
 /* Responsive */
@@ -404,7 +436,7 @@ onMounted(async () => {
     flex-direction: column;
   }
   
-  .categories-sidebar {
+  .brands-sidebar {
     flex: none;
     width: 100%;
     margin-bottom: 20px;

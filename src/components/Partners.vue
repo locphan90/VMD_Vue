@@ -2,11 +2,21 @@
   <section class="partners">
     <h2 class="section-title">ĐỐI TÁC</h2>
     <div class="partner-grid">
-      <div class="partner-card" v-for="(partner, index) in partners" :key="index">
-        <div class="partner-logo">
-          <img :src="partner.image" :alt="partner.name" @error="handleImageError($event, partner.name)" />
-        </div>
-        <div class="partner-name">{{ partner.name }}</div>
+      <div
+        class="partner-card"
+        v-for="(partner, index) in partners"
+        :key="index"
+      >
+        <a :href="partner.linkweb || '#'" target="_blank" rel="noopener">
+          <div class="partner-logo">
+            <img
+              :src="partner.image"
+              :alt="partner.name"
+              @error="handleImageError($event, partner.name)"
+            />
+          </div>
+          <div class="partner-name">{{ partner.name }}</div>
+        </a>
       </div>
     </div>
   </section>
@@ -35,13 +45,16 @@ export default {
           .map((item) => ({
             image: getFullFtpUrl(item.vaL2),
             name: item.val,
+            linkweb: item.vaL3?.startsWith("http") ? item.vaL3 : `https://${item.vaL3}`,
           }));
       } catch (err) {
         console.error("Lỗi khi tải đối tác:", err);
       }
     },
     handleImageError(event, name) {
-      event.target.src = `https://via.placeholder.com/150?text=${encodeURIComponent(name)}`;
+      event.target.src = `https://via.placeholder.com/150?text=${encodeURIComponent(
+        name
+      )}`;
     },
   },
 };
@@ -64,7 +77,7 @@ export default {
 }
 
 .section-title::after {
-  content: '';
+  content: "";
   display: block;
   width: 50px;
   height: 3px;
@@ -93,6 +106,12 @@ export default {
   text-align: center;
 }
 
+.partner-card:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  background-color: #fdfdfd;
+}
+
 .partner-logo {
   width: 100%;
   height: 70%;
@@ -115,6 +134,17 @@ export default {
   color: #333;
 }
 
+.partner-card a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .partner-grid {
@@ -127,6 +157,5 @@ export default {
     gap: 12px;
   }
 }
-
 </style>
 

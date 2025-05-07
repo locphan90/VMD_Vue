@@ -15,7 +15,7 @@
             />
           </div>
 
-          <div class="thumbnail-container">
+          <div class="thumbnail-container" v-if="hasImages">
             <!-- Hiển thị hình ảnh chính đầu tiên -->
             <div
               class="thumbnail"
@@ -142,7 +142,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, watch } from "vue";
+import { ref, onMounted, nextTick, watch, computed } from "vue";
 import { useRoute } from "vue-router";
 import axios from "@/utils/axios";
 import getFullFtpUrl from "@/utils/pathHelper";
@@ -153,6 +153,11 @@ const selectedImage = ref(null);
 const route = useRoute();
 const activeTab = ref('description'); // Mặc định hiển thị tab chi tiết sản phẩm
 const linkCopied = ref(false);
+
+// Computed property để kiểm tra xem có hình ảnh nào để hiển thị không
+const hasImages = computed(() => {
+  return product.value && (product.value.fileFTP || productImages.value.length > 0);
+});
 
 // Các hàm xử lý chia sẻ mạng xã hội
 const getProductUrl = () => {
@@ -240,10 +245,10 @@ onMounted(async () => {
   // Scroll to top khi component được mount
   window.scrollTo(0, 0);
   
-  const id = route.params.id;
+  const slug = route.params.tensanpham;
   try {
     // Fetch product details
-    const productRes = await axios.get(`/api/sanpham/${id}`);
+    const productRes = await axios.get(`/api/sanpham/${slug}`);
     
     // Kiểm tra và xử lý cấu trúc dữ liệu trả về từ API
     if (productRes.data) {
@@ -265,14 +270,26 @@ onMounted(async () => {
       product.value = productData;
 
       // Mặc định, hiển thị hình ảnh chính
-      selectedImage.value = product.value.fileFTP;
-
-      // Fetch product images
-      const imagesRes = await axios.get(`/api/HinhAnhSanPham/sanpham/${id}`);
-      if (imagesRes.data && Array.isArray(imagesRes.data)) {
-        productImages.value = imagesRes.data;
+      if (productData.fileFTP) {
+        selectedImage.value = productData.fileFTP;
       }
-      console.log(imagesRes.data);
+
+      // Lấy ID sản phẩm từ dữ liệu trả về
+      const productId = productData.id || productData.maSP;
+      
+      // Chỉ fetch hình ảnh phụ nếu có ID sản phẩm
+      if (productId) {
+        try {
+          const imagesRes = await axios.get(`/api/HinhAnhSanPham/sanpham/${productId}`);
+          if (imagesRes.data && Array.isArray(imagesRes.data) && imagesRes.data.length > 0) {
+            productImages.value = imagesRes.data;
+          }
+        } catch (imageErr) {
+          console.error("Lỗi khi tải hình ảnh phụ:", imageErr);
+          // Nếu không thể tải được hình ảnh phụ, vẫn tiếp tục với hình ảnh chính
+        }
+      }
+      
       // Cập nhật meta tags sau khi có dữ liệu sản phẩm
       updateMetaTags();
       
@@ -310,7 +327,7 @@ watch(selectedImage, () => {
 .back-button {
   display: inline-flex;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   background-color: transparent;
   border: none;
   font-size: 16px;
@@ -335,7 +352,7 @@ watch(selectedImage, () => {
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-  padding: 10px;
+  padding: 20px;
   margin-bottom: 20px;
 }
 
@@ -349,17 +366,20 @@ watch(selectedImage, () => {
 
 .main-image-container {
   width: 100%;
+  height: 400px;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 5px;
 }
 
 .main-image {
   width: 100%;
-  max-height: 400px;
+  height: 100%;
   object-fit: contain;
-  border-radius: 8px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
 .thumbnail-container {
@@ -676,8 +696,8 @@ watch(selectedImage, () => {
     padding: 15px;
   }
   
-  .main-image {
-    max-height: 300px;
+  .main-image-container {
+    height: 300px;
   }
   
   .thumbnail {
@@ -697,8 +717,8 @@ watch(selectedImage, () => {
     margin-bottom: 15px;
   }
   
-  .main-image {
-    max-height: 250px;
+  .main-image-container {
+    height: 250px;
   }
   
   .product-title {

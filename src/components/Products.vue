@@ -25,7 +25,7 @@
               <img
                 :src="product.fileFTP"
                 :alt="product.tenSP"
-                @click="goToDetail(product.id)"
+                @click="goToDetail(product.slug)"
               />
             </div>
             <h3>{{ product.tenSP }}</h3>
@@ -58,8 +58,8 @@ import getFullFtpUrl from "@/utils/pathHelper";
 import { useRouter } from "vue-router";
 const router = useRouter();
 
-const goToDetail = (id) => {
-  router.push(`/sanpham/${id}`);
+const goToDetail = (slug) => {
+  router.push(`/sanpham/${slug}`);
 };
 
 const props = defineProps({

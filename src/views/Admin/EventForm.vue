@@ -511,12 +511,12 @@ label {
 }
 
 .btn-primary {
-  background-color: #4caf50;
+  background-color: #e74c3c;
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #45a049;
+  background-color: #c0392b;
 }
 
 .btn-secondary {
@@ -525,7 +525,8 @@ label {
 }
 
 .btn-secondary:hover {
-  background-color: #5a6268;
+  background-color: #5a6268 !important;
+  color: white;
 }
 
 .posts-grid {

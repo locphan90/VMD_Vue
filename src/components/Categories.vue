@@ -8,7 +8,7 @@
           <span>FMCG</span>
         </div>
       </router-link>
-      <router-link to="/nganhhang/me-va-be">
+      <router-link to="/nganhhang/mẹ-&-bé">
         <div class="category-icon animate">
           <img src="/images/mother-day.png" alt="Mẹ & Bé" />
           <span>Mẹ & Bé</span>

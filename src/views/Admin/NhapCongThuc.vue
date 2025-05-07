@@ -444,12 +444,12 @@ export default {
 }
 
 .btn-primary {
-  background-color: #4a90e2;
+  background-color: #e74c3c;
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #3a7bc8;
+  background-color: #c0392b;
 }
 
 .btn-secondary {

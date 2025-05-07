@@ -22,7 +22,6 @@
             </option>
             <option value="HOIDAPDAILY">HỎI ĐÁP ĐẠI LÝ</option>
             <option value="CHINHSACHDOITRA">CHÍNH SÁCH ĐỔI TRẢ</option>
-            <option value="HOTROKHACHHANG">HỖ TRỢ KHÁCH HÀNG</option>
             <option value="TRUNGTAMHOTRO">TRUNG TÂM HỖ TRỢ</option>
             <option value="HUONGDANMUAHANG">HƯỚNG DẪN MUA HÀNG</option>
             <option value="DIEUKHOANSUDUNG">ĐIỀU KHOẢN SỬ DỤNG</option>

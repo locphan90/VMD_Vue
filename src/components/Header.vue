@@ -36,13 +36,13 @@
               <router-link to="/content/VECHUNGTOI">VỀ CHÚNG TÔI</router-link>
             </li>
             <li class="dropdown">
-              <a
-                href="#"
+              <router-link
+                to="/products"
                 @mouseenter="loadProductCategories"
                 @click.prevent="toggleProductMenu"
               >
                 SẢN PHẨM <span class="dropdown-arrow">▼</span>
-              </a>
+              </router-link>
               <ul
                 class="dropdown-menu"
                 :class="{ show: showProductMenu }"
@@ -51,7 +51,7 @@
               >
                 <li v-for="category in productCategories" :key="category.val">
                   <router-link
-                    :to="`/category/${category.val}`"
+                    :to="`/danhmucsp/${category.val}`"
                     @click="
                       closeProductMenu();
                       closeMenu();
@@ -64,15 +64,9 @@
             </li>
 
             <li>
-              <a
-                href="#"
-                @click.prevent="
-                  loadContent('MOTANGANHHANG');
-                  closeMenu();
-                "
+              <router-link to="/nganhhang/fmcg" @click="closeMenu"
+                >NGÀNH HÀNG</router-link
               >
-                NGÀNH HÀNG
-              </a>
             </li>
             <li>
               <router-link to="/allbrands" @click="closeMenu"
@@ -81,11 +75,11 @@
             </li>
             <li><router-link to="/congthuc">CÔNG THỨC</router-link></li>
             <li>
-              <router-link to="/content/HETHONGDAILY"
-                >HỆ THỐNG ĐẠI LÝ</router-link
-              >
+              <router-link to="/content/HETHONGDAILY">KHO - ĐẠI LÝ</router-link>
             </li>
-
+<li>
+              <router-link to="/tintuc">TIN TỨC</router-link>
+            </li>
             <!-- Nếu chưa đăng nhập -->
             <li v-if="!isLoggedIn">
               <a

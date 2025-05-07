@@ -389,6 +389,14 @@ onBeforeUnmount(() => {
   position: relative;
 }
 
+.secondary-banner img {
+  transition: transform 0.3s ease;
+}
+
+.secondary-banner:hover img {
+  transform: scale(1.05);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .slide {

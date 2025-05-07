@@ -6,7 +6,10 @@
     <div class="about-content">
       <h2>VỀ VMD</h2>
       <p>
-        VMD được thành lập năm 2025 với đội ngũ sáng tạo dày dạn kinh nghiệm trong lĩnh vực phát triển sản phẩm tiêu thụ nhanh tại Việt Nam. Với vốn và tầm thế giới, VMD khai công mạng lưới phòng thí nghiệm đạt chuẩn (ISO các loại) và 1 & X nhà máy.
+        Công ty Cổ Phần Phát Triển Thị trường Việt Nam VMD là một trong những doanh nghiệp hàng đầu trong lĩnh vực phân phối, phát triển thị trường, kinh doanh đa ngành và cung cấp các giải pháp toàn diện cho các đối tác trong và ngoài nước. 
+       <br> Với sứ mệnh thúc đẩy tăng trưởng kinh tế và mở rộng thị trường, VMD không ngừng nỗ lực để mang đến những dịch vụ chất lượng cao, đóng góp tích cực vào sự phát triển bền vững của nền kinh tế Việt Nam và khu vực
+        Lĩnh vực hoạt động chính<br> VMD hoạt động đa ngành với các lĩnh vực trọng tâm bao gồm:... 
+        <router-link to="/content/VECHUNGTOI">Xem thêm</router-link>
       </p>
     </div>
   </section>

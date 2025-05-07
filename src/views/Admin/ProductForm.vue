@@ -3,7 +3,7 @@
     <h2>Nhập sản phẩm</h2>
     <form @submit.prevent="handleSubmit">
       <div class="form-group">
-        <label>Loại:</label>
+        <label>Mới/Nổi bật</label>
         <select v-model="product.cat">
           <option value="MOI">Mới</option>
           <option value="NOIBAT">Nổi bật</option>
@@ -46,12 +46,13 @@
         />
       </div>
       <div class="form-group">
-        <label>Phân loại:</label>
+        <label>Trạng thái:</label>
         <select v-model="product.loai">
-          <option value="New">New</option>
-          <option value="Sale">Sale</option>
+          <option value="New">Còn hàng</option>
+          <option value="Sale">Hết hàng</option>
           <option value="Hot">Hot</option>
           <option value="Pre-order">Pre-order</option>
+          <option value="KhuyenMai">Khuyến mãi</option>
         </select>
       </div>
 

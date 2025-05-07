@@ -7,7 +7,7 @@
         :key="category.name"
         class="category-item"
         :class="{ active: selectedIndustry === category.name }"
-        @click="selectIndustry(category.name)"
+        @click="navigateToIndustry(category.name)"
       >
         <img :src="category.image" :alt="category.name" />
         <span>{{ category.name }}</span>
@@ -34,6 +34,7 @@
     <div class="main-content">
       <!-- Left Sidebar - Tree Structure -->
       <div class="sidebar">
+        <h3>Danh mục sản phẩm</h3>
         <div class="tree-view">
           <div
             v-for="category in filteredCategories"
@@ -134,9 +135,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import axios from "@/utils/axios";
 import getFullFtpUrl from "@/utils/pathHelper";
+import { useRouter, useRoute } from "vue-router";
+
+// Router
+const router = useRouter();
+const route = useRoute();
 
 // State
 const products = ref([]);
@@ -179,6 +185,30 @@ const fetchProducts = async () => {
     console.error("Lỗi khi tải sản phẩm:", error);
   }
 };
+
+// Watch for route changes
+watch(
+  () => route.params.tennganhhang,
+  (newIndustry) => {
+    if (newIndustry) {
+      // Find matching category, case-insensitive and URL-friendly comparison
+      const industry = categories.find(
+        (cat) => 
+          cat.name.toLowerCase().replace(/\s+/g, "-") === 
+          newIndustry.toLowerCase().replace(/\s+/g, "-")
+      );
+      
+      if (industry) {
+        selectedIndustry.value = industry.name;
+        selectedCategory.value = "";
+        selectedBrand.value = "";
+        expandedCategories.value = [];
+        searchQuery.value = "";
+      }
+    }
+  },
+  { immediate: true }
+);
 
 // Filter products by selected industry
 const productsByIndustry = computed(() => {
@@ -240,12 +270,10 @@ const displayProducts = computed(() => {
 });
 
 // Actions
-const selectIndustry = (industry) => {
-  selectedIndustry.value = industry;
-  selectedCategory.value = "";
-  selectedBrand.value = "";
-  expandedCategories.value = [];
-  searchQuery.value = "";
+const navigateToIndustry = (industry) => {
+  // Convert industry name to URL-friendly format
+  const urlFriendlyName = industry.toLowerCase().replace(/\s+/g, "-");
+  router.push(`/nganhhang/${urlFriendlyName}`);
 };
 
 const toggleCategory = (category) => {
@@ -298,8 +326,13 @@ const clearSearch = () => {
 // Lifecycle hooks
 onMounted(() => {
   fetchProducts();
-  // Set default industry
-  selectIndustry("FMCG");
+  
+  // Check if route already has an industry parameter
+  const industry = route.params.tennganhhang;
+  if (!industry) {
+    // Set default industry if no route parameter exists
+    navigateToIndustry("FMCG");
+  }
 });
 </script>
 
@@ -358,62 +391,131 @@ onMounted(() => {
   margin-top: 10px;
 }
 
-/* Sidebar Tree View */
+/* ------- Sidebar Tree View ------- */
 .sidebar {
   width: 250px;
   flex-shrink: 0;
-  border-right: 1px solid #eee;
+  border-right: none;
   padding-right: 20px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .tree-view {
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .tree-item {
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
+/* Tiêu đề danh mục sản phẩm */
+.sidebar h3 {
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 18px;
+  color: #333;
+}
+
+/* Category item styling - giống form 1 */
 .category-tree-main {
-  padding: 8px 10px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
+  position: relative;
+  padding: 12px 8px;
   cursor: pointer;
-  font-weight: 500;
+  border-bottom: 1px solid #f5f5f5;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow: hidden;
+  background-color: transparent;
+  border-radius: 0;
+  font-weight: normal;
   display: flex;
   align-items: center;
-  transition: all 0.2s;
 }
 
 .category-tree-main i {
   margin-right: 8px;
   font-size: 12px;
+  transition: transform 0.3s ease;
+}
+
+/* Hiệu ứng hover giống form 1 */
+.category-tree-main:hover {
+  color: #e74c3c;
+  background-color: #f9f9f9;
+  padding-left: 15px;
 }
 
 .category-tree-main.active {
-  background-color: #e0e0e0;
+  color: #e74c3c;
+  font-weight: bold;
+  background-color: rgba(231, 76, 60, 0.05);
+  padding-left: 15px;
 }
 
+/* Thêm indicator line (đường kẻ đỏ) khi hover và active như form 1 */
+.category-tree-main::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+  background-color: #e74c3c;
+  transition: width 0.3s ease-in-out;
+}
+
+.category-tree-main:hover::after,
+.category-tree-main.active::after {
+  width: 100%;
+}
+
+/* ------- Brands list styling ------- */
 .brands-list {
   margin-left: 15px;
   margin-top: 5px;
 }
 
 .brand-tree-item {
-  padding: 6px 10px;
-  margin-bottom: 4px;
+  position: relative;
+  padding: 12px 8px;
   cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s;
+  border-bottom: 1px solid #f5f5f5;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow: hidden;
+  border-radius: 0;
 }
 
 .brand-tree-item:hover {
-  background-color: #f0f0f0;
+  color: #e74c3c;
+  background-color: #f9f9f9;
+  padding-left: 15px;
 }
 
 .brand-tree-item.active {
-  background-color: #e0e0e0;
-  font-weight: 500;
+  color: #e74c3c;
+  font-weight: bold;
+  background-color: rgba(231, 76, 60, 0.05);
+  padding-left: 15px;
+}
+
+/* Thêm indicator line (đường kẻ đỏ) cho brands */
+.brand-tree-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+  background-color: #e74c3c;
+  transition: width 0.3s ease-in-out;
+}
+
+.brand-tree-item:hover::after,
+.brand-tree-item.active::after {
+  width: 100%;
 }
 
 /* Products Grid */
@@ -431,8 +533,8 @@ onMounted(() => {
 
 .products-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
 }
 
 .no-products {
@@ -446,18 +548,16 @@ onMounted(() => {
 /* Product Card Styling (copied from the provided example) */
 .product-card {
   width: 100%;
-  max-width: 228px;
+  max-width: none;
   height: auto;
-  padding: 8px;
-  margin: 0 auto;
+  padding: 10px;
+  margin: 0;
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s, box-shadow 0.3s;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              box-shadow 0.3s;
 }
 
 .product-card:hover {
@@ -517,18 +617,12 @@ onMounted(() => {
   .main-content {
     flex-direction: column;
   }
-
+  
   .sidebar {
+    flex: none;
     width: 100%;
-    border-right: none;
-    border-bottom: 1px solid #eee;
-    padding-right: 0;
-    padding-bottom: 15px;
-    margin-bottom: 15px;
-  }
-
-  .brands-list {
-    margin-left: 20px;
+    margin-bottom: 20px;
+    border-bottom: none;
   }
 }
 
@@ -663,12 +757,16 @@ onMounted(() => {
   }
 
   .products-container {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .product-card {
     width: 100%;
+  }
+}
+@media (max-width: 480px) {
+  .products-container {
+    grid-template-columns: 1fr;
   }
 }
 </style>

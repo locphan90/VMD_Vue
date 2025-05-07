@@ -3,7 +3,7 @@
     <h2 class="section-title">NHÃN HIỆU</h2>
     <div class="brand-grid">
       <div class="brand-card" v-for="(brand, index) in brands" :key="index">
-        <router-link :to="`/thuonghieu/${brand.name}`" class="brand-logo">
+        <router-link :to="`/nhanhieu/${brand.name}`" class="brand-logo">
           <img
             :src="brand.image"
             :alt="brand.name"
@@ -41,7 +41,7 @@ export default {
             name: item.val,
           }));
       } catch (err) {
-        console.error("Lỗi khi tải thương hiệu:", err);
+        console.error("Lỗi khi tải nhãn hiệu:", err);
       }
     },
     handleImageError(event, name) {
@@ -96,6 +96,11 @@ export default {
   align-items: center;
   justify-content: center;
   text-align: center;
+}
+.brand-card:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  background-color: #fdfdfd;
 }
 
 .brand-logo {

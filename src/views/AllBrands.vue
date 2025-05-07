@@ -1,6 +1,6 @@
 <template>
   <div class="brands-container">
-    <h2 class="brands-title">Thương Hiệu</h2>
+    <h2 class="brands-title">Nhãn Hiệu</h2>
 
     <div v-if="loading" class="loading">
       <p>Đang tải dữ liệu...</p>
@@ -9,17 +9,19 @@
     <div v-else-if="error" class="error">
       <p>{{ error }}</p>
     </div>
-
     <div v-else class="brands-grid">
       <div v-for="brand in brands" :key="brand.id" class="brand-item">
-        <div class="brand-logo-container">
-          <img
-            :src="getImageUrl(brand.vaL2)"
-            :alt="brand.val"
-            class="brand-logo"
-            @error="handleImageError($event, brand.val)"
-          />
-        </div>
+        <router-link :to="`/nhanhieu/${brand.val}`">
+          <div class="brand-logo-container">
+            <img
+              :src="getImageUrl(brand.vaL2)"
+              :alt="brand.val"
+              class="brand-logo"
+              @error="handleImageError($event, brand.val)"
+            />
+          </div>
+        </router-link>
+
         <div class="brand-name">{{ brand.val }}</div>
       </div>
     </div>
@@ -45,7 +47,7 @@ const fetchBrands = async () => {
 
     brands.value = response.data.filter((brand) => brand.status === "OK");
   } catch (err) {
-    error.value = "Không thể tải dữ liệu thương hiệu: " + err.message;
+    error.value = "Không thể tải dữ liệu nhãn hiệu: " + err.message;
     console.error("Error fetching brands:", err);
   } finally {
     loading.value = false;

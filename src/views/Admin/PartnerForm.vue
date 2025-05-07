@@ -18,6 +18,16 @@
         <input id="partnerFile" type="file" @change="handleFileChange" />
       </div>
 
+      <div class="form-group">
+        <label for="partnerName">Link web đối tác</label>
+        <input
+          id="partnerWeb"
+          v-model="partnerWeb"
+          type="text"
+          placeholder="Nhập web đối tác"
+        />
+      </div>
+
       <button class="btn-save" @click="handleSubmit">Lưu</button>
     </div>
 
@@ -37,25 +47,23 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from '@/utils/axios';
+import axios from "@/utils/axios";
 import getFullFtpUrl from "@/utils/pathHelper";
 
 const partnerName = ref("");
+const partnerWeb = ref("");
 const selectedFile = ref(null);
 const partnerList = ref([]);
 
 const fetchPartners = async () => {
   try {
-    const res = await axios.get(
-      "/api/MISC?cat=DOITAC"
-    );
+    const res = await axios.get("/api/MISC?cat=DOITAC");
     partnerList.value = res.data
       .filter((item) => item.status === "OK")
       .map((item) => ({
         ...item,
         val2: getFullFtpUrl(item.vaL2),
       }));
-
   } catch (err) {
     console.error("Lỗi tải đối tác:", err);
   }
@@ -87,12 +95,14 @@ const handleSubmit = async () => {
       cat: "DOITAC",
       val: partnerName.value,
       val2: fileUrl,
+      val3: partnerWeb.value,
     };
 
     await axios.post("/api/MISC", postData);
     await fetchPartners();
 
     partnerName.value = "";
+    partnerWeb.value="";
     selectedFile.value = null;
     alert("Lưu đối tác thành công!");
   } catch (error) {

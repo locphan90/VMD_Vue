@@ -17,12 +17,13 @@ import StaticPageManager from '../views/Admin/StaticPageManager.vue';
 import ContentDisplay from '../views/ContentDisplay.vue';
 import ProductCat from '../views/Admin/ProductCat.vue';
 import GeneralView from '../views/GeneralView.vue';
-import ThuongHieu from '../views/BrandView.vue';
+import NhanHieu from '../views/BrandView.vue';
 import NhapCongThuc from '../views/Admin/NhapCongThuc.vue';
 import CongThucDisplay from '../views/CongThucDisplay.vue';
 import CongThucDetail from '../views/CongThucDetail.vue';
 import TuyenDung from '../components/TuyenDung.vue';
 import DanhSachTuyenDung from '../views/Admin/DanhSachTuyenDung.vue';
+import DanhMucSP from '../views/ProductCatsView.vue';
 const routes = [
   {
     path: '/',
@@ -40,8 +41,8 @@ const routes = [
     component: AllBrands
   },
   {
-    path: '/allevents',
-    name: 'allevent',
+    path: '/tintuc',
+    name: 'allevents',
     component: AllEvents
   },
   {
@@ -97,7 +98,7 @@ const routes = [
   },
   // routes.js
   {
-    path: '/sanpham/:id',
+    path: '/sanpham/:tensanpham',
     name: 'ProductDetail',
     component: ProductDetail,
     props: true
@@ -132,9 +133,9 @@ const routes = [
     component: GeneralView
   },
   {
-    path: '/thuonghieu/:tenthuonghieu',
-    name: 'ThuongHieu',
-    component: ThuongHieu
+    path: '/nhanhieu/:tenthuonghieu',
+    name: 'nhanhieu',
+    component: NhanHieu
   },
   {
     path: '/admin/nhapcongthuc',
@@ -157,6 +158,11 @@ const routes = [
     name: 'DanhSachTuyenDung',
     component: DanhSachTuyenDung,
     meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/danhmucsp/:tendanhmuc',
+    name: 'DanhMucSP',
+    component: DanhMucSP
   },
 ];
 
