@@ -11,13 +11,13 @@
       <div class="content-header">
         <h1>{{ title }}</h1>
       </div>
-      <div class="content-body" v-html="content"></div>
+      <div class="content-body tinymce-content" v-html="content"></div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import axios from "/src/utils/axios";
 
 // nhận props từ ngoài vào
@@ -34,6 +34,18 @@ const content = ref('');
 const loading = ref(true);
 const error = ref(null);
 
+// Hàm xử lý nội dung từ TinyMCE trước khi hiển thị
+function processContent(htmlContent) {
+  if (!htmlContent) return '';
+  
+  // Đảm bảo các đường dẫn tương đối được xử lý đúng nếu cần
+  // Xử lý các ký tự đặc biệt nếu cần
+  let processedContent = htmlContent
+    .replace(/&nbsp;/g, ' ');
+    
+  return processedContent;
+}
+
 // hàm lấy nội dung
 async function fetchContent(category) {
   loading.value = true;
@@ -48,7 +60,8 @@ async function fetchContent(category) {
     if (Array.isArray(items) && items.length > 0 && items[0].status === "OK") {
       const item = items[0]; // lấy phần tử đầu tiên
       title.value = item.val;
-      content.value = item.vaL3; // Nội dung TinyMCE
+      // Xử lý nội dung trước khi gán vào content
+      content.value = processContent(item.vaL3); // Nội dung TinyMCE
     } else {
       error.value = "Không thể tải nội dung";
     }
@@ -70,9 +83,108 @@ watch(
   },
   { immediate: true } // chạy luôn lần đầu
 );
+
+// Load CSS cho TinyMCE content nếu cần
+onMounted(() => {
+  // Nếu bạn có file CSS riêng cho TinyMCE, có thể load ở đây
+  // Hoặc đã được import trong main.js/main.ts của ứng dụng
+})
 </script>
 
+<style>
+/* Sử dụng style không scoped để các quy tắc CSS 
+   có thể áp dụng cho nội dung được render qua v-html */
+.tinymce-content {
+  /* Định dạng chung */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  line-height: 1.6;
+  color: #333;
+}
 
+/* Định dạng cho hình ảnh */
+.tinymce-content img {
+  max-width: 100%;
+  height: auto;
+  margin: 10px 0;
+}
+
+/* Định dạng cho bảng */
+.tinymce-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 15px 0;
+}
+
+.tinymce-content table td,
+.tinymce-content table th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.tinymce-content table th {
+  background-color: #f2f2f2;
+  text-align: left;
+}
+
+/* Định dạng cho danh sách */
+.tinymce-content ul,
+.tinymce-content ol {
+  padding-left: 20px;
+  margin: 10px 0;
+}
+
+/* Định dạng cho các phần tử văn bản */
+.tinymce-content p {
+  margin: 10px 0;
+}
+
+.tinymce-content h1,
+.tinymce-content h2,
+.tinymce-content h3,
+.tinymce-content h4,
+.tinymce-content h5,
+.tinymce-content h6 {
+  margin: 15px 0 10px 0;
+  line-height: 1.3;
+}
+
+/* Định dạng cho các liên kết */
+.tinymce-content a {
+  color: #0066cc;
+  text-decoration: underline;
+}
+
+.tinymce-content a:hover {
+  color: #004080;
+}
+
+/* Định dạng cho các phần tử định dạng văn bản */
+.tinymce-content strong, 
+.tinymce-content b {
+  font-weight: bold;
+}
+
+.tinymce-content em, 
+.tinymce-content i {
+  font-style: italic;
+}
+
+.tinymce-content blockquote {
+  border-left: 3px solid #ccc;
+  margin: 15px 0;
+  padding: 5px 15px;
+  color: #666;
+}
+
+/* Định dạng cho mã nguồn */
+.tinymce-content pre,
+.tinymce-content code {
+  background-color: #f5f5f5;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+</style>
 
 <style scoped>
 .content-container {
@@ -92,10 +204,6 @@ watch(
   font-size: 28px;
   color: #333;
   margin: 0;
-}
-
-.content-body {
-  line-height: 1.6;
 }
 
 .loading, .error {

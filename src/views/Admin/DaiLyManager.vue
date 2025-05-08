@@ -2,49 +2,79 @@
   <div class="manager-wrapper">
     <h2>Danh sách đăng ký Đại lý (Chờ duyệt)</h2>
 
-    <div class="grid">
-      <div class="grid-header">
-        <span>Họ tên</span>
-        <span>Email</span>
-        <span>SĐT</span>
-        <span>Địa chỉ</span>
-        <span>Nội dung</span>
-        <span>Hành động</span>
-      </div>
-
-      <div class="grid-row" v-for="item in daiLyListChoDuyet" :key="item.id">
-        <span>{{ item.hoTen }}</span>
-        <span>{{ item.email }}</span>
-        <span>{{ item.phone }}</span>
-        <span>{{ item.address }}</span>
-        <span>{{ item.noiDung }}</span>
-        <span class="actions">
+    <!-- Hiển thị dạng thẻ (card) cho màn hình điện thoại -->
+    <div class="card-container">
+      <div class="agent-card" v-for="item in daiLyListChoDuyet" :key="item.id">
+        <div class="card-header">
+          <h3>{{ item.hoTen }}</h3>
+          <div class="status-badge pending">Chờ duyệt</div>
+        </div>
+        <div class="card-content">
+          <div class="info-row">
+            <span class="label">Email:</span>
+            <span class="value">{{ item.email }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">SĐT:</span>
+            <span class="value">{{ item.phone }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Địa chỉ:</span>
+            <span class="value">{{ item.address }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Ngành:</span>
+            <span class="value">{{ item.nganh || 'Chưa cập nhật' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Nội dung:</span>
+            <span class="value">{{ item.noiDung }}</span>
+          </div>
+        </div>
+        <div class="card-actions">
           <button class="btn-accept" @click="updateStatus(item.id, 'OK')">Duyệt</button>
           <button class="btn-reject" @click="updateStatus(item.id, 'XX')">Không duyệt</button>
-        </span>
+        </div>
       </div>
     </div>
 
-    <!-- Lưới đã duyệt hoặc không duyệt -->
+    <!-- Danh sách đã xử lý -->
     <h2 style="margin-top: 40px;">Danh sách Đại lý đã xử lý</h2>
 
-    <div class="grid">
-      <div class="grid-header">
-        <span>Họ tên</span>
-        <span>Email</span>
-        <span>SĐT</span>
-        <span>Địa chỉ</span>
-        <span>Người duyệt</span>
-        <span>Ngày duyệt</span>
-      </div>
-
-      <div class="grid-row" v-for="item in daiLyListDaXuLy" :key="item.id">
-        <span>{{ item.hoTen }}</span>
-        <span>{{ item.email }}</span>
-        <span>{{ item.phone }}</span>
-        <span>{{ item.address }}</span>
-        <span>{{ getUserName(item.nguoiDuyet) }}</span>
-        <span>{{ formatDate(item.ngayDuyet) }}</span>
+    <div class="card-container">
+      <div class="agent-card" v-for="item in daiLyListDaXuLy" :key="item.id">
+        <div class="card-header">
+          <h3>{{ item.hoTen }}</h3>
+          <div class="status-badge" :class="item.status === 'OK' ? 'approved' : 'rejected'">
+            {{ item.status === 'OK' ? 'Đã duyệt' : 'Không duyệt' }}
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="info-row">
+            <span class="label">Email:</span>
+            <span class="value">{{ item.email }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">SĐT:</span>
+            <span class="value">{{ item.phone }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Địa chỉ:</span>
+            <span class="value">{{ item.address }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Ngành:</span>
+            <span class="value">{{ item.nganh || 'Chưa cập nhật' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Người duyệt:</span>
+            <span class="value">{{ getUserName(item.nguoiDuyet) }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Ngày duyệt:</span>
+            <span class="value">{{ formatDate(item.ngayDuyet) }}</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -120,61 +150,117 @@ onMounted(() => {
 <style scoped>
 .manager-wrapper {
   max-width: 1100px;
-  margin: 40px auto;
+  margin: 20px auto;
   background: #fff;
-  padding: 20px;
+  padding: 15px;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 h2 {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   color: #2c3e50;
+  font-size: 1.5rem;
 }
 
-.grid {
+.card-container {
   display: flex;
-  flex-direction: column;
-  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
-.grid-header,
-.grid-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-  gap: 10px;
+.agent-card {
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.card-header {
+  background: #f2f2f2;
+  padding: 12px 15px;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
 }
 
-.grid-header {
-  font-weight: bold;
-  background-color: #f2f2f2;
+.card-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
-.actions {
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: white;
+}
+
+.status-badge.pending {
+  background-color: #f39c12;
+}
+
+.status-badge.approved {
+  background-color: #2ecc71;
+}
+
+.status-badge.rejected {
+  background-color: #e74c3c;
+}
+
+.card-content {
+  padding: 15px;
+}
+
+.info-row {
   display: flex;
-  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px dashed #eee;
+  flex-direction: column;
+}
+
+.label {
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.value {
+  color: #333;
+  word-break: break-word;
+}
+
+.card-actions {
+  display: flex;
+  padding: 12px 15px;
+  background: #efefef;
+  gap: 10px;
+  justify-content: flex-end;
 }
 
 .btn-accept {
-  padding: 6px 10px;
+  padding: 8px 15px;
   background: #2ecc71;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-weight: 500;
 }
 
 .btn-reject {
-  padding: 6px 10px;
+  padding: 8px 15px;
   background: #e74c3c;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-weight: 500;
 }
 
 .btn-accept:hover {
@@ -184,6 +270,35 @@ h2 {
 .btn-reject:hover {
   background: #c0392b;
 }
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+  .card-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .info-row {
+    flex-direction: row;
+  }
+  
+  .label {
+    width: 100px;
+    margin-bottom: 0;
+  }
+  
+  .value {
+    flex: 1;
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 .scroll-target {
   margin-top: 170px; /* đúng với chiều cao header */
 }

@@ -6,27 +6,31 @@
         <label>Họ tên</label>
         <input type="text" v-model="form.HoTen" required />
       </div>
-
       <div class="form-group">
         <label>Email</label>
         <input type="email" v-model="form.Email" required />
       </div>
-
       <div class="form-group">
         <label>Số điện thoại</label>
         <input type="text" v-model="form.Phone" required />
       </div>
-
       <div class="form-group">
         <label>Địa chỉ</label>
         <input type="text" v-model="form.Address" required />
       </div>
-
+      <div class="form-group">
+        <label>Ngành:</label>
+        <select v-model="form.nganh">
+          <option value="FMCG">FMCG</option>
+          <option value="Mẹ & Bé">Mẹ & Bé</option>
+          <option value="HealthCare">HealthCare</option>
+          <option value="Industry">Industry</option>
+        </select>
+      </div>
       <div class="form-group">
         <label>Nội dung đăng ký</label>
         <textarea v-model="form.NoiDung" rows="4"></textarea>
       </div>
-
       <button type="submit" class="btn-submit">Gửi đăng ký</button>
     </form>
   </div>
@@ -41,6 +45,7 @@ const form = ref({
   Email: "",
   Phone: "",
   Address: "",
+  Nganh: "", // Đổi tên biến để đồng nhất
   NoiDung: "",
 });
 
@@ -52,13 +57,14 @@ const handleSubmit = async () => {
       Status: "QQ", // trạng thái chờ duyệt
     };
     console.log(postData);
-    await axios.post("https://localhost:7210/api/DaiLy", postData);
+    await axios.post("/api/DaiLy", postData);
     alert("Đăng ký đại lý thành công! Chúng tôi sẽ liên hệ với bạn sớm.");
     form.value = {
       HoTen: "",
       Email: "",
       Phone: "",
       Address: "",
+      Nganh: "",
       NoiDung: "",
     };
   } catch (err) {
@@ -96,7 +102,8 @@ label {
 }
 
 input,
-textarea {
+textarea,
+select {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;

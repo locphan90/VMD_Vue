@@ -58,7 +58,7 @@
 
           <div class="product-details">
             <div class="detail-item">
-              <span class="detail-label">Loại:</span>
+              <span class="detail-label">Tình trạng:</span>
               <span class="detail-value">{{ product.loai }}</span>
             </div>
 
@@ -123,7 +123,7 @@
           <!-- Product Description Tab -->
           <div v-if="activeTab === 'description'" class="tab-pane">
             <div
-              class="description-content"
+              class="description-content tinymce-content"
               v-html="product.chiTietSP || 'Chưa có chi tiết'"
             ></div>
           </div>
@@ -131,7 +131,7 @@
           <!-- Usage Guide Tab -->
           <div v-if="activeTab === 'guide'" class="tab-pane">
             <div
-              class="guide-content"
+              class="guide-content tinymce-content"
               v-html="product.huongDanSD || 'Chưa có hướng dẫn sử dụng'"
             ></div>
           </div>
@@ -261,7 +261,8 @@ onMounted(async () => {
         // Nếu không, giả sử dữ liệu trả về trực tiếp là sản phẩm
         productData = productRes.data;
       }
-      
+      console.log("OK");
+      console.log(productData);
       // Đảm bảo đường dẫn hình ảnh đầy đủ
       if (productData.fileFTP && !productData.fileFTP.startsWith('http')) {
         productData.fileFTP = getFullFtpUrl(productData.fileFTP);
@@ -271,7 +272,7 @@ onMounted(async () => {
 
       // Mặc định, hiển thị hình ảnh chính
       if (productData.fileFTP) {
-        selectedImage.value = productData.fileFTP;
+        selectedImage.value = getFullFtpUrl(productData.fileFTP);
       }
 
       // Lấy ID sản phẩm từ dữ liệu trả về
@@ -308,6 +309,102 @@ watch(selectedImage, () => {
   updateMetaTags();
 });
 </script>
+
+<style>
+/* Styles for TinyMCE Content - IMPORTANT: This must be global, not scoped */
+.tinymce-content {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  word-break: break-word;
+}
+
+/* Fix for bullet points - explicitly styling the list items */
+.tinymce-content ul {
+  list-style-type: disc !important;
+  padding-left: 2em !important;
+  margin: 1em 0 !important;
+}
+
+.tinymce-content ol {
+  list-style-type: decimal !important;
+  padding-left: 2em !important;
+  margin: 1em 0 !important;
+}
+
+.tinymce-content ul li, 
+.tinymce-content ol li {
+  display: list-item !important;
+  margin-bottom: 0.5em !important;
+}
+
+/* Ensure proper nested lists */
+.tinymce-content ul ul,
+.tinymce-content ol ol,
+.tinymce-content ul ol,
+.tinymce-content ol ul {
+  margin: 0.5em 0 !important;
+}
+
+.tinymce-content ul ul {
+  list-style-type: circle !important;
+}
+
+.tinymce-content ul ul ul {
+  list-style-type: square !important;
+}
+
+/* Fix for blockquotes */
+.tinymce-content blockquote {
+  border-left: 4px solid #3498db;
+  padding: 0.8em 1.2em;
+  margin: 1.2em 0;
+  background-color: #f8f9fa;
+  color: #455a64;
+}
+
+/* Fix for headings */
+.tinymce-content h1,
+.tinymce-content h2,
+.tinymce-content h3,
+.tinymce-content h4,
+.tinymce-content h5,
+.tinymce-content h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+  color: #2c3e50;
+  line-height: 1.4;
+}
+
+/* Fix for images */
+.tinymce-content img {
+  max-width: 100%;
+  height: auto;
+  margin: 1em auto;
+  display: block;
+}
+
+/* Fix for tables */
+.tinymce-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5em 0;
+}
+
+.tinymce-content table th,
+.tinymce-content table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.tinymce-content table th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #f5f7fa;
+}
+</style>
 
 <style scoped>
 .product-detail-container {
@@ -612,33 +709,18 @@ watch(selectedImage, () => {
 }
 
 .tabs-content {
-  padding: 20px;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 0 0 12px 12px;
 }
 
 .tab-pane {
   line-height: 1.7;
   color: #555;
-}
-
-.description-content,
-.guide-content {
-  word-break: break-word;
-  overflow-wrap: break-word;
-}
-
-/* Make images responsive */
-.description-content img,
-.guide-content img {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Make embedded tables responsive */
-.description-content table,
-.guide-content table {
-  max-width: 100%;
-  overflow-x: auto;
-  display: block;
+  background-color: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+  padding: 0.5em;
 }
 
 @media (max-width: 1200px) {
@@ -679,8 +761,8 @@ watch(selectedImage, () => {
     margin-bottom: 2px;
   }
   
-  .product-tabs {
-    padding: 15px;
+  .tabs-content {
+    padding: 20px;
   }
   
   .tabs-header {
@@ -690,10 +772,6 @@ watch(selectedImage, () => {
   .tab-button {
     padding: 12px 15px;
     font-size: 14px;
-  }
-  
-  .tabs-content {
-    padding: 15px;
   }
   
   .main-image-container {
@@ -744,6 +822,10 @@ watch(selectedImage, () => {
   .tab-button {
     padding: 10px;
     font-size: 13px;
+  }
+  
+  .tabs-content {
+    padding: 15px;
   }
 }
 </style>

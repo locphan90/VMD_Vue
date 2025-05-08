@@ -1,5 +1,12 @@
 <template>
   <div class="cong-thuc-container">
+    <!-- Nút quay lại -->
+    <div class="back-button-container">
+      <button class="back-button" @click="goBack">
+        <span class="back-icon">&#8592;</span> Quay lại
+      </button>
+    </div>
+
     <!-- Phần hiển thị hình ảnh và tên công thức -->
     <div class="header-section">
       <div class="image-container">
@@ -47,11 +54,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import axios from "@/utils/axios";
 import getFullFtpUrl from "@/utils/pathHelper";
 
 const route = useRoute();
+const router = useRouter();
 
 const congThuc = ref({
   id: 0,
@@ -91,9 +99,13 @@ const fetchCongThuc = async () => {
 
 const getImageUrl = (filePath) => {
   if (filePath && filePath.startsWith("/httpdocs/")) {
-    return getFullFtpUrl(filePath) ;
+    return getFullFtpUrl(filePath);
   }
   return filePath;
+};
+
+const goBack = () => {
+  router.back();
 };
 
 onMounted(() => {
@@ -108,6 +120,33 @@ onMounted(() => {
   margin: 0 auto;
   padding: 20px;
   font-family: Arial, sans-serif;
+}
+
+.back-button-container {
+  margin-bottom: 20px;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: #f5f5f5;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: #e0e0e0;
+}
+
+.back-icon {
+  margin-right: 8px;
+  font-size: 16px;
 }
 
 .header-section {

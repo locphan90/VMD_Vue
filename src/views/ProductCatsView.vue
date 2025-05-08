@@ -42,7 +42,7 @@
           <div v-for="product in filteredProducts" :key="product.id" class="product-card">
             <router-link :to="`/sanpham/${product.slug}`" class="product-item-link">
               <div class="product-image">
-                <img :src="product.fileFTP" :alt="product.tenSP" />
+                <img :src="getFullFtpUrl(product.fileFTP)" :alt="product.tenSP" />
               </div>
             </router-link>
             <h3>{{ product.tenSP }}</h3>
@@ -73,6 +73,7 @@
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import axios from "@/utils/axios";
+import getFullFtpUrl from "/src/utils/pathHelper";
 
 // Router
 const router = useRouter();

@@ -18,7 +18,7 @@
       </div>
 
       <div class="footer-menu">
-        <h3>DANH MỤC</h3>
+        <h3>CHÍNH SÁCH</h3>
         <ul>
           <li>
             <router-link to="/content/CHINHSACHDAILY"

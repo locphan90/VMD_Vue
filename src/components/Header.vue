@@ -1,6 +1,6 @@
 <template>
   <div>
-    <header class="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
+    <header>
       <div class="top-bar">
         <div class="logo">
           <router-link to="/" @click="closeMenu">
@@ -634,7 +634,7 @@ nav {
   max-width: 1200px;
   margin: 0 auto;
   text-align: center;
-  border-top: 1px solid #f0f0f0;
+  
 }
 
 nav ul {
@@ -1168,6 +1168,12 @@ nav.open,
   backface-visibility: hidden;
 }
 
+a:focus:not(:focus-visible),
+button:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
 /* Hiệu ứng ripple cho các nút trên mobile */
 @media (max-width: 768px) {
   .dropdown-menu li a:active::after,
@@ -1278,5 +1284,28 @@ nav.scroll-enabled {
   header.scroll-down {
     transform: translateY(-100%);
   }
+}
+</style>
+<style scoped>
+.user-dropdown-menu.two-columns {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.user-dropdown-columns {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.user-dropdown-columns .column {
+  flex: 1;
+  min-width: 150px;
+}
+
+.user-dropdown-menu li {
+  list-style: none;
+  margin-bottom: 8px;
 }
 </style>

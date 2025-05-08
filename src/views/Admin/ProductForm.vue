@@ -26,7 +26,7 @@
       </div>
 
       <div class="form-group">
-        <label>Mô tả:</label>
+        <label>Mô tả (20 ký tự trở lại như hộp, lon...):</label>
         <input type="text" v-model="product.mota" />
       </div>
       <div class="form-group">
