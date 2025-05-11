@@ -42,7 +42,7 @@
           <div v-for="product in filteredProducts" :key="product.id" class="product-card">
             <router-link :to="`/sanpham/${product.slug}`" class="product-item-link">
               <div class="product-image">
-                <img :src="getFullFtpUrl(product.fileFTP)" :alt="product.tenSP" />
+                <img :src="getFullFtpUrl(product.fileFTP) " :alt="product.tenSP" />
               </div>
             </router-link>
             <h3>{{ product.tenSP }}</h3>

@@ -62,14 +62,13 @@ onMounted(() => {
     localStorage.removeItem("username");
     localStorage.removeItem("role");
   }
+  document.title = 'VMD - CÔNG TY CỔ PHẦN PHÁT TRIỂN THỊ TRƯỜNG VIỆT NAM';
 });
 
 onBeforeUnmount(() => {
   eventBus.off("scrollTo", handleScroll);
 });
 </script>
-
-
 
 <style scoped>
 </style>

@@ -73,29 +73,54 @@
               <span class="detail-label">Mô tả:</span>
               <span class="detail-value">{{ product.mota }}</span>
             </div>
+            <div class="detail-item">
+              <span class="detail-label">Danh mục SP:</span>
+              <span class="detail-value">{{ product.danhMucSP }}</span>
+            </div>
           </div>
 
           <!-- Phần chia sẻ mạng xã hội -->
           <div class="social-share">
             <p class="share-label">Chia sẻ sản phẩm:</p>
             <div class="social-buttons">
-              <a :href="getFacebookShareUrl()" target="_blank" class="social-button facebook">
+              <a
+                :href="getFacebookShareUrl()"
+                target="_blank"
+                class="social-button facebook"
+              >
                 <i class="fab fa-facebook-f"></i>
               </a>
-              <a :href="getZaloShareUrl()" target="_blank" class="social-button zalo">
+              <a
+                :href="getZaloShareUrl()"
+                target="_blank"
+                class="social-button zalo"
+              >
                 <span class="zalo-icon">Z</span>
               </a>
-              <a :href="getMessengerShareUrl()" target="_blank" class="social-button messenger">
+              <a
+                :href="getMessengerShareUrl()"
+                target="_blank"
+                class="social-button messenger"
+              >
                 <i class="fab fa-facebook-messenger"></i>
               </a>
-              <a :href="getViberShareUrl()" target="_blank" class="social-button viber">
+              <a
+                :href="getViberShareUrl()"
+                target="_blank"
+                class="social-button viber"
+              >
                 <i class="fab fa-viber"></i>
               </a>
-              <button @click="copyProductLink()" class="social-button copy-link">
+              <button
+                @click="copyProductLink()"
+                class="social-button copy-link"
+              >
                 <i class="fas fa-link"></i>
               </button>
             </div>
-            <span v-if="linkCopied" class="copy-notification">Đã sao chép đường dẫn!</span>
+            <span v-if="linkCopied" class="copy-notification"
+              >Đã sao chép đường dẫn!</span
+            >
           </div>
         </div>
       </div>
@@ -103,22 +128,22 @@
       <!-- Tabs for Product Description and Usage Guide -->
       <div class="product-tabs">
         <div class="tabs-header">
-          <button 
-            class="tab-button" 
+          <button
+            class="tab-button"
             :class="{ active: activeTab === 'description' }"
             @click="activeTab = 'description'"
           >
             Chi tiết sản phẩm
           </button>
-          <button 
-            class="tab-button" 
+          <button
+            class="tab-button"
             :class="{ active: activeTab === 'guide' }"
             @click="activeTab = 'guide'"
           >
             Hướng dẫn sử dụng
           </button>
         </div>
-        
+
         <div class="tabs-content">
           <!-- Product Description Tab -->
           <div v-if="activeTab === 'description'" class="tab-pane">
@@ -127,7 +152,7 @@
               v-html="product.chiTietSP || 'Chưa có chi tiết'"
             ></div>
           </div>
-          
+
           <!-- Usage Guide Tab -->
           <div v-if="activeTab === 'guide'" class="tab-pane">
             <div
@@ -151,12 +176,14 @@ const product = ref(null);
 const productImages = ref([]);
 const selectedImage = ref(null);
 const route = useRoute();
-const activeTab = ref('description'); // Mặc định hiển thị tab chi tiết sản phẩm
+const activeTab = ref("description"); // Mặc định hiển thị tab chi tiết sản phẩm
 const linkCopied = ref(false);
 
 // Computed property để kiểm tra xem có hình ảnh nào để hiển thị không
 const hasImages = computed(() => {
-  return product.value && (product.value.fileFTP || productImages.value.length > 0);
+  return (
+    product.value && (product.value.fileFTP || productImages.value.length > 0)
+  );
 });
 
 // Các hàm xử lý chia sẻ mạng xã hội
@@ -165,27 +192,37 @@ const getProductUrl = () => {
 };
 
 const getProductTitle = () => {
-  return product.value ? product.value.tenSP : '';
+  return product.value ? product.value.tenSP : "";
 };
 
 // Chia sẻ Facebook
 const getFacebookShareUrl = () => {
-  return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getProductUrl())}`;
+  return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+    getProductUrl()
+  )}`;
 };
 
 // Chia sẻ Zalo
 const getZaloShareUrl = () => {
-  return `https://zalo.me/share?u=${encodeURIComponent(getProductUrl())}&t=${encodeURIComponent(getProductTitle())}`;
+  return `https://zalo.me/share?u=${encodeURIComponent(
+    getProductUrl()
+  )}&t=${encodeURIComponent(getProductTitle())}`;
 };
 
 // Chia sẻ Messenger
 const getMessengerShareUrl = () => {
-  return `https://www.facebook.com/dialog/send?link=${encodeURIComponent(getProductUrl())}&app_id=YOUR_FACEBOOK_APP_ID&redirect_uri=${encodeURIComponent(getProductUrl())}`;
+  return `https://www.facebook.com/dialog/send?link=${encodeURIComponent(
+    getProductUrl()
+  )}&app_id=YOUR_FACEBOOK_APP_ID&redirect_uri=${encodeURIComponent(
+    getProductUrl()
+  )}`;
 };
 
 // Chia sẻ Viber
 const getViberShareUrl = () => {
-  return `viber://forward?text=${encodeURIComponent(getProductTitle() + ' ' + getProductUrl())}`;
+  return `viber://forward?text=${encodeURIComponent(
+    getProductTitle() + " " + getProductUrl()
+  )}`;
 };
 
 // Sao chép link sản phẩm
@@ -201,42 +238,46 @@ const copyProductLink = () => {
 // Tạo hàm cập nhật meta tags
 const updateMetaTags = () => {
   if (!product.value) return;
-  
+
   // Lấy đường dẫn đầy đủ của trang web
   const baseUrl = window.location.origin;
   const currentUrl = window.location.href;
-  
+
   // Lấy thông tin sản phẩm
-  const productName = product.value.tenSP || '';
-  const productDescription = product.value.mota || 'Chi tiết sản phẩm';
-  const productImage = selectedImage.value || product.value.fileFTP || '';
-  
+  const productName = product.value.tenSP || "";
+  const productDescription = product.value.mota || "Chi tiết sản phẩm";
+  const productImage = selectedImage.value || product.value.fileFTP || "";
+
   // Cập nhật meta tags
   document.title = productName;
-  
+
   // Xóa các meta OG cũ nếu có
-  document.querySelectorAll('meta[property^="og:"]').forEach(el => el.remove());
-  document.querySelectorAll('meta[name^="twitter:"]').forEach(el => el.remove());
-  
+  document
+    .querySelectorAll('meta[property^="og:"]')
+    .forEach((el) => el.remove());
+  document
+    .querySelectorAll('meta[name^="twitter:"]')
+    .forEach((el) => el.remove());
+
   // Thêm meta tags mới
   const metaTags = [
-    { property: 'og:title', content: productName },
-    { property: 'og:description', content: productDescription },
-    { property: 'og:image', content: productImage },
-    { property: 'og:url', content: currentUrl },
-    { property: 'og:type', content: 'product' },
-    { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: productName },
-    { name: 'twitter:description', content: productDescription },
-    { name: 'twitter:image', content: productImage }
+    { property: "og:title", content: productName },
+    { property: "og:description", content: productDescription },
+    { property: "og:image", content: productImage },
+    { property: "og:url", content: currentUrl },
+    { property: "og:type", content: "product" },
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:title", content: productName },
+    { name: "twitter:description", content: productDescription },
+    { name: "twitter:image", content: productImage },
   ];
-  
+
   // Thêm các meta tags vào head
-  metaTags.forEach(tag => {
-    const meta = document.createElement('meta');
-    const key = Object.keys(tag).find(k => k !== 'content');
+  metaTags.forEach((tag) => {
+    const meta = document.createElement("meta");
+    const key = Object.keys(tag).find((k) => k !== "content");
     meta.setAttribute(key, tag[key]);
-    meta.setAttribute('content', tag.content);
+    meta.setAttribute("content", tag.content);
     document.head.appendChild(meta);
   });
 };
@@ -244,16 +285,16 @@ const updateMetaTags = () => {
 onMounted(async () => {
   // Scroll to top khi component được mount
   window.scrollTo(0, 0);
-  
+
   const slug = route.params.tensanpham;
   try {
     // Fetch product details
     const productRes = await axios.get(`/api/sanpham/${slug}`);
-    
+
     // Kiểm tra và xử lý cấu trúc dữ liệu trả về từ API
     if (productRes.data) {
       let productData;
-      
+
       // Kiểm tra xem dữ liệu trả về có cấu trúc { status: "OK", sanPham: {...} } hay không
       if (productRes.data.status === "OK" && productRes.data.sanPham) {
         productData = productRes.data.sanPham;
@@ -264,12 +305,12 @@ onMounted(async () => {
       console.log("OK");
       console.log(productData);
       // Đảm bảo đường dẫn hình ảnh đầy đủ
-      if (productData.fileFTP && !productData.fileFTP.startsWith('http')) {
+      if (productData.fileFTP && !productData.fileFTP.startsWith("http")) {
         productData.fileFTP = getFullFtpUrl(productData.fileFTP);
       }
-      
-      product.value = productData;
 
+      product.value = productData;
+      document.title = `${productData.tenSP} - VMD JSC`;
       // Mặc định, hiển thị hình ảnh chính
       if (productData.fileFTP) {
         selectedImage.value = getFullFtpUrl(productData.fileFTP);
@@ -277,12 +318,18 @@ onMounted(async () => {
 
       // Lấy ID sản phẩm từ dữ liệu trả về
       const productId = productData.id || productData.maSP;
-      
+
       // Chỉ fetch hình ảnh phụ nếu có ID sản phẩm
       if (productId) {
         try {
-          const imagesRes = await axios.get(`/api/HinhAnhSanPham/sanpham/${productId}`);
-          if (imagesRes.data && Array.isArray(imagesRes.data) && imagesRes.data.length > 0) {
+          const imagesRes = await axios.get(
+            `/api/HinhAnhSanPham/sanpham/${productId}`
+          );
+          if (
+            imagesRes.data &&
+            Array.isArray(imagesRes.data) &&
+            imagesRes.data.length > 0
+          ) {
             productImages.value = imagesRes.data;
           }
         } catch (imageErr) {
@@ -290,10 +337,10 @@ onMounted(async () => {
           // Nếu không thể tải được hình ảnh phụ, vẫn tiếp tục với hình ảnh chính
         }
       }
-      
+
       // Cập nhật meta tags sau khi có dữ liệu sản phẩm
       updateMetaTags();
-      
+
       // Đảm bảo scroll lên đầu sau khi dữ liệu đã được tải xong
       nextTick(() => {
         window.scrollTo(0, 0);
@@ -332,7 +379,7 @@ watch(selectedImage, () => {
   margin: 1em 0 !important;
 }
 
-.tinymce-content ul li, 
+.tinymce-content ul li,
 .tinymce-content ol li {
   display: list-item !important;
   margin-bottom: 0.5em !important;
@@ -699,7 +746,7 @@ watch(selectedImage, () => {
 }
 
 .tab-button.active:after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -1px;
   left: 0;
@@ -727,7 +774,7 @@ watch(selectedImage, () => {
   .product-detail-wrapper {
     flex-direction: column;
   }
-  
+
   .product-gallery {
     max-width: 100%;
   }
@@ -737,7 +784,7 @@ watch(selectedImage, () => {
   .product-detail-container {
     padding: 15px;
   }
-  
+
   .product-detail-wrapper {
     padding: 15px;
     gap: 20px;
@@ -747,7 +794,7 @@ watch(selectedImage, () => {
     font-size: 22px;
     padding-bottom: 10px;
   }
-  
+
   .price-value {
     font-size: 20px;
   }
@@ -760,24 +807,24 @@ watch(selectedImage, () => {
     width: auto;
     margin-bottom: 2px;
   }
-  
+
   .tabs-content {
     padding: 20px;
   }
-  
+
   .tabs-header {
     flex-wrap: wrap;
   }
-  
+
   .tab-button {
     padding: 12px 15px;
     font-size: 14px;
   }
-  
+
   .main-image-container {
     height: 300px;
   }
-  
+
   .thumbnail {
     width: 60px;
     height: 60px;
@@ -789,41 +836,41 @@ watch(selectedImage, () => {
   .product-detail-container {
     padding: 10px;
   }
-  
+
   .product-detail-wrapper {
     padding: 12px;
     margin-bottom: 15px;
   }
-  
+
   .main-image-container {
     height: 250px;
   }
-  
+
   .product-title {
     font-size: 20px;
   }
-  
+
   .thumbnail {
     width: 50px;
     height: 50px;
     min-width: 50px;
   }
-  
+
   .back-button {
     margin-bottom: 15px;
   }
-  
+
   .social-button {
     width: 36px;
     height: 36px;
     font-size: 16px;
   }
-  
+
   .tab-button {
     padding: 10px;
     font-size: 13px;
   }
-  
+
   .tabs-content {
     padding: 15px;
   }

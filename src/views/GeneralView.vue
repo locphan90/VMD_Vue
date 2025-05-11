@@ -112,7 +112,7 @@
             class="product-card"
           >
             <router-link
-              :to="`/sanpham/${product.id}`"
+              :to="`/sanpham/${product.slug}`"
               class="product-item-link"
             >
               <div class="product-image">

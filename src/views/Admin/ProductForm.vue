@@ -48,11 +48,9 @@
       <div class="form-group">
         <label>Trạng thái:</label>
         <select v-model="product.loai">
-          <option value="New">Còn hàng</option>
-          <option value="Sale">Hết hàng</option>
-          <option value="Hot">Hot</option>
-          <option value="Pre-order">Pre-order</option>
-          <option value="KhuyenMai">Khuyến mãi</option>
+          <option value="Đang kinh doanh">Đang kinh doanh</option>
+          <option value="Chưa kinh doanh">Chưa kinh doanh</option>
+          <option value="Hết hàng">Hết hàng</option>
         </select>
       </div>
 
@@ -80,7 +78,7 @@
       </div>
 
       <div class="form-group">
-        <label>Thương hiệu:</label>
+        <label>Nhãn hiệu:</label>
         <select v-model="product.thuongHieu">
           <option
             v-for="item in thuongHieuList"
@@ -481,8 +479,14 @@ const handleSubmit = async () => {
   }
 
   // Kiểm tra độ dài của chiTietSP
-  if (product.value.chiTietSP && product.value.chiTietSP.length > 2500) {
-    alert("Chi tiết sản phẩm không được vượt quá 2500 ký tự!");
+  if (product.value.chiTietSP && product.value.chiTietSP.length > 4000) {
+    alert("Chi tiết sản phẩm không được vượt quá 4000 ký tự!");
+    return;
+  }
+
+  // Kiểm tra độ dài của chiTietSP
+  if (product.value.huongDanSD && product.value.huongDanSD.length > 4000) {
+    alert("Hướng dẫn sử dụng không được vượt quá 4000 ký tự!");
     return;
   }
 
@@ -584,6 +588,7 @@ const resetForm = () => {
     giaThamKhao: "",
     mota: "",
     chiTietSP: "",
+    huongDanSD: "",
     loai: "New",
     nganh: "FMCG",
     danhMucSP:"",
@@ -650,6 +655,7 @@ const editProduct = async (item) => {
       giaThamKhao: item.giaThamKhao ? item.giaThamKhao.toLocaleString() : "",
       mota: item.mota || "",
       chiTietSP: item.chiTietSP || "",
+      huongDanSD: item.huongDanSD || "",
       danhMucSP: item.danhMucSP || "",
       thuongHieu: item.thuongHieu || "",
       loai: item.loai || "New",

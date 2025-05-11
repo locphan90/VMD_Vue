@@ -4,19 +4,19 @@
     <form @submit.prevent="handleSubmit">
       <div class="form-group">
         <label>Họ tên</label>
-        <input type="text" v-model="form.HoTen" required />
+        <input type="text" v-model="form.hoTen" required />
       </div>
       <div class="form-group">
         <label>Email</label>
-        <input type="email" v-model="form.Email" required />
+        <input type="email" v-model="form.email" required />
       </div>
       <div class="form-group">
         <label>Số điện thoại</label>
-        <input type="text" v-model="form.Phone" required />
+        <input type="text" v-model="form.phone" required />
       </div>
       <div class="form-group">
         <label>Địa chỉ</label>
-        <input type="text" v-model="form.Address" required />
+        <input type="text" v-model="form.address" required />
       </div>
       <div class="form-group">
         <label>Ngành:</label>
@@ -38,15 +38,15 @@
 
 <script setup>
 import { ref } from "vue";
-import axios from "axios";
+import axios from "@/utils/axios";
 
 const form = ref({
-  HoTen: "",
-  Email: "",
-  Phone: "",
-  Address: "",
-  Nganh: "", // Đổi tên biến để đồng nhất
-  NoiDung: "",
+  hoTen: "",
+  email: "",
+  phone: "",
+  address: "",
+  nganh: "", 
+  noiDung: "",
 });
 
 const handleSubmit = async () => {
@@ -60,12 +60,12 @@ const handleSubmit = async () => {
     await axios.post("/api/DaiLy", postData);
     alert("Đăng ký đại lý thành công! Chúng tôi sẽ liên hệ với bạn sớm.");
     form.value = {
-      HoTen: "",
-      Email: "",
-      Phone: "",
-      Address: "",
-      Nganh: "",
-      NoiDung: "",
+      hoTen: "",
+      email: "",
+      phone: "",
+      address: "",
+      nganh: "",
+      noiDung: "",
     };
   } catch (err) {
     console.error("Lỗi đăng ký:", err);

@@ -43,24 +43,30 @@
               >
                 SẢN PHẨM <span class="dropdown-arrow">▼</span>
               </router-link>
-              <ul
-                class="dropdown-menu"
+              <div
+                class="dropdown-menu multi-column-dropdown"
                 :class="{ show: showProductMenu }"
                 @mouseenter="isHoveringProduct = true"
                 @mouseleave="handleProductMenuMouseLeave"
               >
-                <li v-for="category in productCategories" :key="category.val">
-                  <router-link
-                    :to="`/danhmucsp/${category.val}`"
-                    @click="
-                      closeProductMenu();
-                      closeMenu();
-                    "
-                  >
-                    {{ category.val }}
-                  </router-link>
-                </li>
-              </ul>
+                <div class="columns-wrapper">
+                  <div v-for="(column, colIndex) in productCategoriesColumns" :key="colIndex" class="column">
+                    <ul>
+                      <li v-for="category in column" :key="category.val">
+                        <router-link
+                          :to="`/danhmucsp/${category.val}`"
+                          @click="
+                            closeProductMenu();
+                            closeMenu();
+                          "
+                        >
+                          {{ category.val }}
+                        </router-link>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </li>
 
             <li>
@@ -77,7 +83,7 @@
             <li>
               <router-link to="/content/HETHONGDAILY">KHO - ĐẠI LÝ</router-link>
             </li>
-<li>
+            <li>
               <router-link to="/tintuc">TIN TỨC</router-link>
             </li>
             <!-- Nếu chưa đăng nhập -->
@@ -102,167 +108,176 @@
               >
                 {{ username }} <span class="dropdown-arrow">▼</span>
               </a>
-              <ul
+              <div
                 class="dropdown-menu admin-menu"
                 :class="{ show: showUserMenu }"
                 @mouseenter="isHoveringUser = true"
                 @mouseleave="handleUserMenuMouseLeave"
               >
-                <li>
-                  <router-link
-                    to="/products"
-                    @click="
-                      closeUserMenu();
-                      closeMenu();
-                    "
-                  >
-                    Sản phẩm
-                  </router-link>
-                </li>
-                <li>
-                  <router-link
-                    to="/admin/products"
-                    @click="
-                      closeUserMenu();
-                      closeMenu();
-                    "
-                  >
-                    Nhập sản phẩm
-                  </router-link>
-                </li>
-                <li>
-                  <router-link
-                    to="/admin/productcat"
-                    @click="
-                      closeUserMenu();
-                      closeMenu();
-                    "
-                  >
-                    Nhập danh mục sản phẩm
-                  </router-link>
-                </li>
-                <li>
-                  <router-link
-                    to="/admin/brands"
-                    @click="
-                      closeUserMenu();
-                      closeMenu();
-                    "
-                  >
-                    Nhập thương hiệu
-                  </router-link>
-                </li>
-                <li>
-                  <router-link
-                    to="/admin/partners"
-                    @click="
-                      closeUserMenu();
-                      closeMenu();
-                    "
-                  >
-                    Nhập đối tác
-                  </router-link>
-                </li>
-                <li>
-                  <router-link
-                    to="/admin/nhapcongthuc"
-                    @click="
-                      closeUserMenu();
-                      closeMenu();
-                    "
-                  >
-                    Nhập công thức
-                  </router-link>
-                </li>
-                <li>
-                  <router-link
-                    to="/admin/events"
-                    @click="
-                      closeUserMenu();
-                      closeMenu();
-                    "
-                  >
-                    Nhập thông tin sự kiện
-                  </router-link>
-                </li>
-                <li>
-                  <router-link
-                    to="/admin/bannermanager"
-                    @click="
-                      closeUserMenu();
-                      closeMenu();
-                    "
-                  >
-                    Quản lý banner
-                  </router-link>
-                </li>
-                <li>
-                  <router-link
-                    to="/admin/dailymanager"
-                    @click="
-                      closeUserMenu();
-                      closeMenu();
-                    "
-                  >
-                    Quản lý đăng ký đại lý
-                  </router-link>
-                </li>
-                <li>
-                  <router-link
-                    to="/admin/danhsachtuyendung"
-                    @click="
-                      closeUserMenu();
-                      closeMenu();
-                    "
-                  >
-                    Quản lý tuyển dụng
-                  </router-link>
-                </li>
-                <li>
-                  <router-link
-                    to="/admin/emailmanager"
-                    @click="
-                      closeUserMenu();
-                      closeMenu();
-                    "
-                  >
-                    Quản lý email đăng ký
-                  </router-link>
-                </li>
-
-                <li>
-                  <router-link
-                    to="/admin/staticpagemanager"
-                    @click="
-                      closeUserMenu();
-                      closeMenu();
-                    "
-                  >
-                    Sửa trang tĩnh
-                  </router-link>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    @click.prevent="
-                      changePassword();
-                      closeMenu();
-                    "
-                  >
-                    <i></i> Đổi mật khẩu
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    @click.prevent="
-                      logout();
-                      closeMenu();
-                    "
-                    >Đăng xuất</a
-                  >
-                </li>
-              </ul>
+                <div class="columns-wrapper admin-columns">
+                  <div class="column">
+                    <ul>
+                      <li>
+                        <router-link
+                          to="/products"
+                          @click="
+                            closeUserMenu();
+                            closeMenu();
+                          "
+                        >
+                          Sản phẩm
+                        </router-link>
+                      </li>
+                      <li>
+                        <router-link
+                          to="/admin/products"
+                          @click="
+                            closeUserMenu();
+                            closeMenu();
+                          "
+                        >
+                          Nhập sản phẩm
+                        </router-link>
+                      </li>
+                      <li>
+                        <router-link
+                          to="/admin/productcat"
+                          @click="
+                            closeUserMenu();
+                            closeMenu();
+                          "
+                        >
+                          Nhập danh mục sản phẩm
+                        </router-link>
+                      </li>
+                      <li>
+                        <router-link
+                          to="/admin/brands"
+                          @click="
+                            closeUserMenu();
+                            closeMenu();
+                          "
+                        >
+                          Nhập nhãn hiệu
+                        </router-link>
+                      </li>
+                      <li>
+                        <router-link
+                          to="/admin/partners"
+                          @click="
+                            closeUserMenu();
+                            closeMenu();
+                          "
+                        >
+                          Nhập đối tác
+                        </router-link>
+                      </li>
+                      <li>
+                        <router-link
+                          to="/admin/nhapcongthuc"
+                          @click="
+                            closeUserMenu();
+                            closeMenu();
+                          "
+                        >
+                          Nhập công thức
+                        </router-link>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="column">
+                    <ul>
+                      <li>
+                        <router-link
+                          to="/admin/events"
+                          @click="
+                            closeUserMenu();
+                            closeMenu();
+                          "
+                        >
+                          Nhập thông tin sự kiện
+                        </router-link>
+                      </li>
+                      <li>
+                        <router-link
+                          to="/admin/bannermanager"
+                          @click="
+                            closeUserMenu();
+                            closeMenu();
+                          "
+                        >
+                          Quản lý banner
+                        </router-link>
+                      </li>
+                      <li>
+                        <router-link
+                          to="/admin/dailymanager"
+                          @click="
+                            closeUserMenu();
+                            closeMenu();
+                          "
+                        >
+                          Quản lý đăng ký đại lý
+                        </router-link>
+                      </li>
+                      <li>
+                        <router-link
+                          to="/admin/danhsachtuyendung"
+                          @click="
+                            closeUserMenu();
+                            closeMenu();
+                          "
+                        >
+                          Quản lý tuyển dụng
+                        </router-link>
+                      </li>
+                      <li>
+                        <router-link
+                          to="/admin/emailmanager"
+                          @click="
+                            closeUserMenu();
+                            closeMenu();
+                          "
+                        >
+                          Quản lý email đăng ký
+                        </router-link>
+                      </li>
+                      <li>
+                        <router-link
+                          to="/admin/staticpagemanager"
+                          @click="
+                            closeUserMenu();
+                            closeMenu();
+                          "
+                        >
+                          Sửa trang tĩnh
+                        </router-link>
+                      </li>
+                      <li>
+                        <a
+                          href="#"
+                          @click.prevent="
+                            changePassword();
+                            closeMenu();
+                          "
+                        >
+                          <i></i> Đổi mật khẩu
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          href="#"
+                          @click.prevent="
+                            logout();
+                            closeMenu();
+                          "
+                          >Đăng xuất</a
+                        >
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </li>
           </ul>
         </div>
@@ -301,7 +316,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import LoginForm from "./LoginForm.vue";
 import ChangePasswordForm from "./ChangePasswordForm.vue";
@@ -309,6 +324,9 @@ import eventBus from "../eventBus";
 import logo from "../assets/logo VMD.png";
 import axios from "@/utils/axios";
 import getFullFtpUrl from "@/utils/pathHelper";
+
+const router = useRouter();
+const route = useRoute();
 
 const isHoveringUser = ref(false);
 const isHoveringProduct = ref(false);
@@ -321,14 +339,43 @@ const showProductMenu = ref(false);
 const productCategories = ref([]);
 const categoriesLoaded = ref(false);
 const showChangePassword = ref(false);
-const router = useRouter();
-const route = useRoute();
 
 // Biến cho nội dung TinyMCE
 const showContentModal = ref(false);
 const contentHTML = ref("");
 const contentLoading = ref(false);
 const contentTitle = ref("");
+
+// Tính toán số cột cho menu sản phẩm dựa trên số lượng danh mục
+const productCategoriesColumns = computed(() => {
+  const categories = productCategories.value;
+  if (!categories || categories.length === 0) return [];
+  
+  // Xác định số cột dựa trên số lượng danh mục
+  let columnCount = 1;
+  if (categories.length > 20) {
+    columnCount = 4;
+  } else if (categories.length > 12) {
+    columnCount = 3;
+  } else if (categories.length > 6) {
+    columnCount = 2;
+  }
+  
+  // Tính số mục trên mỗi cột
+  const itemsPerColumn = Math.ceil(categories.length / columnCount);
+  
+  // Chia danh mục thành các cột
+  const columns = [];
+  for (let i = 0; i < columnCount; i++) {
+    const startIndex = i * itemsPerColumn;
+    const endIndex = Math.min(startIndex + itemsPerColumn, categories.length);
+    if (startIndex < categories.length) {
+      columns.push(categories.slice(startIndex, endIndex));
+    }
+  }
+  
+  return columns;
+});
 
 const scrollToSection = (section) => {
   eventBus.emit("scrollTo", section);
@@ -482,6 +529,17 @@ const closeChangePassword = () => {
   showChangePassword.value = false;
 };
 
+const checkMobileMenuBehavior = () => {
+  // Nếu là desktop thì reset lại các menu
+  if (window.innerWidth > 768) {
+    // Đặt lại những behavior phù hợp cho desktop
+    document.querySelector("nav").classList.remove("scroll-enabled");
+  } else {
+    // Đặt behavior cho mobile
+    document.querySelector("nav").classList.add("scroll-enabled");
+  }
+}
+
 onMounted(() => {
   const savedLogin = localStorage.getItem("isLoggedIn");
   const savedUsername = localStorage.getItem("username");
@@ -531,17 +589,6 @@ onMounted(() => {
   // Thêm event listener để kiểm tra kích thước màn hình
   window.addEventListener("resize", checkMobileMenuBehavior);
   checkMobileMenuBehavior();
-
-  function checkMobileMenuBehavior() {
-    // Nếu là desktop thì reset lại các menu
-    if (window.innerWidth > 768) {
-      // Đặt lại những behavior phù hợp cho desktop
-      document.querySelector("nav").classList.remove("scroll-enabled");
-    } else {
-      // Đặt behavior cho mobile
-      document.querySelector("nav").classList.add("scroll-enabled");
-    }
-  }
 });
 </script>
 
@@ -634,7 +681,6 @@ nav {
   max-width: 1200px;
   margin: 0 auto;
   text-align: center;
-  
 }
 
 nav ul {
@@ -746,6 +792,54 @@ nav ul li a:hover:after {
 
 .dropdown-menu li a:after {
   display: none;
+}
+
+/* Multi-column dropdown styles */
+.multi-column-dropdown {
+  width: auto;
+  min-width: 600px;
+  max-width: 80vw;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  padding: 15px;
+}
+
+.multi-column-dropdown.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+.columns-wrapper {
+  display: flex;
+  gap: 20px;
+}
+
+.column {
+  flex: 1;
+}
+
+.column ul {
+  display: block;
+  padding: 0;
+  margin: 0;
+}
+
+.column li {
+  margin-bottom: 5px;
+}
+
+/* Admin menu columns */
+.admin-columns {
+  display: flex;
+  gap: 20px;
+}
+
+.admin-columns .column {
+  min-width: 200px;
+}
+
+.admin-menu {
+  width: auto;
+  min-width: 500px;
 }
 
 header {
@@ -1047,6 +1141,27 @@ header {
     font-size: 0.95em;
   }
 
+  /* Reset multi-column styles on mobile */
+  .multi-column-dropdown {
+    min-width: auto;
+    width: 100%;
+    left: 0;
+    transform: none;
+  }
+
+  .multi-column-dropdown.show {
+    transform: none;
+  }
+
+  .columns-wrapper, .admin-columns {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .column {
+    width: 100%;
+  }
+
   /* Điều chỉnh spacing cho mobile */
   .content-container {
     padding: 10px;
@@ -1284,28 +1399,5 @@ nav.scroll-enabled {
   header.scroll-down {
     transform: translateY(-100%);
   }
-}
-</style>
-<style scoped>
-.user-dropdown-menu.two-columns {
-  max-height: 300px;
-  overflow-y: auto;
-  padding: 10px;
-}
-
-.user-dropdown-columns {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.user-dropdown-columns .column {
-  flex: 1;
-  min-width: 150px;
-}
-
-.user-dropdown-menu li {
-  list-style: none;
-  margin-bottom: 8px;
 }
 </style>

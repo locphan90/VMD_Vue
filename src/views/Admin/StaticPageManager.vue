@@ -14,7 +14,7 @@
           >
             <option value="VECHUNGTOI">VỀ CHÚNG TÔI</option>
             <option value="LIENHE">LIÊN HỆ</option>
-            <option value="HETHONGDAILY">HỆ THỐNG ĐẠI LÝ</option>
+            <option value="HETHONGDAILY">KHO - ĐẠI LÝ</option>
             <option value="CHINHSACHDAILY">CHÍNH SÁCH ĐẠI LÝ</option>
             <option value="CHINHSACHBAOMAT">CHÍNH SÁCH BẢO MẬT</option>
             <option value="CHINHSACHGIAONHANHANG">
