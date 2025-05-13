@@ -231,7 +231,7 @@ const copyProductLink = () => {
     linkCopied.value = true;
     setTimeout(() => {
       linkCopied.value = false;
-    }, 2000);
+    }, 3000);
   });
 };
 

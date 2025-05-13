@@ -6,7 +6,7 @@
           <img :src="logo" alt="VMD Logo" />
         </div>
         <p><strong>CÔNG TY CỔ PHẦN PHÁT TRIỂN THỊ TRƯỜNG VIỆT NAM</strong></p>
-        <p>Địa chỉ: Lầu 5, 88 Lê Lai, Phường Bến Thành, Quận 1, TP.HCM</p>
+        <p>Địa chỉ: 53 Trần Bình Trọng, Phường 5, Quận Bình Thạnh, TP. Hồ Chí Minh</p>
         <p>Email: info@vmd.com.vn</p>
         <p>Hotline: 1900 2022 (8:00-17:00)</p>
         <div class="social-links">

@@ -44,7 +44,7 @@
                 SẢN PHẨM <span class="dropdown-arrow">▼</span>
               </router-link>
               <div
-                class="dropdown-menu multi-column-dropdown"
+                class="dropdown-menu multi-column-dropdown product-menu"
                 :class="{ show: showProductMenu }"
                 @mouseenter="isHoveringProduct = true"
                 @mouseleave="handleProductMenuMouseLeave"
@@ -589,6 +589,34 @@ onMounted(() => {
   // Thêm event listener để kiểm tra kích thước màn hình
   window.addEventListener("resize", checkMobileMenuBehavior);
   checkMobileMenuBehavior();
+
+  // Thêm scroll event listener để ẩn/hiện header
+  let lastScrollTop = 0;
+  const headerElement = document.querySelector("header");
+
+  if (headerElement) {
+    window.addEventListener("scroll", () => {
+      let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+      if (scrollTop > lastScrollTop) {
+        // Scroll Down
+        headerElement.classList.remove("scroll-up");
+        headerElement.classList.add("scroll-down");
+      } else {
+        // Scroll Up
+        headerElement.classList.remove("scroll-down");
+        headerElement.classList.add("scroll-up");
+      }
+
+      lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // For Mobile or negative scrolling
+      // Thêm class 'scrolled' khi scroll để hiển thị shadow
+      if (scrollTop > 50) {
+        headerElement.classList.add("scrolled");
+      } else {
+        headerElement.classList.remove("scrolled");
+      }
+    });
+  }
 });
 </script>
 
@@ -761,12 +789,64 @@ nav ul li a:hover:after {
   transform: translateY(10px);
   transition: opacity 0.3s, transform 0.3s;
   pointer-events: none;
+  max-height: 80vh; /* Limit maximum height */
+  overflow-y: auto; /* Enable scrolling if needed */
+  max-width: 90vw; /* Ensure it doesn't exceed viewport width */
 }
 
 .dropdown-menu.show {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
+}
+
+/* Ensure dropdown menus stay within viewport */
+.dropdown-menu {
+  max-height: 80vh;
+  overflow-y: auto;
+  max-width: 90vw;
+}
+
+/* Adjust position for admin menu to ensure visibility */
+.admin-menu {
+  left: auto;
+  right: 0;
+}
+
+/* Ensure dropdown menus are positioned correctly on smaller screens */
+@media (max-width: 1200px) {
+  .multi-column-dropdown {
+    left: auto;
+    right: 0;
+    transform: translateY(10px);
+  }
+  
+  .multi-column-dropdown.show {
+    transform: translateY(0);
+  }
+  
+  /* Adjust admin menu for smaller screens */
+  .admin-menu {
+    max-width: min(500px, 90vw);
+    right: 0;
+  }
+  
+  /* Ensure columns wrap properly on smaller screens */
+  .admin-columns {
+    flex-wrap: wrap;
+  }
+}
+
+/* Additional adjustments for tablet-sized screens */
+@media (max-width: 992px) and (min-width: 769px) {
+  .dropdown-menu.admin-menu {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  
+  .admin-columns .column {
+    min-width: 180px;
+  }
 }
 
 .dropdown-menu li {
@@ -1146,20 +1226,25 @@ header {
     min-width: auto;
     width: 100%;
     left: 0;
-    transform: none;
+    transform: none !important;
+    position: static;
   }
 
   .multi-column-dropdown.show {
-    transform: none;
+    transform: none !important;
   }
 
   .columns-wrapper, .admin-columns {
     flex-direction: column;
     gap: 0;
   }
-
+  
   .column {
     width: 100%;
+  }
+  
+  .column ul {
+    padding: 0;
   }
 
   /* Điều chỉnh spacing cho mobile */
@@ -1379,6 +1464,67 @@ nav.scroll-enabled {
     content: "•";
     margin-right: 8px;
     color: #e74c3c;
+  }
+}
+
+/* Đồng bộ style cho menu sản phẩm trên mobile */
+@media (max-width: 768px) {
+  .dropdown-menu.product-menu {
+    position: static;
+    width: 100%;
+    border: none;
+    box-shadow: none;
+  }
+
+  .dropdown-menu.product-menu li a {
+    background-color: #f0f0f0;
+    margin: 2px 5px;
+    border-radius: 4px;
+    padding-left: 30px;
+    width: calc(100% - 10px); /* Đảm bảo chiều rộng phù hợp với container */
+    box-sizing: border-box;
+    white-space: normal; /* Cho phép text wrap */
+    word-break: break-word; /* Đảm bảo text không tràn ra ngoài */
+  }
+
+  .dropdown-menu.product-menu li a:before {
+    content: "•";
+    margin-right: 8px;
+    color: #e74c3c;
+  }
+  
+  /* Đảm bảo hiển thị đúng trên mobile */
+  .dropdown-menu.product-menu.show {
+    display: block;
+    height: auto;
+    visibility: visible;
+    max-height: none;
+    overflow-y: visible;
+    width: 100%; /* Đảm bảo chiều rộng đầy đủ */
+  }
+  
+  /* Đảm bảo các cột hiển thị đầy đủ */
+  .dropdown-menu.product-menu .columns-wrapper {
+    display: block;
+    width: 100%;
+  }
+  
+  .dropdown-menu.product-menu .column {
+    margin-bottom: 5px;
+    width: 100%;
+  }
+  
+  /* Đảm bảo không có giới hạn chiều cao cho menu sản phẩm */
+  .dropdown-menu.product-menu.show .column ul {
+    max-height: none;
+    overflow: visible;
+    width: 100%;
+  }
+  
+  /* Đảm bảo mỗi mục menu có chiều rộng phù hợp */
+  .dropdown-menu.product-menu .column li {
+    width: 100%;
+    box-sizing: border-box;
   }
 }
 
