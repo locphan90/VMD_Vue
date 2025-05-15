@@ -7,8 +7,9 @@
         </div>
         <p><strong>CÔNG TY CỔ PHẦN PHÁT TRIỂN THỊ TRƯỜNG VIỆT NAM</strong></p>
         <p>Địa chỉ: 53 Trần Bình Trọng, Phường 5, Quận Bình Thạnh, TP. Hồ Chí Minh</p>
+        <p>Trụ sở ĐKKD: 20/1 Ấp Mới 1, xã Tân Xuân, Hóc Môn</p>
         <p>Email: info@vmd.com.vn</p>
-        <p>Hotline: 1900 2022 (8:00-17:00)</p>
+        <p>Hotline: 0396 455 567</p>
         <div class="social-links">
           <a href="#"><i class="fab fa-facebook-f"></i></a>
           <a href="#"><i class="fab fa-youtube"></i></a>

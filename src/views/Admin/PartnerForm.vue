@@ -126,7 +126,10 @@ const deletePartner = async (id) => {
   }
 };
 
-onMounted(fetchPartners);
+onMounted(() => {
+  fetchPartners();
+  document.title="VMD - ADMIN"
+});
 </script>
 
 <style scoped>

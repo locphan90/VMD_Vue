@@ -152,6 +152,7 @@ const filteredProducts = computed(() => {
 onMounted(async () => {
   await fetchBrandInfo();
   await fetchProducts();
+  document.title="NHÃN HIỆU " + route.params.tenthuonghieu;
 });
 </script>
 

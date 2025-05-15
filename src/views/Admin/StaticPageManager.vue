@@ -273,6 +273,7 @@ async function saveContent() {
 
 // Lifecycle
 onMounted(() => {
+  document.title="VMD ADMIN"
   fetchContent();
   window.addEventListener("resize", adjustEditorHeight);
 });

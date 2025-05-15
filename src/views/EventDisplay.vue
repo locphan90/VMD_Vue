@@ -100,7 +100,10 @@ const goBack = () => {
   router.go(-1)
 }
 
-onMounted(fetchNewsDetail)
+onMounted(() => {
+  document.title = "TIN TỨC";
+  fetchNewsDetail();
+})
 </script>
 
 

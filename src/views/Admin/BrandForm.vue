@@ -135,8 +135,10 @@ const deleteBrand = async (id) => {
   }
 };
 
-
-onMounted(fetchBrands);
+onMounted(() => {
+  fetchBrands();
+  document.title="VMD - ADMIN"
+});
 </script>
 
 <style scoped>

@@ -5,11 +5,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- <meta property="og:title" content="{{ documentProps.title }}">
-  <meta property="og:description" content="{{ documentProps.description }}">
-  <meta property="og:image" content="{{ documentProps.ogImage }}"> -->
   <title>VMD - Công Ty Cổ Phần Phát Triển Thị Trường Việt Nam</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    (function () {
+      const botRegex = /bot|crawler|facebook|zalo|twitter|slack|discord|meta/i;
+      const isBot = botRegex.test(navigator.userAgent);
+      const pathname = window.location.pathname;
+  
+      if (isBot && pathname.startsWith('/sanpham/')) {
+        const slug = pathname.replace('/sanpham/', '').replace(/\/$/, '');
+        const redirectUrl = 'https://preview.vmdjsc.com/sanpham/' + slug;
+        window.location.href = redirectUrl;
+      }
+    })();
+  </script>
 </head>
 
 <body>

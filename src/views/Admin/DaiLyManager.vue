@@ -144,6 +144,7 @@ const formatDate = (dateStr) => {
 onMounted(() => {
   fetchData();
   fetchUsers();
+  document.title="VMD - ADMIN"
 });
 </script>
 

@@ -778,6 +778,7 @@ onMounted(() => {
   fetchAllProducts();
   fetchThuongHieu();
   fetchDanhMucSP();
+  document.title="VMD - ADMIN"
 });
 </script>
 

@@ -208,6 +208,7 @@ onMounted(() => {
   fetchProducts();
   const adminFlag = localStorage.getItem("isAdmin");
   isAdmin.value = adminFlag === "true";
+  document.title="VMD - SẢN PHẨM"
 });
 </script>
 

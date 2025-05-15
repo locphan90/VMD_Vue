@@ -87,6 +87,7 @@
                 :href="getFacebookShareUrl()"
                 target="_blank"
                 class="social-button facebook"
+                aria-label="Chia sẻ qua Facebook"
               >
                 <i class="fab fa-facebook-f"></i>
               </a>
@@ -94,6 +95,7 @@
                 :href="getZaloShareUrl()"
                 target="_blank"
                 class="social-button zalo"
+                aria-label="Chia sẻ qua Zalo"
               >
                 <span class="zalo-icon">Z</span>
               </a>
@@ -101,6 +103,7 @@
                 :href="getMessengerShareUrl()"
                 target="_blank"
                 class="social-button messenger"
+                aria-label="Chia sẻ qua Messenger"
               >
                 <i class="fab fa-facebook-messenger"></i>
               </a>
@@ -108,12 +111,14 @@
                 :href="getViberShareUrl()"
                 target="_blank"
                 class="social-button viber"
+                aria-label="Chia sẻ qua Viber"
               >
                 <i class="fab fa-viber"></i>
               </a>
               <button
                 @click="copyProductLink()"
                 class="social-button copy-link"
+                aria-label="Sao chép đường dẫn"
               >
                 <i class="fas fa-link"></i>
               </button>
@@ -167,7 +172,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, watch, computed } from "vue";
+import { ref, onMounted, nextTick, watch, computed, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
 import axios from "@/utils/axios";
 import getFullFtpUrl from "@/utils/pathHelper";
@@ -178,12 +183,40 @@ const selectedImage = ref(null);
 const route = useRoute();
 const activeTab = ref("description"); // Mặc định hiển thị tab chi tiết sản phẩm
 const linkCopied = ref(false);
+const facebookAppId = ref("YOUR_FACEBOOK_APP_ID"); // Thay thế bằng App ID thực tế của bạn
 
 // Computed property để kiểm tra xem có hình ảnh nào để hiển thị không
 const hasImages = computed(() => {
   return (
     product.value && (product.value.fileFTP || productImages.value.length > 0)
   );
+});
+
+// Computed property cho structured data
+const structuredData = computed(() => {
+  if (!product.value) return null;
+  
+  return {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": product.value.tenSP,
+    "image": [
+      selectedImage.value || product.value.fileFTP,
+      ...productImages.value.map(img => getFullFtpUrl(img.linkHinhAnh))
+    ],
+    "description": product.value.mota || "",
+    "brand": {
+      "@type": "Brand",
+      "name": product.value.thuongHieu || "VMD JSC"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": window.location.href,
+      "priceCurrency": "VND",
+      "price": product.value.giaThamKhao || 0,
+      "availability": "https://schema.org/InStock"
+    }
+  };
 });
 
 // Các hàm xử lý chia sẻ mạng xã hội
@@ -197,32 +230,35 @@ const getProductTitle = () => {
 
 // Chia sẻ Facebook
 const getFacebookShareUrl = () => {
-  return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-    getProductUrl()
-  )}`;
+  const url = encodeURIComponent(getProductUrl());
+  const title = encodeURIComponent(getProductTitle());
+  const description = encodeURIComponent(product.value?.mota || "");
+  const image = encodeURIComponent(selectedImage.value || product.value?.fileFTP || "");
+  
+  return `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${title}`;
 };
 
 // Chia sẻ Zalo
 const getZaloShareUrl = () => {
-  return `https://zalo.me/share?u=${encodeURIComponent(
-    getProductUrl()
-  )}&t=${encodeURIComponent(getProductTitle())}`;
+  const url = encodeURIComponent(getProductUrl());
+  const title = encodeURIComponent(getProductTitle());
+  
+  return `https://zalo.me/share?u=${url}&t=${title}`;
 };
 
 // Chia sẻ Messenger
 const getMessengerShareUrl = () => {
-  return `https://www.facebook.com/dialog/send?link=${encodeURIComponent(
-    getProductUrl()
-  )}&app_id=YOUR_FACEBOOK_APP_ID&redirect_uri=${encodeURIComponent(
-    getProductUrl()
-  )}`;
+  const url = encodeURIComponent(getProductUrl());
+  const redirectUri = encodeURIComponent(getProductUrl());
+  
+  return `https://www.facebook.com/dialog/send?link=${url}&app_id=${facebookAppId.value}&redirect_uri=${redirectUri}`;
 };
 
 // Chia sẻ Viber
 const getViberShareUrl = () => {
-  return `viber://forward?text=${encodeURIComponent(
-    getProductTitle() + " " + getProductUrl()
-  )}`;
+  const text = encodeURIComponent(getProductTitle() + " " + getProductUrl());
+  
+  return `viber://forward?text=${text}`;
 };
 
 // Sao chép link sản phẩm
@@ -247,39 +283,90 @@ const updateMetaTags = () => {
   const productName = product.value.tenSP || "";
   const productDescription = product.value.mota || "Chi tiết sản phẩm";
   const productImage = selectedImage.value || product.value.fileFTP || "";
+  const productPrice = product.value.giaThamKhao ? 
+    `${product.value.giaThamKhao.toLocaleString()}đ` : 
+    "Liên hệ";
+  const productBrand = product.value.thuongHieu || "VMD JSC";
 
-  // Cập nhật meta tags
-  document.title = productName;
+  // Cập nhật title và meta description
+  document.title = `${productName} - ${productBrand}`;
+  
+  // Tìm hoặc tạo meta description
+  let metaDescription = document.querySelector('meta[name="description"]');
+  if (!metaDescription) {
+    metaDescription = document.createElement('meta');
+    metaDescription.setAttribute('name', 'description');
+    document.head.appendChild(metaDescription);
+  }
+  metaDescription.setAttribute('content', productDescription);
 
   // Xóa các meta OG cũ nếu có
   document
-    .querySelectorAll('meta[property^="og:"]')
-    .forEach((el) => el.remove());
-  document
-    .querySelectorAll('meta[name^="twitter:"]')
+    .querySelectorAll('meta[property^="og:"], meta[name^="twitter:"], meta[property^="product:"]')
     .forEach((el) => el.remove());
 
   // Thêm meta tags mới
   const metaTags = [
+    // Open Graph tags cơ bản
     { property: "og:title", content: productName },
     { property: "og:description", content: productDescription },
     { property: "og:image", content: productImage },
+    { property: "og:image:alt", content: productName },
     { property: "og:url", content: currentUrl },
     { property: "og:type", content: "product" },
+    { property: "og:site_name", content: "VMD JSC" },
+    
+    // Open Graph tags cho sản phẩm
+    { property: "product:price:amount", content: product.value.giaThamKhao?.toString() || "" },
+    { property: "product:price:currency", content: "VND" },
+    { property: "product:brand", content: productBrand },
+    { property: "product:availability", content: "in stock" },
+    
+    // Twitter Card tags
     { name: "twitter:card", content: "summary_large_image" },
     { name: "twitter:title", content: productName },
     { name: "twitter:description", content: productDescription },
     { name: "twitter:image", content: productImage },
+    
+    // Canonical URL
+    { rel: "canonical", href: currentUrl, tag: "link" }
   ];
 
   // Thêm các meta tags vào head
   metaTags.forEach((tag) => {
-    const meta = document.createElement("meta");
-    const key = Object.keys(tag).find((k) => k !== "content");
-    meta.setAttribute(key, tag[key]);
-    meta.setAttribute("content", tag.content);
+    let meta;
+    if (tag.tag === "link") {
+      meta = document.createElement("link");
+      meta.setAttribute("rel", tag.rel);
+      meta.setAttribute("href", tag.href);
+    } else {
+      meta = document.createElement("meta");
+      const key = Object.keys(tag).find((k) => k !== "content" && k !== "tag");
+      meta.setAttribute(key, tag[key]);
+      meta.setAttribute("content", tag.content);
+    }
     document.head.appendChild(meta);
   });
+
+  // Thêm JSON-LD structured data
+  updateStructuredData();
+};
+
+// Thêm structured data vào head
+const updateStructuredData = () => {
+  // Xóa structured data cũ nếu có
+  const existingScript = document.querySelector('script[type="application/ld+json"]');
+  if (existingScript) {
+    existingScript.remove();
+  }
+
+  if (!product.value) return;
+
+  // Tạo script element mới
+  const script = document.createElement('script');
+  script.setAttribute('type', 'application/ld+json');
+  script.textContent = JSON.stringify(structuredData.value);
+  document.head.appendChild(script);
 };
 
 onMounted(async () => {
@@ -287,13 +374,15 @@ onMounted(async () => {
   window.scrollTo(0, 0);
 
   const slug = route.params.tensanpham;
+  let productData = null; // Khởi tạo productData ở đây
+
   try {
     // Fetch product details
     const productRes = await axios.get(`/api/sanpham/${slug}`);
 
     // Kiểm tra và xử lý cấu trúc dữ liệu trả về từ API
     if (productRes.data) {
-      let productData;
+      
 
       // Kiểm tra xem dữ liệu trả về có cấu trúc { status: "OK", sanPham: {...} } hay không
       if (productRes.data.status === "OK" && productRes.data.sanPham) {
@@ -310,7 +399,7 @@ onMounted(async () => {
       }
 
       product.value = productData;
-      document.title = `${productData.tenSP} - VMD JSC`;
+      
       // Mặc định, hiển thị hình ảnh chính
       if (productData.fileFTP) {
         selectedImage.value = getFullFtpUrl(productData.fileFTP);
@@ -354,6 +443,15 @@ onMounted(async () => {
 // Theo dõi thay đổi của selectedImage để cập nhật lại meta tag image
 watch(selectedImage, () => {
   updateMetaTags();
+});
+
+// Cleanup khi component unmount
+onBeforeUnmount(() => {
+  // Xóa structured data khi rời khỏi trang
+  const existingScript = document.querySelector('script[type="application/ld+json"]');
+  if (existingScript) {
+    existingScript.remove();
+  }
 });
 </script>
 

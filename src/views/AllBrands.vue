@@ -65,6 +65,10 @@ const handleImageError = (event, brandName) => {
 };
 
 onMounted(fetchBrands);
+onMounted(() => {
+  document.title = "VMD - TẤT CẢ NHÃN HIỆU";
+  fetchBrands();
+})
 </script>
 
 <style scoped>

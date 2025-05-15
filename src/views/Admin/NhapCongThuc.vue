@@ -245,6 +245,7 @@ export default {
   },
   mounted() {
     this.fetchRecipes();
+    document.title="VMD - ADMIN"
   },
   methods: {
     showMessage(text, type = 'success') {

@@ -62,6 +62,9 @@ async function fetchContent(category) {
       title.value = item.val;
       // Xử lý nội dung trước khi gán vào content
       content.value = processContent(item.vaL3); // Nội dung TinyMCE
+      
+      // Cập nhật document.title với giá trị title mới
+      document.title = `VMD - ${title.value}`;
     } else {
       error.value = "Không thể tải nội dung";
     }
@@ -84,8 +87,19 @@ watch(
   { immediate: true } // chạy luôn lần đầu
 );
 
-// Load CSS cho TinyMCE content nếu cần
+// Theo dõi sự thay đổi của title để cập nhật document.title
+watch(
+  () => title.value,
+  (newTitle) => {
+    if (newTitle) {
+      document.title = `VMD - ${newTitle}`;
+    }
+  }
+);
+
+// Thiết lập mặc định cho document.title
 onMounted(() => {
+  document.title = "VMD - Đang tải...";
   // Nếu bạn có file CSS riêng cho TinyMCE, có thể load ở đây
   // Hoặc đã được import trong main.js/main.ts của ứng dụng
 })

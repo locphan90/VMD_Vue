@@ -333,6 +333,7 @@ onMounted(() => {
     // Set default industry if no route parameter exists
     navigateToIndustry("FMCG");
   }
+  document.title= "VMD - NGÀNH HÀNG";
 });
 </script>
 

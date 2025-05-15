@@ -190,6 +190,7 @@ const deleteCategory = async () => {
 // Lifecycle hook
 onMounted(() => {
   fetchCategories();
+  document.title="VMD - ADMIN"
 });
 </script>
 

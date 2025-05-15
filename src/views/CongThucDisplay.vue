@@ -185,6 +185,7 @@ export default {
   },
   mounted() {
     this.fetchRecipes();
+    document.title="VMD - CÔNG THỨC"
   },
   methods: {
     async fetchRecipes() {

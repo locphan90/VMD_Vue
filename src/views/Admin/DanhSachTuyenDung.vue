@@ -1,20 +1,24 @@
 <template>
   <div class="recruitment-list">
     <h1 class="page-title">Danh Sách Đơn Tuyển Dụng</h1>
-    
+
     <div class="filters">
       <div class="search-box">
-        <input 
-          type="text" 
-          v-model="searchQuery" 
+        <input
+          type="text"
+          v-model="searchQuery"
           placeholder="Tìm kiếm theo tên hoặc email..."
           @input="filterApplications"
           class="search-input"
-        >
+        />
       </div>
-      
+
       <div class="status-filter">
-        <select v-model="statusFilter" @change="filterApplications" class="filter-select">
+        <select
+          v-model="statusFilter"
+          @change="filterApplications"
+          class="filter-select"
+        >
           <option value="ALL">Tất cả trạng thái</option>
           <option value="OK">Chờ duyệt</option>
           <option value="CF">Đã duyệt</option>
@@ -22,16 +26,16 @@
         </select>
       </div>
     </div>
-    
+
     <div v-if="loading" class="loading">
       <div class="loading-spinner"></div>
       <p>Đang tải dữ liệu...</p>
     </div>
-    
+
     <div v-else-if="filteredApplications.length === 0" class="no-data">
       <p>Không có đơn tuyển dụng nào</p>
     </div>
-    
+
     <div v-else class="data-grid">
       <table class="applications-table">
         <thead>
@@ -46,10 +50,13 @@
           </tr>
         </thead>
         <tbody>
-          <tr 
-            v-for="application in filteredApplications" 
+          <tr
+            v-for="application in filteredApplications"
             :key="application.id"
-            :class="{'approved': application.status === 'CF', 'rejected': application.status === 'RJ'}"
+            :class="{
+              approved: application.status === 'CF',
+              rejected: application.status === 'RJ',
+            }"
             @click="viewApplication(application)"
           >
             <td>{{ application.hoTen }}</td>
@@ -57,7 +64,10 @@
             <td>{{ application.soDienThoai }}</td>
             <td>{{ application.viTri }}</td>
             <td>
-              <button @click.stop="viewCV(application.fileCV)" class="view-cv-btn">
+              <button
+                @click.stop="viewCV(application.fileCV)"
+                class="view-cv-btn"
+              >
                 Xem CV
               </button>
             </td>
@@ -67,17 +77,17 @@
               </span>
             </td>
             <td class="actions" @click.stop>
-              <button 
+              <button
                 v-if="application.status !== 'CF'"
-                @click="approveApplication(application)" 
+                @click="approveApplication(application)"
                 class="approve-btn"
                 :disabled="application.status === 'RJ'"
               >
                 Duyệt
               </button>
-              <button 
+              <button
                 v-if="application.status !== 'RJ'"
-                @click="rejectApplication(application)" 
+                @click="rejectApplication(application)"
                 class="reject-btn"
                 :disabled="application.status === 'CF'"
               >
@@ -88,48 +98,55 @@
         </tbody>
       </table>
     </div>
-    
+
     <!-- Modal xem chi tiết đơn tuyển dụng -->
     <div v-if="selectedApplication" class="modal">
       <div class="modal-content">
         <span class="close-modal" @click="closeModal">&times;</span>
         <h2>Chi Tiết Đơn Ứng Tuyển</h2>
-        
+
         <div class="detail-content">
           <div class="detail-row">
             <div class="detail-label">Họ và tên:</div>
             <div class="detail-value">{{ selectedApplication.hoTen }}</div>
           </div>
-          
+
           <div class="detail-row">
             <div class="detail-label">Email:</div>
             <div class="detail-value">{{ selectedApplication.email }}</div>
           </div>
-          
+
           <div class="detail-row">
             <div class="detail-label">Số điện thoại:</div>
-            <div class="detail-value">{{ selectedApplication.soDienThoai }}</div>
+            <div class="detail-value">
+              {{ selectedApplication.soDienThoai }}
+            </div>
           </div>
-          
+
           <div class="detail-row">
             <div class="detail-label">Vị trí ứng tuyển:</div>
             <div class="detail-value">{{ selectedApplication.viTri }}</div>
           </div>
-          
+
           <div class="detail-row">
             <div class="detail-label">Nội dung:</div>
-            <div class="detail-value detail-content-value">{{ selectedApplication.noiDung }}</div>
+            <div class="detail-value detail-content-value">
+              {{ selectedApplication.noiDung }}
+            </div>
           </div>
-          
+
           <div class="detail-row">
             <div class="detail-label">CV:</div>
             <div class="detail-value">
-              <button @click="viewCV(selectedApplication.fileCV)" class="view-cv-btn">
+              <button
+                @click="viewCV(selectedApplication.fileCV)"
+                class="view-cv-btn"
+              >
                 Xem CV
               </button>
             </div>
           </div>
-          
+
           <div class="detail-row">
             <div class="detail-label">Trạng thái:</div>
             <div class="detail-value">
@@ -138,19 +155,19 @@
               </span>
             </div>
           </div>
-          
+
           <div class="detail-actions">
-            <button 
+            <button
               v-if="selectedApplication.status !== 'CF'"
-              @click="approveApplication(selectedApplication)" 
+              @click="approveApplication(selectedApplication)"
               class="approve-btn"
               :disabled="selectedApplication.status === 'RJ'"
             >
               Duyệt đơn
             </button>
-            <button 
+            <button
               v-if="selectedApplication.status !== 'RJ'"
-              @click="rejectApplication(selectedApplication)" 
+              @click="rejectApplication(selectedApplication)"
               class="reject-btn"
               :disabled="selectedApplication.status === 'CF'"
             >
@@ -160,17 +177,17 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Modal xem CV -->
     <div v-if="showCVModal" class="modal cv-modal">
       <div class="modal-content cv-modal-content">
         <span class="close-modal" @click="closeCVModal">&times;</span>
         <h2>Xem CV</h2>
-        
+
         <div class="cv-container">
-          <iframe 
-            :src="currentCV" 
-            width="100%" 
+          <iframe
+            :src="currentCV"
+            width="100%"
             height="600px"
             @load="handleCVLoad"
             @error="handleCVError"
@@ -190,35 +207,37 @@
 import axios from "@/utils/axios";
 import getFullFtpUrl from "@/utils/pathHelper";
 export default {
-  name: 'DanhSachTuyenDung',
-  
+  name: "DanhSachTuyenDung",
+
   data() {
     return {
       applications: [],
       filteredApplications: [],
       selectedApplication: null,
-      searchQuery: '',
-      statusFilter: 'ALL',
+      searchQuery: "",
+      statusFilter: "ALL",
       loading: true,
       showCVModal: false,
-      currentCV: '',
+      currentCV: "",
       cvLoadError: false,
-      processingIds: new Set() // Để tránh nhấn nút nhiều lần
+      processingIds: new Set(), // Để tránh nhấn nút nhiều lần
     };
   },
-  
+
   created() {
     this.fetchApplications();
   },
-  
+  mounted(){
+    document.title="VMD - ADMIN";
+  },
   methods: {
     async fetchApplications() {
       this.loading = true;
       try {
-        const response = await axios.get('api/tuyendung');
+        const response = await axios.get("api/tuyendung");
         if (Array.isArray(response.data)) {
           this.applications = response.data;
-        } else if (response.data && typeof response.data === 'object') {
+        } else if (response.data && typeof response.data === "object") {
           // Nếu API trả về một object thay vì array
           this.applications = [response.data];
         } else {
@@ -226,76 +245,85 @@ export default {
         }
         this.filterApplications();
       } catch (error) {
-        console.error('Lỗi khi lấy danh sách đơn tuyển dụng:', error);
+        console.error("Lỗi khi lấy danh sách đơn tuyển dụng:", error);
         this.applications = [];
       } finally {
         this.loading = false;
       }
     },
-    
+
     filterApplications() {
       let filtered = [...this.applications];
-      
+
       // Lọc theo từ khóa tìm kiếm
-      if (this.searchQuery.trim() !== '') {
+      if (this.searchQuery.trim() !== "") {
         const query = this.searchQuery.toLowerCase();
-        filtered = filtered.filter(app => 
-          app.hoTen.toLowerCase().includes(query) ||
-          app.email.toLowerCase().includes(query) ||
-          app.soDienThoai.includes(query) ||
-          app.viTri.toLowerCase().includes(query)
+        filtered = filtered.filter(
+          (app) =>
+            app.hoTen.toLowerCase().includes(query) ||
+            app.email.toLowerCase().includes(query) ||
+            app.soDienThoai.includes(query) ||
+            app.viTri.toLowerCase().includes(query)
         );
       }
-      
+
       // Lọc theo trạng thái
-      if (this.statusFilter !== 'ALL') {
-        filtered = filtered.filter(app => app.status === this.statusFilter);
+      if (this.statusFilter !== "ALL") {
+        filtered = filtered.filter((app) => app.status === this.statusFilter);
       }
-      
+
       this.filteredApplications = filtered;
     },
-    
+
     getStatusText(status) {
       switch (status) {
-        case 'OK': return 'Chờ duyệt';
-        case 'CF': return 'Đã duyệt';
-        case 'RJ': return 'Đã từ chối';
-        default: return 'Không xác định';
+        case "OK":
+          return "Chờ duyệt";
+        case "CF":
+          return "Đã duyệt";
+        case "RJ":
+          return "Đã từ chối";
+        default:
+          return "Không xác định";
       }
     },
-    
+
     getStatusClass(status) {
       switch (status) {
-        case 'OK': return 'status-pending';
-        case 'CF': return 'status-approved';
-        case 'RJ': return 'status-rejected';
-        default: return '';
+        case "OK":
+          return "status-pending";
+        case "CF":
+          return "status-approved";
+        case "RJ":
+          return "status-rejected";
+        default:
+          return "";
       }
     },
-    
+
     viewApplication(application) {
-      this.selectedApplication = {...application};
+      this.selectedApplication = { ...application };
     },
-    
+
     viewCV(cvPath) {
       // Ngăn việc mở modal lồng trong modal
       event.stopPropagation();
-      
+
       this.currentCV = getFullFtpUrl(cvPath);
       this.cvLoadError = false; // Reset trạng thái lỗi
       this.showCVModal = true;
     },
-    
+
     closeModal() {
       this.selectedApplication = null;
     },
-    
+
     closeCVModal() {
       this.showCVModal = false;
-      this.currentCV = '';
+      this.currentCV = "";
       this.cvLoadError = false;
     },
-    
+
     handleCVLoad(event) {
       // Kiểm tra nếu iframe đã load nhưng nội dung không có hoặc lỗi
       const iframe = this.$refs.cvIframe;
@@ -304,102 +332,129 @@ export default {
         // Đối với một số lỗi, việc truy cập nội dung có thể gây ra exception
         if (iframe.contentDocument && iframe.contentDocument.body) {
           // Nếu nội dung là trang lỗi hoặc rỗng
-          if (iframe.contentDocument.body.innerHTML.includes('error') || 
-              iframe.contentDocument.body.innerHTML.includes('404') ||
-              iframe.contentDocument.body.innerHTML.trim() === '') {
+          if (
+            iframe.contentDocument.body.innerHTML.includes("error") ||
+            iframe.contentDocument.body.innerHTML.includes("404") ||
+            iframe.contentDocument.body.innerHTML.trim() === ""
+          ) {
             this.cvLoadError = true;
           }
         }
       } catch (e) {
-        // Nếu không thể truy cập nội dung iframe (cross-origin), 
+        // Nếu không thể truy cập nội dung iframe (cross-origin),
         // không xác định được lỗi rõ ràng
         // Trong trường hợp này, chúng ta giả định CV đã load thành công
       }
     },
-    
+
     handleCVError() {
       this.cvLoadError = true;
     },
-    
+
     async approveApplication(application) {
       if (this.processingIds.has(application.id)) {
         return; // Nếu đơn này đang được xử lý, không làm gì cả
       }
-      
-      if (confirm(`Bạn có chắc muốn duyệt đơn ứng tuyển của ${application.hoTen}?`)) {
+
+      if (
+        confirm(
+          `Bạn có chắc muốn duyệt đơn ứng tuyển của ${application.hoTen}?`
+        )
+      ) {
         this.processingIds.add(application.id);
-        
+
         try {
           // Clone đối tượng hiện tại và cập nhật trạng thái
-          const updatedData = {...application, status: 'CF'};
-          
+          const updatedData = { ...application, status: "CF" };
+
           // Gửi yêu cầu cập nhật
-          await axios.post(`api/tuyendung/update/${application.id}`, updatedData);
-          
+          await axios.post(
+            `api/tuyendung/update/${application.id}`,
+            updatedData
+          );
+
           // Cập nhật trạng thái trong danh sách
-          const index = this.applications.findIndex(app => app.id === application.id);
+          const index = this.applications.findIndex(
+            (app) => app.id === application.id
+          );
           if (index !== -1) {
-            this.applications[index].status = 'CF';
-            
+            this.applications[index].status = "CF";
+
             // Cập nhật ngày duyệt và người duyệt nếu API trả về
-            if (this.selectedApplication && this.selectedApplication.id === application.id) {
-              this.selectedApplication.status = 'CF';
+            if (
+              this.selectedApplication &&
+              this.selectedApplication.id === application.id
+            ) {
+              this.selectedApplication.status = "CF";
             }
           }
-          
+
           // Cập nhật lại danh sách lọc
           this.filterApplications();
-          
-          alert('Đơn ứng tuyển đã được duyệt thành công!');
+
+          alert("Đơn ứng tuyển đã được duyệt thành công!");
         } catch (error) {
-          console.error('Lỗi khi duyệt đơn:', error);
-          alert('Đã xảy ra lỗi khi duyệt đơn. Vui lòng thử lại sau.');
+          console.error("Lỗi khi duyệt đơn:", error);
+          alert("Đã xảy ra lỗi khi duyệt đơn. Vui lòng thử lại sau.");
         } finally {
           this.processingIds.delete(application.id);
         }
       }
     },
-    
+
     async rejectApplication(application) {
       if (this.processingIds.has(application.id)) {
         return; // Nếu đơn này đang được xử lý, không làm gì cả
       }
-      
-      if (confirm(`Bạn có chắc muốn từ chối đơn ứng tuyển của ${application.hoTen}?`)) {
+
+      if (
+        confirm(
+          `Bạn có chắc muốn từ chối đơn ứng tuyển của ${application.hoTen}?`
+        )
+      ) {
         this.processingIds.add(application.id);
-        
+
         try {
           // Clone đối tượng hiện tại và cập nhật trạng thái
-          const updatedData = {...application, status: 'RJ'};
-          
+          const updatedData = { ...application, status: "RJ" };
+
           // Gửi yêu cầu cập nhật
-          await axios.post(`api/tuyendung/update/${application.id}`, updatedData);
+          await axios.post(
+            `api/tuyendung/update/${application.id}`,
+            updatedData
+          );
           console.log(updatedData);
           // Cập nhật trạng thái trong danh sách
-          const index = this.applications.findIndex(app => app.id === application.id);
+          const index = this.applications.findIndex(
+            (app) => app.id === application.id
+          );
           if (index !== -1) {
-            this.applications[index].status = 'RJ';
-            
+            this.applications[index].status = "RJ";
+
             // Cập nhật trạng thái trong modal chi tiết nếu đang mở
-            if (this.selectedApplication && this.selectedApplication.id === application.id) {
-              this.selectedApplication.status = 'RJ';
+            if (
+              this.selectedApplication &&
+              this.selectedApplication.id === application.id
+            ) {
+              this.selectedApplication.status = "RJ";
             }
           }
-          
+
           // Cập nhật lại danh sách lọc
           this.filterApplications();
-          
-          alert('Đơn ứng tuyển đã được từ chối thành công!');
+
+          alert("Đơn ứng tuyển đã được từ chối thành công!");
         } catch (error) {
-          console.error('Lỗi khi từ chối đơn:', error);
-          alert('Đã xảy ra lỗi khi từ chối đơn. Vui lòng thử lại sau.');
+          console.error("Lỗi khi từ chối đơn:", error);
+          alert("Đã xảy ra lỗi khi từ chối đơn. Vui lòng thử lại sau.");
         } finally {
           this.processingIds.delete(application.id);
         }
       }
-    }
-  }
+    },
+  },
 };
+
 </script>
 
 <style scoped>
@@ -462,8 +517,12 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .no-data {
@@ -714,26 +773,26 @@ export default {
   .filters {
     flex-direction: column;
   }
-  
+
   .search-box {
     margin-right: 0;
     margin-bottom: 10px;
   }
-  
+
   .applications-table {
     display: block;
     overflow-x: auto;
   }
-  
+
   .detail-row {
     flex-direction: column;
   }
-  
+
   .detail-label,
   .detail-value {
     width: 100%;
   }
-  
+
   .detail-label {
     margin-bottom: 5px;
   }

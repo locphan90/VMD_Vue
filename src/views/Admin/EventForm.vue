@@ -205,6 +205,7 @@ export default {
     // Load posts on component mount
     onMounted(async () => {
       await fetchPosts();
+      document.title="VMD - ADMIN"
     });
 
     // Fetch all posts

@@ -110,6 +110,7 @@ const goBack = () => {
 
 onMounted(() => {
   fetchCongThuc();
+  document.title="CÔNG THỨC - " + route.params.tencongthuc;
 });
 </script>
 

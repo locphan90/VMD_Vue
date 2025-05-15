@@ -33,13 +33,13 @@
               <router-link to="/" @click="closeMenu">TRANG CHỦ</router-link>
             </li>
             <li>
-              <router-link to="/content/VECHUNGTOI">VỀ CHÚNG TÔI</router-link>
+              <router-link to="/content/VECHUNGTOI" @click="closeMenu">VỀ CHÚNG TÔI</router-link>
             </li>
             <li class="dropdown">
               <router-link
                 to="/products"
                 @mouseenter="loadProductCategories"
-                @click.prevent="toggleProductMenu"
+                @click.prevent="toggleProductMenu(); closeMenu()"
               >
                 SẢN PHẨM <span class="dropdown-arrow">▼</span>
               </router-link>
@@ -79,12 +79,12 @@
                 >NHÃN HIỆU</router-link
               >
             </li>
-            <li><router-link to="/congthuc">CÔNG THỨC</router-link></li>
+            <li><router-link to="/congthuc" @click="closeMenu">CÔNG THỨC</router-link></li>
             <li>
-              <router-link to="/content/HETHONGDAILY">KHO - ĐẠI LÝ</router-link>
+              <router-link to="/content/HETHONGDAILY" @click="closeMenu">KHO - ĐẠI LÝ</router-link>
             </li>
             <li>
-              <router-link to="/tintuc">TIN TỨC</router-link>
+              <router-link to="/tintuc" @click="closeMenu">TIN TỨC</router-link>
             </li>
             <!-- Nếu chưa đăng nhập -->
             <li v-if="!isLoggedIn">
@@ -284,11 +284,14 @@
       </nav>
 
       <!-- Form đăng nhập -->
-      <LoginForm
-        v-if="showLogin"
-        @close="closeLogin"
-        @login-success="handleLoginSuccess"
-      />
+      <div class="login-modal-overlay" v-if="showLogin">
+        <div class="login-modal-container">
+          <LoginForm
+            @close="closeLogin"
+            @login-success="handleLoginSuccess"
+          />
+        </div>
+      </div>
 
       <!-- Form đổi mật khẩu -->
       <ChangePasswordForm
@@ -1544,6 +1547,47 @@ nav.scroll-enabled {
 
   header.scroll-down {
     transform: translateY(-100%);
+  }
+}
+
+/* Fullscreen Login Modal */
+.login-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+.login-modal-container {
+  width: 100%;
+  max-width: 450px;
+  padding: 20px;
+  animation: scaleIn 0.3s ease;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive adjustments for login modal */
+@media (max-width: 500px) {
+  .login-modal-container {
+    max-width: 90%;
+    padding: 15px;
   }
 }
 </style>

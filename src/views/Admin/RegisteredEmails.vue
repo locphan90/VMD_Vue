@@ -53,7 +53,10 @@ const fetchData = async () => {
   }
 };
 
-onMounted(fetchData);
+onMounted(() => {
+  document.title = "VMD - ADMIN";
+  fetchData();
+})
 
 const filteredList = computed(() =>
   emailList.value.filter((item) =>

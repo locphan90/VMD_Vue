@@ -228,6 +228,7 @@ const notification = ref({
 // Lấy dữ liệu banner khi component được mount
 onMounted(async () => {
   await fetchBanners();
+  document.title="VMD - ADMIN"
 });
 
 // Hàm lấy dữ liệu banner từ API - đã sửa để chuyển đổi URLs và lấy link (vaL3)

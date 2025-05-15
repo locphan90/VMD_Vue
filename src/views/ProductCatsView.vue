@@ -70,7 +70,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import axios from "@/utils/axios";
 import getFullFtpUrl from "/src/utils/pathHelper";
@@ -86,6 +86,19 @@ const selectedBrand = ref("");
 const selectedCategory = ref(route.params.tendanhmuc || route.query.category || "");
 const sortOption = ref("newest");
 const loading = ref(false);
+
+// Thiết lập tiêu đề trang
+const updatePageTitle = () => {
+  // Thêm setTimeout để đảm bảo tiêu đề được cập nhật sau khi mọi thứ khác hoàn thành
+  setTimeout(() => {
+    const categoryTitle = selectedCategory.value 
+      ? `VMD - ${selectedCategory.value.toUpperCase()}`
+      : "VMD - DANH MỤC SẢN PHẨM";
+    
+    document.title = categoryTitle;
+    console.log("Đã cập nhật tiêu đề trang:", document.title);
+  }, 0);
+};
 
 // Goback function
 const goBack = () => {
@@ -145,6 +158,10 @@ const fetchProductsByCategory = async () => {
     } else {
       brands.value = [];
     }
+    
+    // Cập nhật tiêu đề trang sau khi tải dữ liệu xong
+    updatePageTitle();
+    
   } catch (error) {
     console.error("Lỗi khi tải sản phẩm:", error);
     console.error("Chi tiết lỗi:", error.response ? error.response.data : error.message);
@@ -154,6 +171,7 @@ const fetchProductsByCategory = async () => {
     loading.value = false;
   }
 };
+
 // Select brand
 const selectBrand = (brand) => {
   selectedBrand.value = selectedBrand.value === brand ? "" : brand;
@@ -191,14 +209,30 @@ watch(
       selectedCategory.value = newCategory;
       selectedBrand.value = ""; // Reset selected brand when category changes
       fetchProductsByCategory();
+      
+      // Cập nhật tiêu đề khi route thay đổi
+      updatePageTitle();
     }
   },
   { immediate: true }
 );
 
+// Watch for changes in selectedBrand to update page title
+watch(selectedBrand, () => {
+  updatePageTitle();
+});
+
 // Lifecycle
 onMounted(() => {
   fetchProductsByCategory();
+  // Thêm log để debug
+  updatePageTitle();
+  console.log("Component mounted, tiêu đề trang hiện tại:", document.title);
+  
+  // Thêm một lần cập nhật nữa sau khi component đã được render
+  nextTick(() => {
+    updatePageTitle();
+  });
 });
 </script>
 

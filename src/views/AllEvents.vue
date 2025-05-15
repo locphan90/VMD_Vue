@@ -92,7 +92,10 @@ const goToDetail = (id) => {
   router.push(`/news/${id}`);
 };
 
-onMounted(fetchNews);
+onMounted(() => {
+  document.title = "VMD - TIN TỨC";
+  fetchNews();
+})
 </script>
 
 
