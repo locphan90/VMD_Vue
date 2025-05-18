@@ -49,11 +49,41 @@
         </div>
       </div>
     </div>
+
+    <!-- Phần công thức liên quan -->
+    <div class="related-recipes-section">
+      <h2 class="related-title">Công thức khác bạn có thể thích</h2>
+      <div class="related-recipes-container">
+        <div v-if="loading" class="loading">Đang tải...</div>
+        <div v-else-if="relatedRecipes.length === 0" class="no-recipes">
+          Không có công thức liên quan
+        </div>
+        <div v-else class="related-recipes-grid">
+          <router-link 
+            v-for="recipe in relatedRecipes" 
+            :key="recipe.id" 
+            :to="`/congthuc/${recipe.slug || recipe.id}`"
+            class="related-recipe-card"
+          >
+            <div class="related-image-container">
+              <img
+                v-if="recipe.fileFTP"
+                :src="getImageUrl(recipe.fileFTP)"
+                :alt="recipe.tenCongThuc"
+                class="related-recipe-image"
+              />
+              <div v-else class="related-image-placeholder">Không có hình</div>
+            </div>
+            <h3 class="related-recipe-title">{{ recipe.tenCongThuc }}</h3>
+          </router-link>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from "@/utils/axios";
 import getFullFtpUrl from "@/utils/pathHelper";
@@ -75,6 +105,7 @@ const congThuc = ref({
 const activeTab = ref("nguyen-lieu");
 const loading = ref(true);
 const error = ref(null);
+const relatedRecipes = ref([]);
 
 const fetchCongThuc = async () => {
   const slug = route.params.tencongthuc;
@@ -89,12 +120,52 @@ const fetchCongThuc = async () => {
   try {
     const response = await axios.get(`api/CongThuc/${slug}`);
     congThuc.value = response.data;
+    // Sau khi lấy công thức chính, gọi API lấy công thức liên quan
+    fetchRelatedRecipes();
+    // Cập nhật tiêu đề trang
+    document.title = "CÔNG THỨC - " + slug;
   } catch (err) {
     error.value = err.response?.data?.message || err.message || "Đã xảy ra lỗi";
     console.error("Lỗi khi tải công thức:", err);
+    loading.value = false;
+  }
+};
+
+const fetchRelatedRecipes = async () => {
+  try {
+    // Gọi API lấy tất cả công thức
+    const response = await axios.get('api/congthuc');
+    
+    // Lọc ra các công thức khác với công thức hiện tại
+    const filteredRecipes = response.data.filter(recipe => recipe.id !== congThuc.value.id);
+    
+    // Nếu có ít hơn hoặc bằng 5 công thức, lấy tất cả
+    if (filteredRecipes.length <= 5) {
+      relatedRecipes.value = filteredRecipes;
+    } else {
+      // Nếu có nhiều hơn 5 công thức, lấy ngẫu nhiên 5 công thức
+      relatedRecipes.value = getRandomRecipes(filteredRecipes, 5);
+    }
+  } catch (err) {
+    console.error("Lỗi khi tải công thức liên quan:", err);
   } finally {
     loading.value = false;
   }
+};
+
+// Hàm lấy ngẫu nhiên n phần tử từ mảng
+const getRandomRecipes = (array, n) => {
+  // Tạo bản sao của mảng để không làm thay đổi mảng gốc
+  const shuffled = [...array];
+  
+  // Thuật toán Fisher-Yates để xáo trộn mảng
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  
+  // Trả về n phần tử đầu tiên của mảng đã xáo trộn
+  return shuffled.slice(0, n);
 };
 
 const getImageUrl = (filePath) => {
@@ -108,16 +179,34 @@ const goBack = () => {
   router.back();
 };
 
+// Theo dõi thay đổi của route.params.tencongthuc
+const newSlug = ref(route.params.tencongthuc);
+
+watch(
+  () => route.params.tencongthuc,
+  (newSlugValue, oldSlugValue) => {
+    newSlug.value = newSlugValue;
+    if (newSlugValue !== oldSlugValue) {
+      // Nếu slug thay đổi, tải lại dữ liệu
+      fetchCongThuc();
+      // Reset tab về mặc định
+      activeTab.value = "nguyen-lieu";
+      // Cuộn lên đầu trang
+      window.scrollTo(0, 0);
+    }
+  },
+  { immediate: false }
+);
+
 onMounted(() => {
   fetchCongThuc();
-  document.title="CÔNG THỨC - " + route.params.tencongthuc;
 });
 </script>
 
 
 <style scoped>
 .cong-thuc-container {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   font-family: Arial, sans-serif;
@@ -194,6 +283,7 @@ onMounted(() => {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  margin-bottom: 40px;
 }
 
 .tabs-header {
@@ -242,5 +332,115 @@ onMounted(() => {
 
 .tab-pane :deep(li) {
   margin-bottom: 5px;
+}
+
+/* Phần style cho công thức liên quan */
+.related-recipes-section {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.related-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.related-recipes-container {
+  width: 100%;
+}
+
+.loading, .no-recipes {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.related-recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+}
+
+.related-recipe-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.related-recipe-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.related-image-container {
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+}
+
+.related-recipe-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.related-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+  color: #999;
+  font-size: 14px;
+}
+
+.related-recipe-title {
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  /* Giới hạn tiêu đề 2 dòng */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 50px;
+}
+
+/* Responsive cho màn hình nhỏ hơn */
+@media (max-width: 1200px) {
+  .related-recipes-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .related-recipes-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .related-recipes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .related-recipes-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

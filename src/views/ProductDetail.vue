@@ -167,6 +167,9 @@
           </div>
         </div>
       </div>
+      
+      <!-- Đặt component sản phẩm liên quan ở đây, dưới cùng của content-wrapper -->
+      <RelatedProductsSection :currentProduct="product" />
     </div>
   </div>
 </template>
@@ -176,6 +179,7 @@ import { ref, onMounted, nextTick, watch, computed, onBeforeUnmount } from "vue"
 import { useRoute } from "vue-router";
 import axios from "@/utils/axios";
 import getFullFtpUrl from "@/utils/pathHelper";
+import RelatedProductsSection from './RelatedProductsSection.vue';
 
 const product = ref(null);
 const productImages = ref([]);
@@ -219,9 +223,10 @@ const structuredData = computed(() => {
   };
 });
 
+
 // Các hàm xử lý chia sẻ mạng xã hội
 const getProductUrl = () => {
-  return window.location.href;
+  return window.location.href.replace('vmdjsc.com','preview.vmdjsc.com');
 };
 
 const getProductTitle = () => {
@@ -369,20 +374,20 @@ const updateStructuredData = () => {
   document.head.appendChild(script);
 };
 
-onMounted(async () => {
-  // Scroll to top khi component được mount
-  window.scrollTo(0, 0);
-
-  const slug = route.params.tensanpham;
-  let productData = null; // Khởi tạo productData ở đây
-
+// Hàm tải dữ liệu sản phẩm
+const fetchProductData = async (slug) => {
   try {
+    // Reset state trước khi tải dữ liệu mới
+    product.value = null;
+    productImages.value = [];
+    selectedImage.value = null;
+    
     // Fetch product details
     const productRes = await axios.get(`/api/sanpham/${slug}`);
 
     // Kiểm tra và xử lý cấu trúc dữ liệu trả về từ API
     if (productRes.data) {
-      
+      let productData = null;
 
       // Kiểm tra xem dữ liệu trả về có cấu trúc { status: "OK", sanPham: {...} } hay không
       if (productRes.data.status === "OK" && productRes.data.sanPham) {
@@ -391,8 +396,9 @@ onMounted(async () => {
         // Nếu không, giả sử dữ liệu trả về trực tiếp là sản phẩm
         productData = productRes.data;
       }
-      console.log("OK");
-      console.log(productData);
+      
+      console.log("Đã tải sản phẩm:", productData.tenSP);
+      
       // Đảm bảo đường dẫn hình ảnh đầy đủ
       if (productData.fileFTP && !productData.fileFTP.startsWith("http")) {
         productData.fileFTP = getFullFtpUrl(productData.fileFTP);
@@ -423,7 +429,6 @@ onMounted(async () => {
           }
         } catch (imageErr) {
           console.error("Lỗi khi tải hình ảnh phụ:", imageErr);
-          // Nếu không thể tải được hình ảnh phụ, vẫn tiếp tục với hình ảnh chính
         }
       }
 
@@ -438,12 +443,25 @@ onMounted(async () => {
   } catch (err) {
     console.error("Lỗi khi tải dữ liệu sản phẩm:", err);
   }
+};
+
+onMounted(() => {
+  // Không cần gọi fetchProductData ở đây nữa vì đã có watch với immediate: true
+  // Chỉ cần đảm bảo scroll lên đầu
+  window.scrollTo(0, 0);
 });
 
 // Theo dõi thay đổi của selectedImage để cập nhật lại meta tag image
 watch(selectedImage, () => {
   updateMetaTags();
 });
+
+watch(() => route.params.tensanpham, (newSlug, oldSlug) => {
+  if (newSlug && newSlug !== oldSlug) {
+    console.log("Slug thay đổi từ", oldSlug, "thành", newSlug);
+    fetchProductData(newSlug);
+  }
+}, { immediate: true });
 
 // Cleanup khi component unmount
 onBeforeUnmount(() => {

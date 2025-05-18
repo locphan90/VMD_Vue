@@ -4,21 +4,23 @@
       <!-- Banner Chính (Slideshow) bên trái -->
       <div class="main-banner-container">
         <div class="main-banner-slideshow">
-          <transition-group name="fade" tag="div" class="slides-container">
+          <!-- Sử dụng v-if thay vì v-show để đảm bảo hiển thị đúng trên mobile -->
+          <div class="slides-container">
             <div
               v-for="(banner, index) in mainBanners"
               :key="banner.id"
               class="slide"
-              v-show="currentMainBannerIndex === index"
+              :class="{ 'active-slide': currentMainBannerIndex === index }"
               @click="navigateToBanner(banner)"
             >
               <img
                 :src="banner.vaL2"
                 :alt="`Banner chính ${index + 1}`"
                 class="banner-image"
+                loading="lazy"
               />
             </div>
-          </transition-group>
+          </div>
 
           <!-- Nút điều hướng slideshow -->
           <div class="slideshow-controls">
@@ -58,6 +60,7 @@
             :src="banner.vaL2"
             :alt="`Banner phụ ${index + 1}`"
             class="banner-image"
+            loading="lazy"
           />
         </div>
 
@@ -77,7 +80,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import axios from "@/utils/axios";
 import getFullFtpUrl from "@/utils/pathHelper";
 
@@ -86,11 +89,18 @@ const mainBanners = ref([]);
 const secondaryBanners = ref([]);
 const loading = ref(true);
 const error = ref(null);
+const isMobile = ref(false);
 
 // State cho slideshow
 const currentMainBannerIndex = ref(0);
 const slideshowInterval = ref(null);
 const slideshowDuration = 5000; // 5 giây cho mỗi slide
+const isTransitioning = ref(false);
+
+// Theo dõi kích thước màn hình
+const handleResize = () => {
+  isMobile.value = window.innerWidth <= 768;
+};
 
 // Tính số lượng banner phụ còn thiếu để điền placeholder
 const missingSecondaryBannersCount = computed(() => {
@@ -170,29 +180,51 @@ const navigateToBanner = (banner) => {
 
 // Hàm điều khiển slideshow banner chính
 const nextMainBanner = () => {
-  if (mainBanners.value.length <= 1) return;
+  if (mainBanners.value.length <= 1 || isTransitioning.value) return;
 
+  isTransitioning.value = true;
   currentMainBannerIndex.value =
     (currentMainBannerIndex.value + 1) % mainBanners.value.length;
   resetSlideshowTimer();
+  
+  // Đặt lại trạng thái chuyển đổi sau khi hoàn thành
+  setTimeout(() => {
+    isTransitioning.value = false;
+  }, 500); // Thời gian bằng với thời gian chuyển đổi CSS
 };
 
 const prevMainBanner = () => {
-  if (mainBanners.value.length <= 1) return;
+  if (mainBanners.value.length <= 1 || isTransitioning.value) return;
 
+  isTransitioning.value = true;
   currentMainBannerIndex.value =
     (currentMainBannerIndex.value - 1 + mainBanners.value.length) %
     mainBanners.value.length;
   resetSlideshowTimer();
+  
+  // Đặt lại trạng thái chuyển đổi sau khi hoàn thành
+  setTimeout(() => {
+    isTransitioning.value = false;
+  }, 500); // Thời gian bằng với thời gian chuyển đổi CSS
 };
 
 const setMainBannerIndex = (index) => {
+  if (isTransitioning.value) return;
+  
+  isTransitioning.value = true;
   currentMainBannerIndex.value = index;
   resetSlideshowTimer();
+  
+  // Đặt lại trạng thái chuyển đổi sau khi hoàn thành
+  setTimeout(() => {
+    isTransitioning.value = false;
+  }, 500); // Thời gian bằng với thời gian chuyển đổi CSS
 };
+
 const filteredSecondaryBanners = computed(() => {
   return secondaryBanners.value.filter((banner) => banner !== null);
 });
+
 const startSlideshow = () => {
   // Xóa interval cũ nếu có
   if (slideshowInterval.value) {
@@ -213,9 +245,36 @@ const resetSlideshowTimer = () => {
   }
 };
 
+// Preload hình ảnh để tránh giật khi chuyển slide
+const preloadImages = () => {
+  if (mainBanners.value.length > 0) {
+    mainBanners.value.forEach(banner => {
+      const img = new Image();
+      img.src = banner.vaL2;
+    });
+  }
+  
+  if (secondaryBanners.value.length > 0) {
+    secondaryBanners.value.forEach(banner => {
+      if (banner) {
+        const img = new Image();
+        img.src = banner.vaL2;
+      }
+    });
+  }
+};
+
 // Hooks
 onMounted(() => {
   fetchBanners();
+  // Khởi tạo giá trị isMobile
+  handleResize();
+  window.addEventListener('resize', handleResize);
+  
+  // Preload hình ảnh sau khi fetch
+  watch(mainBanners, () => {
+    preloadImages();
+  });
 });
 
 onBeforeUnmount(() => {
@@ -223,6 +282,7 @@ onBeforeUnmount(() => {
   if (slideshowInterval.value) {
     clearInterval(slideshowInterval.value);
   }
+  window.removeEventListener('resize', handleResize);
 });
 </script>
 
@@ -249,6 +309,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  will-change: transform; /* Tối ưu hiệu suất */
 }
 
 .main-banner-slideshow {
@@ -261,6 +322,7 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 100%;
   position: relative;
+  transform: translateZ(0); /* Kích hoạt GPU acceleration */
 }
 
 .slide {
@@ -270,6 +332,20 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 100%;
   cursor: pointer;
+  backface-visibility: hidden; /* Tối ưu hiệu suất */
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  z-index: 1; /* Đảm bảo slide hiển thị trên các phần tử khác */
+  opacity: 0;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  display: none; /* Ẩn tất cả slide mặc định */
+}
+
+.slide.active-slide {
+  z-index: 2; /* Slide đang hiển thị có z-index cao hơn */
+  opacity: 1;
+  display: block; /* Hiển thị slide đang active */
 }
 
 .banner-image {
@@ -277,21 +353,11 @@ onBeforeUnmount(() => {
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
+  will-change: transform; /* Tối ưu hiệu suất */
 }
 
 .slide:hover .banner-image {
   transform: scale(1.03);
-}
-
-/* Hiệu ứng chuyển đổi */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 
 /* Nút điều khiển slideshow */
@@ -319,6 +385,7 @@ onBeforeUnmount(() => {
   justify-content: center;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  -webkit-tap-highlight-color: transparent; /* Loại bỏ highlight khi tap trên mobile */
 }
 
 .control-btn:hover {
@@ -344,6 +411,7 @@ onBeforeUnmount(() => {
   background-color: rgba(255, 255, 255, 0.5);
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.3s ease;
+  -webkit-tap-highlight-color: transparent; /* Loại bỏ highlight khi tap trên mobile */
 }
 
 .indicator.active {
@@ -370,6 +438,7 @@ onBeforeUnmount(() => {
   position: relative;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   cursor: pointer;
+  will-change: transform; /* Tối ưu hiệu suất */
 }
 
 .secondary-banner.empty {
@@ -385,12 +454,13 @@ onBeforeUnmount(() => {
   color: #999;
   font-style: italic;
 }
-.slide {
-  position: relative;
-}
 
 .secondary-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transition: transform 0.3s ease;
+  will-change: transform; /* Tối ưu hiệu suất */
 }
 
 .secondary-banner:hover img {
@@ -399,48 +469,75 @@ onBeforeUnmount(() => {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .slide {
-    position: relative !important;
+  .banner-display-container {
+    padding: 10px;
   }
+  
   .banner-layout {
     flex-direction: column;
     height: auto;
+    gap: 15px;
   }
 
   .main-banner-container {
-    height: 300px;
+    height: 250px; /* Chiều cao banner chính trên mobile */
+    width: 100%;
+    flex: none;
+  }
+  
+  .slide {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+  }
+  
+  .slide.active-slide {
+    display: block !important;
   }
 
   .secondary-banners-container {
     width: 100%;
-    flex-direction: row;
-    height: 120px;
+    flex-direction: column;
+    height: auto;
+    gap: 15px;
   }
 
   .secondary-banner {
-    flex: 1;
-  }
-
-  .main-banner-container {
-    height: 300px;
-  }
-
-  .main-banner-slideshow,
-  .slides-container,
-  .slide,
-  .banner-image {
-    height: 100%;
+    flex: none;
+    height: 180px;
+    width: 100%;
   }
 }
 
 @media (max-width: 480px) {
-  .secondary-banners-container {
-    flex-direction: column;
-    height: auto;
+  .banner-display-container {
+    padding: 10px;
   }
-
+  
+  .banner-layout {
+    gap: 10px;
+  }
+  
+  .main-banner-container {
+    height: 200px; /* Giảm chiều cao hơn nữa trên điện thoại nhỏ */
+  }
+  
   .secondary-banner {
-    height: 120px;
+    height: 150px;
+  }
+  
+  .control-btn {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .slideshow-indicators {
+    bottom: 10px;
+  }
+  
+  .indicator {
+    width: 8px;
+    height: 8px;
   }
 }
 </style>

@@ -3,8 +3,18 @@
     <Banner />
     <About />
     <Categories />
+    <ResponsiveBanner banner-image="/images/banner 1.jpg">
+      <!-- Nội dung tùy chọn bên trong banner -->
+      <!-- <h1>Tiêu đề banner</h1>
+      <p>Mô tả hoặc slogan của bạn</p> -->
+    </ResponsiveBanner>
     <Products title="SẢN PHẨM NỔI BẬT" type="NOIBAT" />
     <Brands />
+    <ResponsiveBanner banner-image="/images/banner 2.jpg">
+      <!-- Nội dung tùy chọn bên trong banner -->
+      <!-- <h1>Tiêu đề banner</h1>
+      <p>Mô tả hoặc slogan của bạn</p> -->
+    </ResponsiveBanner>
     <Products title="SẢN PHẨM MỚI" type="MOI" />
     <Partners />
     <News />
@@ -24,6 +34,7 @@ import Brands from "./components/Brands.vue";
 import Partners from "./components/Partners.vue";
 import News from "./components/News.vue";
 import Newsletter from "./components/Newsletter.vue";
+import ResponsiveBanner from "./components/ResponsiveBanner.vue";
 
 // Tạo ref cho từng section
 const bannerSection = ref(null);
@@ -62,7 +73,7 @@ onMounted(() => {
     localStorage.removeItem("username");
     localStorage.removeItem("role");
   }
-  document.title = 'VMD - CÔNG TY CỔ PHẦN PHÁT TRIỂN THỊ TRƯỜNG VIỆT NAM';
+  document.title = "VMD - CÔNG TY CỔ PHẦN PHÁT TRIỂN THỊ TRƯỜNG VIỆT NAM";
 });
 
 onBeforeUnmount(() => {

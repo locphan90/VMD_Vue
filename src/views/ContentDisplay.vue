@@ -13,10 +13,14 @@
       </div>
       <div class="content-body tinymce-content" v-html="content"></div>
     </div>
+    <Categories />
+    <Products title="SẢN PHẨM NỔI BẬT" type="NOIBAT" />
   </div>
 </template>
 
 <script setup>
+import Categories from "../components/Categories.vue";
+import Products from "../components/Products.vue";
 import { ref, watch, onMounted } from 'vue';
 import axios from "/src/utils/axios";
 
