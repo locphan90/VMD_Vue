@@ -1,6 +1,6 @@
 <template>
   <section class="news">
-    <h2 class="section-title">THÔNG TIN & SỰ KIỆN</h2>
+    <h2 class="section-title">TIN TỨC</h2>
     <div class="news-grid">
       <router-link
         :to="`/news/${item.id}`"

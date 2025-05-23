@@ -183,6 +183,18 @@
                           Nhập công thức
                         </router-link>
                       </li>
+                      <li>
+                        <a
+                          href="#"
+                          @click.prevent="
+                            openFileManager();
+                            closeUserMenu();
+                            closeMenu();
+                          "
+                        >
+                          Quản lý hình ảnh
+                        </a>
+                      </li>
                     </ul>
                   </div>
                   <div class="column">
@@ -195,7 +207,7 @@
                             closeMenu();
                           "
                         >
-                          Nhập thông tin sự kiện
+                          Nhập tin tức
                         </router-link>
                       </li>
                       <li>
@@ -298,6 +310,13 @@
         v-if="showChangePassword"
         @close="closeChangePassword"
       />
+
+      <!-- Form quản lý hình ảnh -->
+      <div class="file-manager-modal-overlay" v-if="showFileManager">
+        <div class="file-manager-modal-container">
+          <FtpFileManager @close="closeFileManager" />
+        </div>
+      </div>
     </header>
 
     <!-- Container cho nội dung TinyMCE -->
@@ -323,6 +342,7 @@ import { ref, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import LoginForm from "./LoginForm.vue";
 import ChangePasswordForm from "./ChangePasswordForm.vue";
+import FtpFileManager from "../views/Admin/FtpFileManager.vue";
 import eventBus from "../eventBus";
 import logo from "../assets/logo VMD.png";
 import axios from "@/utils/axios";
@@ -339,9 +359,10 @@ const isLoggedIn = ref(false);
 const username = ref("");
 const showUserMenu = ref(false);
 const showProductMenu = ref(false);
-const productCategories = ref([]);
+const productCategories = ref(null); // Initialize with null
 const categoriesLoaded = ref(false);
 const showChangePassword = ref(false);
+const showFileManager = ref(false);
 
 // Biến cho nội dung TinyMCE
 const showContentModal = ref(false);
@@ -351,29 +372,28 @@ const contentTitle = ref("");
 
 // Tính toán số cột cho menu sản phẩm dựa trên số lượng danh mục
 const productCategoriesColumns = computed(() => {
-  const categories = productCategories.value;
-  if (!categories || categories.length === 0) return [];
+  if (!productCategories.value || productCategories.value.length === 0) return [];
   
   // Xác định số cột dựa trên số lượng danh mục
   let columnCount = 1;
-  if (categories.length > 20) {
+  if (productCategories.value.length > 20) {
     columnCount = 4;
-  } else if (categories.length > 12) {
+  } else if (productCategories.value.length > 12) {
     columnCount = 3;
-  } else if (categories.length > 6) {
+  } else if (productCategories.value.length > 6) {
     columnCount = 2;
   }
   
   // Tính số mục trên mỗi cột
-  const itemsPerColumn = Math.ceil(categories.length / columnCount);
+  const itemsPerColumn = Math.ceil(productCategories.value.length / columnCount);
   
   // Chia danh mục thành các cột
   const columns = [];
   for (let i = 0; i < columnCount; i++) {
     const startIndex = i * itemsPerColumn;
-    const endIndex = Math.min(startIndex + itemsPerColumn, categories.length);
-    if (startIndex < categories.length) {
-      columns.push(categories.slice(startIndex, endIndex));
+    const endIndex = Math.min(startIndex + itemsPerColumn, productCategories.value.length);
+    if (startIndex < productCategories.value.length) {
+      columns.push(productCategories.value.slice(startIndex, endIndex));
     }
   }
   
@@ -532,6 +552,19 @@ const closeChangePassword = () => {
   showChangePassword.value = false;
 };
 
+// Thêm hàm mở và đóng File Manager
+const openFileManager = () => {
+  showFileManager.value = true;
+  // Ngăn body cuộn khi modal mở
+  document.body.style.overflow = 'hidden';
+};
+
+const closeFileManager = () => {
+  showFileManager.value = false;
+  // Đảm bảo body có thể cuộn lại sau khi đóng modal
+  document.body.style.overflow = '';
+};
+
 const checkMobileMenuBehavior = () => {
   // Nếu là desktop thì reset lại các menu
   if (window.innerWidth > 768) {
@@ -593,26 +626,12 @@ onMounted(() => {
   window.addEventListener("resize", checkMobileMenuBehavior);
   checkMobileMenuBehavior();
 
-  // Thêm scroll event listener để ẩn/hiện header
-  let lastScrollTop = 0;
+  // Thay thế bằng đoạn code đơn giản hơn chỉ để thêm shadow khi cuộn
   const headerElement = document.querySelector("header");
-
   if (headerElement) {
     window.addEventListener("scroll", () => {
       let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-      if (scrollTop > lastScrollTop) {
-        // Scroll Down
-        headerElement.classList.remove("scroll-up");
-        headerElement.classList.add("scroll-down");
-      } else {
-        // Scroll Up
-        headerElement.classList.remove("scroll-down");
-        headerElement.classList.add("scroll-up");
-      }
-
-      lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // For Mobile or negative scrolling
-      // Thêm class 'scrolled' khi scroll để hiển thị shadow
+      // Chỉ thêm class 'scrolled' khi scroll để hiển thị shadow
       if (scrollTop > 50) {
         headerElement.classList.add("scrolled");
       } else {
@@ -628,8 +647,12 @@ header {
   width: 100%;
   background: #fff;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  position: relative;
-  z-index: 100;
+  position: fixed; /* Đảm bảo header luôn cố định */
+  top: 0; /* Đặt header ở đầu trang */
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  transition: box-shadow 0.3s ease; /* Chỉ giữ transition cho box-shadow */
 }
 
 .top-bar {
@@ -923,16 +946,6 @@ nav ul li a:hover:after {
 .admin-menu {
   width: auto;
   min-width: 500px;
-}
-
-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background-color: white;
-  z-index: 1000;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Content Modal Styles */
@@ -1572,6 +1585,33 @@ nav.scroll-enabled {
   animation: scaleIn 0.3s ease;
 }
 
+/* File Manager Modal */
+.file-manager-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+  overflow: hidden; /* Prevent scrolling of the overlay */
+}
+
+.file-manager-modal-container {
+  width: 90%;
+  max-width: 1200px;
+  height: 90vh;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden; /* Hide overflow of container */
+  animation: scaleIn 0.3s ease;
+  display: flex; /* Use flexbox for child component */
+}
+
 @keyframes scaleIn {
   from {
     opacity: 0;
@@ -1588,6 +1628,11 @@ nav.scroll-enabled {
   .login-modal-container {
     max-width: 90%;
     padding: 15px;
+  }
+  
+  .file-manager-modal-container {
+    max-width: 95%;
+    height: 95vh;
   }
 }
 </style>

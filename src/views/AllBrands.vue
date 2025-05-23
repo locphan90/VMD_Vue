@@ -64,9 +64,8 @@ const handleImageError = (event, brandName) => {
     "https://via.placeholder.com/150?text=" + encodeURIComponent(brandName);
 };
 
-onMounted(fetchBrands);
 onMounted(() => {
-  document.title = "VMD - TẤT CẢ NHÃN HIỆU";
+  document.title = "VMD - NHÃN HIỆU";
   fetchBrands();
 })
 </script>
